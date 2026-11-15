@@ -1,0 +1,11 @@
+@use "sass:math";
+@use "sass:map";
+@use "abstracts" as *;
+
+// ---------- sections ----------
+.sec { padding: fluid(90, 160) 0; }
+.sec-head { margin-bottom: fluid(48, 80); display: grid; gap: 1.2rem;
+  h2 { font-size: fluid(44, 104); } p { color: $muted; max-width: 54ch; } }
+
+.about__text { font-family: $display; font-weight: 500; font-size: fluid(26, 52); line-height: 1.2; letter-spacing: -0.02em; max-width: 24ch; margin-top: 2rem;
+  .w { opacity: 0.12; } em { font-style: normal; @include grad-text; } }

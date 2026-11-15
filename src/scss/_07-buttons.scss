@@ -1,0 +1,14 @@
+@use "sass:math";
+@use "sass:map";
+@use "abstracts" as *;
+
+// ---------- buttons ----------
+.btn {
+  position: relative; display: inline-flex; align-items: center; gap: 0.7rem; padding: 1rem 1.8rem; border-radius: 99px;
+  font-weight: 500; font-size: 0.95rem; overflow: hidden; isolation: isolate; border: 1px solid $line;
+  span { position: relative; z-index: 2; }
+  &::before { content: ""; position: absolute; inset: 0; z-index: 1; background: $grad; transform: translateY(101%); border-radius: inherit; transition: transform 0.6s $ease-out; }
+  &:hover::before { transform: translateY(0); }
+  &--fill { background: $ink; color: $bg; border-color: transparent; &:hover { color: #fff; } }
+  &--ghost { @include glass; }
+}

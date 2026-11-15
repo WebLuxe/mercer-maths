@@ -1,0 +1,126 @@
+@use "sass:math";
+@use "sass:map";
+@use "abstracts" as *;
+
+// ---------- mobile booking bar ----------
+.mbar {
+  position: fixed; left: 12px; right: 12px; bottom: 12px; z-index: 110; display: none; align-items: center; justify-content: space-between; gap: 1rem;
+  padding: 0.75rem 0.8rem 0.75rem 1.2rem; border-radius: 20px; @include glass-blur(0.08); background: rgba(20, 16, 34, 0.82);
+  transform: translateY(140%); transition: transform 0.6s $ease-out;
+  span { font-size: 0.75rem; color: $muted; line-height: 1.3; b { display: block; color: $ink; font-size: 0.95rem; } }
+  em { font-style: normal; font-weight: 600; font-size: 0.9rem; padding: 0.7rem 1.1rem; border-radius: 14px; background: $grad; color: #fff; white-space: nowrap; }
+  &.is-on { transform: translateY(0); }
+  @include down(md) { display: flex; }
+}
+
+.progress { position: fixed; top: 0; left: 0; height: 2px; width: 100%; z-index: 120; background: $grad; transform-origin: left; transform: scaleX(0); }
+
+// ==========================================================
+//  PANEL MODE (desktop): every section is exactly one screen.
+//  Sizes scale with viewport height so it fits 720p → 1440p.
+// ==========================================================
+$panel: "(min-width: 900px) and (min-height: 560px)";
+@media #{$panel} {
+  :root {
+    --h: clamp(2.3rem, min(5.6vw, 9vh), 6rem);   // section heading size
+    --gap: clamp(1rem, 3.2vh, 2.6rem);           // vertical rhythm
+    --pad-top: calc(68px + 3vh);                 // clears the nav
+    --pad-bot: calc(56px + 2vh);                 // clears the HUD pill
+  }
+  .sec, .contact {
+    height: 100vh; min-height: 0; padding: var(--pad-top) 0 var(--pad-bot);
+    display: flex; flex-direction: column; justify-content: center;
+  }
+  .sec.show { display: block; height: auto; padding: 0; }
+  .wrap { width: min(1280px, 100% - 150px); }   // leaves a lane for the section dots
+  .hero { height: 100vh; min-height: 0; padding: var(--pad-top) 0 var(--pad-bot); }
+  .hero__title { font-size: clamp(3rem, min(7.4vw, 12.5vh), 7rem); margin: 2.4vh 0; }
+  .hero__cta { margin-top: 4vh; }
+  .portrait { width: min(420px, 100%, 62vh * 0.8); }
+
+  .sec-head {
+    margin-bottom: var(--gap); gap: 1.2vh 3rem; grid-template-columns: 1.25fr 1fr; align-items: end;
+    .eyebrow { grid-column: 1 / -1; }
+    h2 { font-size: var(--h); grid-column: 1; }
+    p { grid-column: 2; font-size: clamp(0.9rem, 1.9vh, 1.05rem); }
+  }
+  .eyebrow { font-size: clamp(0.65rem, 1.4vh, 0.75rem); }
+
+  .about__text { font-size: clamp(1.6rem, min(3.6vw, 6.2vh), 3.3rem); margin-top: var(--gap); }
+
+  // results: heading + 2×2 stats on the left, chart on the right
+  #results .wrap {
+    display: grid; grid-template-columns: 1fr 1.15fr; column-gap: clamp(1.5rem, 3vw, 3.5rem); align-items: center;
+    grid-template-areas: "head chart" "stats chart" "foot chart";
+    .sec-head { grid-area: head; grid-template-columns: 1fr; h2, p { grid-column: 1; } }
+    .stats { grid-area: stats; grid-template-columns: repeat(2, 1fr); border-radius: 22px; }
+    .footnote { grid-area: foot; margin-top: 1vh; }
+    .chart { grid-area: chart; margin-top: 0; }
+  }
+  .stat { padding: clamp(0.9rem, 2.6vh, 1.8rem) clamp(1rem, 1.6vw, 1.8rem);
+    &__num { font-size: clamp(2.2rem, 6.6vh, 4.4rem); } &__label { margin-top: 0.6vh; font-size: clamp(0.75rem, 1.6vh, 0.85rem); } }
+  .chart { padding: clamp(1.1rem, 3.2vh, 2.2rem);
+    &__top { margin-bottom: 2.4vh; } h3 { font-size: clamp(1.3rem, 3.2vh, 1.9rem); }
+    &__rows { gap: clamp(6px, 1.1vh, 11px); } &__track { height: clamp(16px, 2.6vh, 22px); }
+    &__grade { font-size: clamp(1rem, 2.4vh, 1.35rem); } &__foot { margin-top: 1.8vh; } }
+
+  // subjects
+  .subject { padding: clamp(1rem, 3vh, 2.2rem);
+    h3 { font-size: clamp(1.5rem, 4.2vh, 2.5rem); } &__head { margin-bottom: 1.2vh; }
+    li { padding: clamp(0.3rem, 1.05vh, 0.8rem) 0.3rem; font-size: clamp(0.85rem, 1.9vh, 1rem); }
+    .f { font-size: clamp(0.8rem, 1.8vh, 0.95rem); } }
+
+  // method (pinned sideways cards)
+  .show__pin { gap: 4vh; padding-top: 4vh; }
+  .show__head h2 { font-size: var(--h); }
+  .show__track { padding-left: max(75px, calc((100vw - 1280px) / 2)); }
+  .card { max-height: 56vh; padding: clamp(1.2rem, 3.2vh, 2rem);
+    &__sym { font-size: clamp(3.6rem, 11vh, 7rem); } h3 { font-size: clamp(1.3rem, 3.4vh, 2.1rem); }
+    p { font-size: clamp(0.8rem, 1.75vh, 0.92rem); } &__tags { margin-top: 1.4vh; } }
+
+  // worked example
+  .worked__board, .worked__plot { padding: clamp(1rem, 3vh, 2.2rem); }
+  .worked__plot { display: grid; place-items: center; svg { max-height: 46vh; width: auto; max-width: 100%; } }
+  .worked__q { margin-bottom: 1.4vh; }
+  .worked__line { padding: clamp(0.4rem, 1.3vh, 0.85rem) 0; }
+  .worked .eq { font-size: clamp(1.2rem, 3.6vh, 2rem); }
+
+  // quiz + story: heading on the left, content on the right
+  #quiz .wrap, #journey .wrap {
+    display: grid; grid-template-columns: 0.85fr 1.15fr; gap: clamp(2rem, 4vw, 4.5rem); align-items: center;
+    .sec-head { margin: 0; grid-template-columns: 1fr; h2, p { grid-column: 1; } }
+  }
+  .quiz { padding: clamp(1.1rem, 3.4vh, 2.4rem);
+    &__top { margin-bottom: 2vh; } &__stage { min-height: 0; }
+    &__q { font-size: clamp(1.5rem, 4.4vh, 2.7rem); margin-bottom: 2.4vh; }
+    &__opt { padding: clamp(0.6rem, 1.6vh, 1rem) 1.1rem; font-size: clamp(1rem, 2.3vh, 1.2rem); }
+    &__why { margin-top: 1.8vh; padding: 1.2vh 1.1rem; font-size: clamp(0.82rem, 1.8vh, 0.95rem); }
+    &__next { margin-top: 1.8vh; }
+    &__end .score { font-size: clamp(4.5rem, 15vh, 9rem); } }
+  .timeline { gap: clamp(1.2rem, 4vh, 2.6rem); }
+  .tl { h3 { font-size: clamp(1.15rem, 2.9vh, 1.75rem); } p { font-size: clamp(0.85rem, 1.85vh, 1rem); }
+    grid-template-columns: 100px 1fr; }
+
+  // quotes + fees
+  .quote { padding: clamp(1.1rem, 3vh, 2rem); gap: 1.6vh;
+    blockquote { font-size: clamp(0.95rem, 2.3vh, 1.3rem); }
+    &:first-child blockquote { font-size: clamp(1.1rem, 2.9vh, 1.65rem); }
+    &__shift b { font-size: clamp(1.1rem, 2.8vh, 1.6rem); } }
+  .format { padding: clamp(1.1rem, 3vh, 2.1rem); gap: 1.5vh;
+    h3 { font-size: clamp(1.3rem, 3.4vh, 1.8rem); } &__price { font-size: clamp(1.8rem, 5.2vh, 2.7rem); }
+    ul { gap: 0.8vh; font-size: clamp(0.8rem, 1.8vh, 0.9rem); }
+    .btn { padding: clamp(0.65rem, 1.6vh, 1rem) 1.5rem; } }
+
+  // FAQ
+  .faq-wrap .sec-head { grid-template-columns: 1fr; h2 { grid-column: 1; } }
+  .faq__q { padding: clamp(0.8rem, 2.3vh, 1.4rem) 0; font-size: clamp(1rem, 2.4vh, 1.35rem); }
+  .faq__a p { padding-bottom: 2vh; font-size: clamp(0.85rem, 1.9vh, 1rem); }
+
+  // contact
+  .contact { text-align: center;
+    &__big { font-size: clamp(3rem, min(9vw, 14vh), 10rem); margin: 2vh 0; }
+    &__lede { margin-bottom: 3.5vh; }
+    &__info { margin-top: 5vh; div { padding: 1.6vh 1.4rem; } }
+    &__foot { margin-top: 5vh; padding-top: 2vh; } }
+  .btn { padding: clamp(0.75rem, 1.8vh, 1rem) clamp(1.3rem, 1.8vw, 1.8rem); }
+}

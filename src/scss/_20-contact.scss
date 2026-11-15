@@ -1,0 +1,14 @@
+@use "sass:math";
+@use "sass:map";
+@use "abstracts" as *;
+
+// ---------- contact ----------
+.contact { text-align: center; padding: fluid(110, 190) 0 3rem;
+  &__big { font-size: fluid(52, 170); margin: 1.5rem 0 1.2rem; }
+  &__lede { color: $muted; max-width: 46ch; margin: 0 auto 2.6rem; }
+  &__cta { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.8rem; }
+  &__info { display: grid; gap: 1rem; margin-top: 4rem; text-align: left; @include up(md) { grid-template-columns: repeat(3, 1fr); }
+    div { border-radius: 20px; padding: 1.3rem 1.5rem; @include glass(0.03); }
+    dt { font-size: 0.72rem; letter-spacing: 0.2em; text-transform: uppercase; color: $muted; margin-bottom: 0.4rem; } }
+  &__foot { margin-top: 5rem; padding-top: 2rem; border-top: 1px solid $line; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 1rem; color: $muted; font-size: 0.8rem; }
+}

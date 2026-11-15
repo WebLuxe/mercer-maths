@@ -1,0 +1,37 @@
+@use "sass:math";
+@use "sass:map";
+@use "abstracts" as *;
+
+// ---------- quiz ----------
+@keyframes shake { 20%, 60% { transform: translateX(-8px); } 40%, 80% { transform: translateX(8px); } }
+.quiz {
+  position: relative; border-radius: 28px; padding: fluid(22, 44); @include glass(0.03); overflow: hidden; max-width: 900px;
+  &::after { content: ""; position: absolute; width: 50%; aspect-ratio: 1; right: -15%; top: -40%; border-radius: 50%; background: $a1; filter: blur(110px); opacity: 0.25; pointer-events: none; }
+  &__top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.6rem; }
+  &__count { font-size: 0.75rem; letter-spacing: 0.2em; text-transform: uppercase; color: $muted; }
+  &__dots { display: flex; gap: 6px;
+    i { width: 28px; height: 4px; border-radius: 4px; background: $line; transition: background 0.4s;
+      &.is-done { background: $grad; } &.is-now { background: rgba($ink, 0.5); } } }
+  &__stage { position: relative; min-height: 22rem; }
+  &__q { font-family: $display; font-weight: 700; letter-spacing: -0.03em; font-size: fluid(28, 52); line-height: 1.05; margin-bottom: 1.8rem;
+    sub, sup { font-size: 0.55em; } }
+  &__opts { display: grid; gap: 0.8rem; @include up(sm) { grid-template-columns: 1fr 1fr; } }
+  &__opt {
+    position: relative; text-align: left; padding: 1.1rem 1.3rem; border-radius: 18px; font-family: $display; font-weight: 500; font-size: 1.25rem;
+    @include glass(0.04); display: flex; align-items: center; gap: 1rem; transition: border-color 0.3s, background 0.3s, transform 0.4s $ease-out;
+    b { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; font-size: 0.8rem; border: 1px solid rgba(255, 255, 255, 0.2); color: $muted; flex-shrink: 0; }
+    &:hover:not(:disabled) { border-color: rgba($a2, 0.6); transform: translateY(-2px); }
+    &.is-right { border-color: $a2; background: rgba($a2, 0.12); box-shadow: 0 0 30px rgba($a2, 0.25); b { background: $a2; color: $bg; border-color: $a2; } }
+    &.is-wrong { border-color: $a3; background: rgba($a3, 0.1); animation: shake 0.4s; b { background: $a3; color: $bg; border-color: $a3; } }
+    &:disabled { cursor: default; }
+  }
+  &__why { margin-top: 1.4rem; padding: 1rem 1.2rem; border-radius: 16px; border-left: 2px solid $a2; background: rgba(255, 255, 255, 0.03); color: rgba($ink, 0.85); font-size: 0.95rem;
+    strong { @include grad-text; font-weight: 600; } }
+  &__next { margin-top: 1.4rem; }
+  &__end { text-align: center; padding: 1rem 0;
+    .score { font-family: $display; font-weight: 700; font-size: fluid(90, 170); line-height: 1; letter-spacing: -0.05em; @include grad-text; }
+    p { color: $muted; max-width: 40ch; margin: 1rem auto 1.8rem; }
+    .row { display: flex; flex-wrap: wrap; gap: 0.8rem; justify-content: center; } }
+  &__burst { position: absolute; inset: 0; pointer-events: none; overflow: hidden;
+    span { position: absolute; font-family: $display; font-weight: 700; font-size: 1.6rem; } }
+}

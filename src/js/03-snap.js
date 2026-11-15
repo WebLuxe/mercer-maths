@@ -1,0 +1,136 @@
+/* ==================================================================
+   Full-screen section snapping (desktop)
+   One flick = one section. Sections taller than the screen scroll
+   freely until their end, then the next flick snaps onward.
+   Registered before Lenis so it gets first say on wheel events.
+================================================================== */
+const panelMQ = matchMedia("(min-width: 900px) and (min-height: 560px)");
+const snapOn = finePointer && !reduce;
+const snapActive = () => snapOn && panelMQ.matches;
+const snap = { busy: false, consumed: false, edge: false, lastWheel: 0 };
+const sectionEls = $$("main > section");
+const sectionBounds = () => sectionEls.map((el) => {
+  const r = el.getBoundingClientRect();
+  return { el, top: r.top + scrollY, bottom: r.top + scrollY + r.height };
+});
+const easeSnap = (t) => (t < 0.5 ? 16 * t ** 5 : 1 - Math.pow(-2 * t + 2, 5) / 2);
+const ui = { book: false };
+function snapTo(y, dur = 1.2) {
+  if (!lenis) return;
+  snap.busy = true;
+  snap.consumed = true;
+  lenis.scrollTo(y, { duration: dur, easing: easeSnap, lock: true, force: true, onComplete: () => (snap.busy = false) });
+  setTimeout(() => (snap.busy = false), dur * 1000 + 300); // safety net
+}
+// the 3D carousel section has one stop per card
+const carouselStops = (sec) => {
+  const range = sec.bottom - sec.top - innerHeight, n = $$("#showTrack .card").length;
+  return Array.from({ length: n }, (_, k) => sec.top + (range * k) / (n - 1));
+};
+function snapStep(dir, delta) {
+  const secs = sectionBounds(), vh = innerHeight;
+  const y = lenis.targetScroll;
+  let i = 0;
+  secs.forEach((s, k) => { if (s.top <= y + 2) i = k; });
+  const cur = secs[i], minY = cur.top, maxY = Math.max(cur.top, cur.bottom - vh);
+  if (cur.el.id === "method") {
+    const stops = carouselStops(cur);
+    const to = dir > 0 ? stops.find((p) => p > y + 2) : [...stops].reverse().find((p) => p < y - 2);
+    if (to !== undefined) return snapTo(to, 0.95);
+    if (dir > 0 && secs[i + 1]) return snapTo(secs[i + 1].top);
+    if (dir < 0 && secs[i - 1]) { const p = secs[i - 1]; return snapTo(Math.max(p.top, p.bottom - vh)); }
+    return;
+  }
+  if (dir > 0) {
+    if (y < maxY - 2) {                         // still content below in this section
+      const to = Math.min(y + delta, maxY);
+      lenis.scrollTo(to, { lerp: 0.1 });
+      if (to >= maxY - 2) snap.edge = true;
+      return;
+    }
+    if (snap.edge || !secs[i + 1]) return;     // wait for a fresh flick at the edge
+    snapTo(secs[i + 1].top);
+  } else {
+    if (y > minY + 2) {
+      const to = Math.max(y + delta, minY);
+      lenis.scrollTo(to, { lerp: 0.1 });
+      if (to <= minY + 2) snap.edge = true;
+      return;
+    }
+    if (snap.edge || !secs[i - 1]) return;
+    const prev = secs[i - 1];
+    snapTo(Math.max(prev.top, prev.bottom - vh));   // land on the end of a tall previous section
+  }
+}
+if (snapOn) {
+  addEventListener("wheel", (e) => {
+    if (ui.book || !lenis || !snapActive() || document.body.classList.contains("is-loading")) return;
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    const now = performance.now(), gap = now - snap.lastWheel;
+    snap.lastWheel = now;
+    if (gap > 220) { snap.consumed = false; snap.edge = false; }   // a new gesture started
+    if (snap.busy || snap.consumed) return;                        // swallow trackpad inertia
+    let d = e.deltaY;
+    if (e.deltaMode === 1) d *= 32; else if (e.deltaMode === 2) d *= innerHeight;
+    if (Math.abs(d) < 1) return;
+    snapStep(Math.sign(d), d);
+  }, { passive: false, capture: true });
+
+  addEventListener("keydown", (e) => {
+    if (ui.book || !lenis || !snapActive() || document.body.classList.contains("is-loading")) return;
+    if (e.target.closest("input, textarea, select, [contenteditable]")) return;
+    let dir = { ArrowDown: 1, PageDown: 1, " ": 1, ArrowUp: -1, PageUp: -1 }[e.key];
+    if (!dir || (e.key === " " && e.target.closest("button, a"))) return;
+    if (e.key === " " && e.shiftKey) dir = -1;
+    e.preventDefault();
+    if (snap.busy) return;
+    snap.edge = false;
+    snapStep(dir, dir * innerHeight * 0.6);
+  }, { capture: true });
+}
+
+// side dots: one per section, click to jump
+const dotsEl = $("#dots");
+const DOT_LABELS = { teaser: "Tuition", timetable: "Timetable", about: "Tutor", results: "Results", subjects: "Subjects", method: "Method", example: "Lesson", quiz: "Quiz", journey: "Story", students: "Students", fees: "Fees", faq: "FAQ", contact: "Contact" };
+sectionEls.forEach((el, i) => {
+  const b = document.createElement("button");
+  b.setAttribute("aria-label", "Go to " + (DOT_LABELS[el.id] || "Home"));
+  b.innerHTML = `<span>${DOT_LABELS[el.id] || "Home"}</span>`;
+  b.addEventListener("click", () => (lenis ? snapTo(sectionBounds()[i].top) : el.scrollIntoView()));
+  dotsEl.appendChild(b);
+});
+const dotBtns = [...dotsEl.children];
+const navLinks = $$(".nav__links a");
+let activeDot = -1;
+function updateDots() {
+  const mid = scrollY + innerHeight * 0.45;
+  let i = 0;
+  sectionBounds().forEach((s, k) => { if (s.top <= mid) i = k; });
+  if (i === activeDot) return;
+  activeDot = i;
+  dotBtns.forEach((b, k) => b.classList.toggle("is-on", k === i));
+  const id = sectionEls[i].id;
+  navLinks.forEach((a) => a.classList.toggle("is-active", a.getAttribute("href") === "#" + id));
+}
+
+
+if (!reduce && Lenis) {
+  lenis = new Lenis({ duration: 1.25, easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)) });
+  lenis.stop();
+  lenis.on("scroll", ScrollTrigger.update);
+  lenis.on("scroll", () => updateDots());
+  gsap.ticker.add((t) => lenis.raf(t * 1000));
+  gsap.ticker.lagSmoothing(0);
+}
+if (!lenis) addEventListener("scroll", () => updateDots(), { passive: true });
+updateDots();
+$$('a[href^="#"]').forEach((a) =>
+  a.addEventListener("click", (e) => {
+    const id = a.getAttribute("href");
+    if (id === "#" || a.hasAttribute("data-book")) return;
+    e.preventDefault();
+    const target = id === "#top" ? 0 : $(id);
+    lenis ? lenis.scrollTo(target, { duration: 1.8 }) : target === 0 ? scrollTo({ top: 0 }) : target.scrollIntoView();
+  })
+);

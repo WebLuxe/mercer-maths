@@ -1,0 +1,14 @@
+@use "sass:math";
+@use "sass:map";
+@use "abstracts" as *;
+
+// ---------- timeline ----------
+.timeline { position: relative; display: grid; gap: 3rem; padding-left: 2.5rem;
+  &__line { position: absolute; left: 6px; top: 0; bottom: 0; width: 2px; background: $line; i { position: absolute; inset: 0; background: $grad; transform-origin: top; transform: scaleY(0); } } }
+.tl { position: relative;
+  &::before { content: ""; position: absolute; left: calc(-2.5rem + 1px); top: 0.45rem; width: 12px; height: 12px; border-radius: 50%; background: $bg; border: 2px solid $a2; box-shadow: 0 0 0 6px rgba($a2, 0.12); }
+  &__year { font-family: $display; font-size: 0.85rem; color: $a2; letter-spacing: 0.1em; }
+  h3 { font-family: $display; font-size: fluid(22, 32); letter-spacing: -0.02em; margin: 0.3rem 0 0.4rem; }
+  p { color: $muted; max-width: 60ch; }
+  @include up(md) { display: grid; grid-template-columns: 140px 1fr; gap: 2rem; .tl__year { padding-top: 0.5rem; } h3 { margin-top: 0; } }
+}

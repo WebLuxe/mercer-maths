@@ -1,0 +1,35 @@
+@use "sass:math";
+@use "sass:map";
+@use "abstracts" as *;
+
+// ==========================================================
+//  3D CAROUSEL (section 4): cards on a cylinder
+// ==========================================================
+.show__stage {
+  --cw: min(78vw, 400px, 44vh);
+  position: relative; height: calc(var(--cw) * 1.25 + 6vh); perspective: 1600px; perspective-origin: 50% 35%;
+}
+.show__track { position: absolute; left: 50%; top: 50%; width: 0; height: 0; padding: 0 !important; display: block; transform-style: preserve-3d; }
+.show .card {
+  position: absolute; width: var(--cw); height: calc(var(--cw) * 1.25); max-height: none; aspect-ratio: auto;
+  left: calc(var(--cw) / -2); top: calc(var(--cw) * -0.625);
+  backface-visibility: hidden; -webkit-backface-visibility: hidden; cursor: pointer;
+  transition: box-shadow 0.6s $ease-out, border-color 0.6s;
+  &.is-front { cursor: default; border-color: rgba(255, 255, 255, 0.22); box-shadow: 0 40px 100px -30px rgba($a1, 0.65), 0 0 0 1px rgba(255, 255, 255, 0.05); }
+}
+.show__meta {
+  display: flex; align-items: center; gap: 1rem; font-family: $display; color: $muted; font-size: 0.9rem;
+  b { font-size: 1.6rem; @include grad-text; }
+  i { width: 140px; height: 2px; border-radius: 2px; background: $line; overflow: hidden; display: block; }
+  em { display: block; height: 100%; background: $grad; transform-origin: left; transform: scaleX(0); }
+}
+
+// glare layer injected on tilting cards
+.glare {
+  position: absolute; inset: 0; border-radius: inherit; pointer-events: none; z-index: 3; opacity: 0; transition: opacity 0.5s;
+  background: radial-gradient(420px circle at var(--gx, 50%) var(--gy, 50%), rgba(255, 255, 255, 0.11), transparent 45%);
+}
+.is-tilting .glare { opacity: 1; }
+
+// active nav link
+.nav__links a.is-active { color: $ink; &::after { transform: scaleX(1); transform-origin: left; } }

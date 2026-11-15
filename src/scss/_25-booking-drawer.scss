@@ -1,0 +1,56 @@
+@use "sass:math";
+@use "sass:map";
+@use "abstracts" as *;
+
+// ==========================================================
+//  BOOKING DRAWER
+// ==========================================================
+.book {
+  position: fixed; inset: 0; z-index: 180; pointer-events: none; visibility: hidden;
+  &.is-open { pointer-events: auto; visibility: visible; }
+  &__scrim { position: absolute; inset: 0; background: rgba(5, 4, 10, 0.62); opacity: 0; }
+  &__panel {
+    position: absolute; top: 12px; right: 12px; bottom: 12px; width: min(520px, calc(100% - 24px)); border-radius: 28px;
+    background: linear-gradient(160deg, rgba($a1, 0.18), rgba($a2, 0.05) 55%, rgba($a3, 0.08)), #0e0b1a;
+    border: 1px solid rgba(255, 255, 255, 0.12); padding: clamp(1.4rem, 4vh, 2.6rem); display: flex; flex-direction: column;
+    overflow-y: auto; overscroll-behavior: contain; box-shadow: -40px 0 120px rgba(0, 0, 0, 0.55);
+  }
+  &__x { position: absolute; top: 18px; right: 18px; width: 40px; height: 40px; border-radius: 50%; border: 1px solid $line; display: grid; place-items: center;
+    transition: background 0.3s, transform 0.5s $ease-out; &:hover { background: rgba(255, 255, 255, 0.08); transform: rotate(90deg); } }
+  &__head { margin-bottom: 4vh; padding-right: 3rem; }
+  &__bar { display: flex; gap: 6px; margin-top: 1.2rem;
+    i { flex: 1; height: 3px; border-radius: 3px; background: $line; transition: background 0.5s; &.is-on { background: $grad; } } }
+  form { flex: 1; display: flex; flex-direction: column; }
+  &__step { border: 0; display: none; &.is-on { display: block; } }
+  &__q { font-family: $display; font-weight: 700; font-size: clamp(1.7rem, 4.4vh, 2.5rem); letter-spacing: -0.03em; line-height: 1.05; margin-bottom: 3vh; padding: 0; }
+  &__hint { color: $muted; font-size: 0.85rem; margin-top: 1.4rem; }
+  &__err { color: $a3; font-size: 0.85rem; min-height: 1.4em; margin-top: 1rem; }
+  &__nav { display: flex; justify-content: space-between; gap: 1rem; margin-top: auto; padding-top: 2vh; }
+  &__tick { width: 76px; height: 76px; border-radius: 50%; background: $grad; display: grid; place-items: center; font-size: 2.1rem; margin-bottom: 3vh; box-shadow: 0 0 50px rgba($a1, 0.65); }
+  &__done p { color: $muted; }
+  &__send { display: flex; flex-wrap: wrap; gap: 0.7rem; margin: 3.5vh 0; }
+  &__preview { white-space: pre-wrap; font-family: ui-monospace, monospace; font-size: 0.78rem; color: $muted; line-height: 1.6;
+    background: rgba(255, 255, 255, 0.03); border: 1px solid $line; border-radius: 16px; padding: 1rem 1.2rem; }
+}
+.chips { display: flex; flex-wrap: wrap; gap: 0.6rem;
+  &__label { display: block; font-size: 0.72rem; color: $muted; letter-spacing: 0.16em; text-transform: uppercase; margin: 2.4vh 0 0.8rem; }
+  button { padding: 0.75rem 1.15rem; border-radius: 99px; border: 1px solid rgba(255, 255, 255, 0.16); background: rgba(255, 255, 255, 0.03); font-size: 0.92rem;
+    transition: border-color 0.3s, background 0.3s, box-shadow 0.4s, transform 0.4s $ease-out;
+    &:hover { border-color: rgba($a2, 0.6); transform: translateY(-2px); }
+    &[aria-pressed="true"] { background: $grad; border-color: transparent; color: #fff; box-shadow: 0 10px 30px -8px rgba($a1, 0.75); } } }
+.field { display: block; margin-bottom: 1.3rem;
+  span { display: block; font-size: 0.72rem; color: $muted; margin-bottom: 0.5rem; letter-spacing: 0.16em; text-transform: uppercase; }
+  input { width: 100%; padding: 0.95rem 1.1rem; border-radius: 14px; border: 1px solid rgba(255, 255, 255, 0.14); background: rgba(255, 255, 255, 0.03);
+    color: $ink; font: inherit; outline: none; transition: border-color 0.3s, box-shadow 0.3s;
+    &::placeholder { color: rgba($muted, 0.6); }
+    &:focus { border-color: $a2; box-shadow: 0 0 0 4px rgba($a2, 0.15); }
+    &.is-bad { border-color: $a3; box-shadow: 0 0 0 4px rgba($a3, 0.12); } } }
+
+// short laptop screens (≈720–780px tall): tighten the rhythm a notch
+@media (min-width: 900px) and (min-height: 560px) and (max-height: 780px) {
+  :root { --h: clamp(2.1rem, min(5vw, 8.2vh), 5rem); --gap: 2.4vh; }
+  .sec-head p { font-size: 0.85rem; }
+  .subject { padding: 2.2vh 1.3rem; li { padding: 0.75vh 0.3rem; } }
+  .slot { padding: 1.1vh 0.8rem; &__seats { margin-top: 0.3rem; } }
+  .tt__filters { margin-bottom: 1.6vh; }
+}

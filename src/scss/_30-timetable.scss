@@ -1,0 +1,40 @@
+@use "sass:math";
+@use "sass:map";
+@use "abstracts" as *;
+
+// ==========================================================
+//  TIMETABLE
+// ==========================================================
+.tt__filters { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; margin-bottom: clamp(1rem, 2.6vh, 1.6rem);
+  button { padding: 0.55rem 1.05rem; border-radius: 99px; border: 1px solid rgba(255, 255, 255, 0.16); background: rgba(255, 255, 255, 0.03); font-size: 0.85rem;
+    transition: border-color 0.3s, background 0.3s, box-shadow 0.4s;
+    &:hover { border-color: rgba($a2, 0.6); }
+    &[aria-selected="true"] { background: $grad; border-color: transparent; color: #fff; box-shadow: 0 8px 26px -8px rgba($a1, 0.75); } } }
+.tt__legend { margin-left: auto; font-size: 0.75rem; color: $muted; display: flex; align-items: center; gap: 0.45rem;
+  i { width: 8px; height: 8px; border-radius: 50%; background: rgba(255, 255, 255, 0.18); margin-left: 0.4rem; }
+  i.is-free { background: $a2; box-shadow: 0 0 8px $a2; }
+  @include down(sm) { display: none; } }
+.tt__grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 0.8rem; @include down(md) { grid-template-columns: repeat(2, 1fr); } }
+.tt__day { display: flex; flex-direction: column; gap: 0.6rem;
+  h4 { font-family: $display; font-size: 0.78rem; font-weight: 500; letter-spacing: 0.18em; text-transform: uppercase; color: $muted; padding-bottom: 0.55rem; border-bottom: 1px solid $line; }
+  .tt__long { opacity: 0.5; @include down(lg) { display: none; } } }
+.slot {
+  position: relative; overflow: hidden; text-align: left; padding: clamp(0.7rem, 1.8vh, 1rem); border-radius: 16px; @include glass(0.03);
+  display: flex; flex-direction: column; gap: 0.15rem; transition: border-color 0.3s, transform 0.45s $ease-out, opacity 0.45s, filter 0.45s;
+  &__time { font-family: $display; font-weight: 700; font-size: clamp(1.05rem, 2.6vh, 1.4rem); letter-spacing: -0.02em; }
+  b { font-weight: 600; font-size: 0.86rem; }
+  &__meta { font-size: 0.72rem; color: $muted; }
+  &__seats { display: flex; gap: 3px; margin-top: 0.5rem;
+    i { width: 8px; height: 8px; border-radius: 50%; background: rgba(255, 255, 255, 0.16); }
+    i.is-free { background: $a2; box-shadow: 0 0 6px rgba($a2, 0.85); } }
+  &__left { font-size: 0.7rem; color: $a2; margin-top: 0.3rem; }
+  &:hover:not(.is-full) { border-color: rgba($a2, 0.6); transform: translateY(-4px); }
+  &.is-full { opacity: 0.55; .slot__left { color: $a3; } }
+  &.is-dim { opacity: 0.14; filter: grayscale(1); pointer-events: none; }
+  &--online::after { content: "online"; position: absolute; top: 0.6rem; right: 0.6rem; font-size: 0.6rem; letter-spacing: 0.12em; text-transform: uppercase;
+    padding: 0.15rem 0.45rem; border-radius: 99px; background: rgba($a3, 0.2); color: $a3; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; }
+}

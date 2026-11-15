@@ -1,0 +1,20 @@
+@use "sass:math";
+@use "sass:map";
+@use "abstracts" as *;
+
+// ---------- subjects ----------
+.subjects { display: grid; gap: 1.4rem; @include up(md) { grid-template-columns: 1fr 1fr; } }
+.subject {
+  border-radius: 28px; padding: fluid(22, 38); @include glass(0.03); position: relative; overflow: hidden;
+  &::before { content: ""; position: absolute; width: 60%; aspect-ratio: 1; top: -30%; right: -20%; border-radius: 50%; background: var(--c, #{$a1}); filter: blur(80px); opacity: 0.25; pointer-events: none; }
+  &__head { display: flex; justify-content: space-between; align-items: start; gap: 1rem; margin-bottom: 1.2rem; }
+  h3 { font-family: $display; font-size: fluid(30, 46); letter-spacing: -0.03em; line-height: 1; }
+  &__codes { display: flex; flex-direction: column; gap: 0.35rem; align-items: end;
+    span { font-size: 0.7rem; padding: 0.3rem 0.7rem; border-radius: 99px; border: 1px solid rgba(255, 255, 255, 0.18); white-space: nowrap; } }
+  ol { list-style: none; }
+  li { display: grid; grid-template-columns: 30px 1fr auto; gap: 0.8rem; align-items: baseline; padding: 0.85rem 0.3rem; border-bottom: 1px solid $line; transition: padding 0.4s $ease-out;
+    &:last-child { border-bottom: 0; }
+    &:hover { padding-left: 0.8rem; .f { @include grad-text; } } }
+  .n { font-size: 0.72rem; color: $muted; font-variant-numeric: tabular-nums; }
+  .f { font-family: $display; font-size: 0.95rem; color: $muted; white-space: nowrap; @include down(sm) { display: none; } }
+}

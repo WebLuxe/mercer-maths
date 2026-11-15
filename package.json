@@ -1,0 +1,9 @@
+{
+  "name": "mercer-maths",
+  "private": true,
+  "description": "Two-page 3D animated site for a Maths & Add Maths tutor (demo content).",
+  "scripts": {
+    "build": "node build.mjs",
+    "serve": "python -m http.server 4823"
+  }
+}

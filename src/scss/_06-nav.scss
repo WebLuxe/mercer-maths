@@ -1,0 +1,18 @@
+@use "sass:math";
+@use "sass:map";
+@use "abstracts" as *;
+
+// ---------- nav ----------
+.nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100; padding: 1.1rem 0; transition: background 0.4s; // movement is GSAP's job, never a CSS transition
+  .wrap { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+  &__logo { font-family: $display; font-weight: 700; font-size: 1.3rem; letter-spacing: -0.03em; b { @include grad-text; } }
+  &__links { display: none; gap: 2rem; font-size: 0.85rem; @include up(md) { display: flex; }
+    a { position: relative; color: $muted; transition: color 0.3s;
+      &::after { content: ""; position: absolute; left: 0; bottom: -4px; width: 100%; height: 1px; background: $grad; transform: scaleX(0); transform-origin: right; transition: transform 0.5s $ease-out; }
+      &:hover { color: $ink; &::after { transform: scaleX(1); transform-origin: left; } } } }
+  &.is-solid { @include glass-blur(0.03); border-width: 0 0 1px; }
+}
+.status { display: inline-flex; align-items: center; gap: 0.6rem; font-size: 0.75rem; padding: 0.5rem 1rem; border-radius: 99px; @include glass;
+  i { width: 8px; height: 8px; border-radius: 50%; background: #34d399; box-shadow: 0 0 12px #34d399; animation: pulse 2s infinite; }
+  @include down(sm) { span { display: none; } } }

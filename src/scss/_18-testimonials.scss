@@ -1,0 +1,15 @@
+@use "sass:math";
+@use "sass:map";
+@use "abstracts" as *;
+
+// ---------- testimonials ----------
+.quotes { display: grid; gap: 1.4rem; @include up(md) { grid-template-columns: 1.3fr 1fr 1fr; } }
+.quote {
+  border-radius: 28px; padding: fluid(22, 34); @include glass(0.03); display: flex; flex-direction: column; gap: 1.3rem;
+  &__shift { display: flex; align-items: center; gap: 0.6rem; font-size: 0.8rem; color: $muted;
+    b { font-family: $display; font-size: 1.6rem; color: $ink; line-height: 1; } i { font-style: normal; @include grad-text; font-size: 1.2rem; }
+    b:last-child { @include grad-text; } }
+  blockquote { font-family: $display; font-weight: 500; letter-spacing: -0.02em; font-size: fluid(18, 22); line-height: 1.35; }
+  &:first-child blockquote { font-size: fluid(21, 28); }
+  cite { font-style: normal; font-size: 0.82rem; color: $muted; margin-top: auto; }
+}
