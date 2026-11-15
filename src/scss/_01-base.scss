@@ -34,3 +34,8 @@ html.lenis-stopped { overflow: hidden; }           // page behind the booking pa
 .wrap { width: min(1280px, 100% - 32px); margin-inline: auto; @include up(sm) { width: min(1280px, 100% - 64px); } }
 section { position: relative; z-index: 2; }
 .reveal-line { display: block; overflow: hidden; padding-bottom: 0.06em; > span { display: block; } }
+
+// performance engine: low-power tier drops the decorative layers
+.low-power .grain, .low-power .trail { display: none; }
+.fps { position: fixed; left: 12px; top: 84px; z-index: 500; pointer-events: none; white-space: pre; line-height: 1.5;
+  font: 600 12px/1.5 ui-monospace, monospace; color: #7cffb2; background: rgba(0, 0, 0, 0.72); padding: 0.45rem 0.7rem; border-radius: 8px; }

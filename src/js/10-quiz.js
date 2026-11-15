@@ -71,7 +71,7 @@ if ($("#quizStage")) {
       "That's exactly what the diagnostic paper is for. Every one of these is fixable in a few lessons.",
       "A start. The gaps are usually just one or two habits, and they're quick to fix.",
       "Nearly there. One slip on the day costs a grade, and that's what exam technique fixes.",
-      "Full marks. You'd fit straight into the Form V Add Maths group.",
+      "Full marks. You'd fit straight into the Grade 11 Add Maths group.",
     ][score];
     swap(() => {
       stage.innerHTML = `<div class="quiz__end"><div class="score"><span id="qs">0</span>/${QUIZ.length}</div><p>${msg}</p>

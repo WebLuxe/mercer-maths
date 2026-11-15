@@ -6,7 +6,7 @@ const bookSteps = $$(".book__step"), bookBars = $$(".book__bar i"), bookErr = $(
 const bookNext = $("#bookNext"), bookBack = $("#bookBack"), bookForm = $("#bookForm"), bookDone = $("#bookDone");
 const booking = {};
 let bookStep = 0, bookFocus = null;
-const FIELD_LABELS = { form: "Form", syllabus: "Syllabus", format: "Format", day: "Best time" };
+const FIELD_LABELS = { grade: "Grade", format: "Format", day: "Best time" };
 
 function pickChip(group, btn) {
   $$("button", group).forEach((x) => x.setAttribute("aria-pressed", String(x === btn)));
@@ -38,7 +38,7 @@ function showBookStep(i, dir = 1) {
 }
 
 function bookProblem() {
-  const need = [["subject"], ["form", "syllabus", "format"], ["day"]][bookStep];
+  const need = [["subject"], ["grade", "format"], ["day"]][bookStep];
   const missing = need.find((k) => !booking[k]);
   if (bookStep === 2) {
     const name = bookForm.name.value.trim(), phone = bookForm.phone.value.replace(/\D/g, "");
@@ -69,7 +69,7 @@ function finishBooking() {
 
 Student: ${name}
 Subject: ${booking.subject}
-Form: ${booking.form} (${booking.syllabus})
+Grade: ${booking.grade}
 Format: ${booking.format}
 Best time: ${booking.day}
 Parent's WhatsApp: ${phone}`;

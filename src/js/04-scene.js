@@ -34,8 +34,11 @@ const SHAPES = [
 const canvas = $("#webgl");
 // MSAA off: points and a full-screen shader gain nothing from it, and it's a big GPU cost
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: false, alpha: false, powerPreference: "high-performance" });
-const DPR_MAX = Math.min(devicePixelRatio, isMobile ? 1.25 : 1.5);
-let dpr = DPR_MAX;
+const DPR_MAX = Math.min(devicePixelRatio, isMobile ? 1 : 1.25);
+const QKEY = "mm-quality";
+let savedQ = null;
+try { savedQ = JSON.parse(localStorage.getItem(QKEY) || "null"); } catch (e) {}
+let dpr = savedQ ? Math.min(DPR_MAX, savedQ.dpr) : DPR_MAX;
 renderer.setPixelRatio(dpr);
 renderer.setSize(innerWidth, innerHeight);
 renderer.setClearColor(0x07060b, 1);
@@ -62,7 +65,7 @@ const bgMat = new THREE.ShaderMaterial({
   fragmentShader: /* glsl */ `
     ${NOISE}
     uniform float uTime, uScroll, uIntro, uVel, uDir, uRippleT; uniform vec2 uRes, uMouse, uRipple;
-    float fbm(vec3 p){ float a = .5, s = 0.; for (int i = 0; i < 3; i++){ s += a * snoise(p); p *= 2.03; a *= .5; } return s; }
+    float fbm(vec3 p){ float a = .5, s = 0.; for (int i = 0; i < 2; i++){ s += a * snoise(p); p *= 2.03; a *= .5; } return s; }
     float hash(float n){ return fract(sin(n) * 43758.5453); }
 
     // a shooting star that crosses the screen once per period
@@ -133,7 +136,7 @@ const bgMat = new THREE.ShaderMaterial({
 });
 // The background is soft by nature, so it's drawn at half resolution into a texture and
 // stretched to full screen: ~75% fewer shader pixels per frame, no visible difference.
-const BG_SCALE = 0.5;
+const BG_SCALE = 0.35;
 const bgScene = new THREE.Scene(), bgCam = new THREE.Camera();
 const bgQuad = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), bgMat);
 bgQuad.frustumCulled = false;
@@ -162,7 +165,7 @@ ScrollTrigger.addEventListener("refresh", syncMax);
 syncMax();
 
 // ---- particles
-const COUNT = isMobile ? 6000 : 15000;
+const COUNT = isMobile ? 3500 : 7500;
 const A = new Float32Array(COUNT * 3), B = new Float32Array(COUNT * 3), C = new Float32Array(COUNT * 3),
       D = new Float32Array(COUNT * 3), E = new Float32Array(COUNT * 3), F = new Float32Array(COUNT * 3);
 const rnd = new Float32Array(COUNT), col = new Float32Array(COUNT * 3);
@@ -205,7 +208,7 @@ const pMat = new THREE.ShaderMaterial({
   uniforms: {
     uTime: { value: 0 }, uMorph: { value: 0 }, uIntro: { value: 0 }, uVel: { value: 0 },
     uMouse: { value: new THREE.Vector3(99, 99, 0) }, uShock: { value: new THREE.Vector3(99, 99, 0) }, uShockAge: { value: 10 },
-    uSize: { value: 28 * dpr },
+    uSize: { value: 34 * dpr },
   },
   vertexShader: /* glsl */ `
     ${NOISE}
@@ -243,6 +246,12 @@ const pMat = new THREE.ShaderMaterial({
 const points = new THREE.Points(pGeo, pMat);
 points.frustumCulled = false;
 const perfState = { low: false };
+const goLow = () => {
+  perfState.low = true;
+  pGeo.setDrawRange(0, Math.floor(COUNT * 0.6));
+  document.documentElement.classList.add("low-power");
+};
+if (savedQ?.low) goLow();
 world.add(points);
 
 // ---- liquid blob (desktop only; detail 40 looks identical to 96 at this size, at a fraction of the cost)
@@ -269,11 +278,11 @@ const blobMat = new THREE.ShaderMaterial({
       gl_FragColor = vec4(col * (.12 + f * 1.4), (.25 + f) * uAlpha);
     }`,
 });
-const blob = new THREE.Mesh(new THREE.IcosahedronGeometry(1.25, isMobile ? 16 : 40), blobMat);
+const blob = new THREE.Mesh(new THREE.IcosahedronGeometry(1.25, isMobile ? 12 : 24), blobMat);
 world.add(blob);
 
 { // background dust
-  const n = 1200, g = new THREE.BufferGeometry(), a = new Float32Array(n * 3);
+  const n = 500, g = new THREE.BufferGeometry(), a = new Float32Array(n * 3);
   for (let i = 0; i < n * 3; i++) a[i] = (Math.random() - 0.5) * 60;
   g.setAttribute("position", new THREE.BufferAttribute(a, 3));
   scene.add(new THREE.Points(g, new THREE.PointsMaterial({ size: 0.03, color: 0x9a94b8, transparent: true, opacity: 0.5, depthWrite: false })));
@@ -300,7 +309,7 @@ function makeSymbols() {
     tex.colorSpace = THREE.SRGBColorSpace;
     return tex;
   })());
-  const n = isMobile ? 10 : 22;
+  const n = isMobile ? 6 : 12;
   for (let i = 0; i < n; i++) {
     const mat = new THREE.SpriteMaterial({ map: texFor(glyphs[i % glyphs.length]), color: tints[i % 4], transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending });
     const s = new THREE.Sprite(mat);
@@ -372,20 +381,22 @@ const applyDpr = () => {
   renderer.setPixelRatio(dpr);
   renderer.setSize(innerWidth, innerHeight);
   syncBgRes();
-  pMat.uniforms.uSize.value = 28 * dpr;
+  pMat.uniforms.uSize.value = 34 * dpr;
 };
-const perf = { frames: 0, acc: 0, last: performance.now(), warm: performance.now() + 3000 };
+const perf = { frames: 0, acc: 0, last: performance.now(), warm: performance.now() + 2000 };
+const saveQ = () => { try { localStorage.setItem(QKEY, JSON.stringify({ dpr, low: perfState.low })); } catch (e) {} };
 function watchPerf() {
   const now = performance.now(), dt = now - perf.last;
   perf.last = now;
-  if (now < perf.warm || dt > 250) return;          // ignore the loader and tab switches
+  if (now < perf.warm || dt > 250 || ui.book) return;   // ignore loader, tab switches, booking panel          // ignore the loader and tab switches
   perf.acc += dt; perf.frames++;
-  if (perf.frames < 90) return;
+  if (perf.frames < 60) return;
   const avg = perf.acc / perf.frames;
   perf.frames = 0; perf.acc = 0;
-  if (avg > 21 && dpr > 0.75) { dpr = Math.max(0.75, dpr - 0.25); applyDpr(); }
-  else if (avg > 21 && !perfState.low) { perfState.low = true; pGeo.setDrawRange(0, Math.floor(COUNT * 0.6)); }
-  else if (avg < 12 && dpr < DPR_MAX) { dpr = Math.min(DPR_MAX, dpr + 0.25); applyDpr(); }
+  perf.avg = avg;
+  if (avg > 18.5 && dpr > 0.75) { dpr = Math.max(0.75, dpr - 0.25); applyDpr(); saveQ(); }     // under ~54fps: step down
+  else if (avg > 18.5 && !perfState.low) { goLow(); saveQ(); }
+  else if (avg < 11 && dpr < DPR_MAX && !perfState.low) { dpr = Math.min(DPR_MAX, dpr + 0.25); applyDpr(); saveQ(); }
 }
 
 // ---- one render loop, driven by GSAP's ticker (same frame as Lenis + ScrollTrigger)
@@ -394,12 +405,17 @@ let prevScroll = scrollY, spin = 0;
 // measure the screen's refresh rate once
 let frameNo = 0, renderEvery = 1;
 {
-  let n = 0;
-  const t0 = performance.now();
+  // median frame gap, skipping start-up frames (shader compiles make those slow and would hide a 120Hz screen)
+  const gaps = [];
+  let last = 0;
   const probe = () => {
-    if (++n < 90) return;
+    const now = performance.now();
+    if (last) gaps.push(now - last);
+    last = now;
+    if (gaps.length < 150) return;
     gsap.ticker.remove(probe);
-    renderEvery = 1000 * n / (performance.now() - t0) > 100 ? 2 : 1;
+    const med = gaps.slice(30).sort((a, b) => a - b)[60];
+    renderEvery = med < 10 ? 2 : 1;          // under 10ms a frame = 100Hz+ screen
   };
   gsap.ticker.add(probe);
 }

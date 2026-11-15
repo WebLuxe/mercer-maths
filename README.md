@@ -1,6 +1,6 @@
 # Mercer Maths
 
-**A 3D, animated two-page website for a Mathematics & Additional Mathematics tutor.**
+**A 3D, animated two-page website for a Maths tutor in Mauritius: Grades 7–13 (NCE, SC, HSC) and SC Add Maths.**
 Particles that morph through real equations, full-screen snap scrolling, a 3D lesson carousel,
 an interactive timetable and a booking flow that writes the WhatsApp message for you.
 
@@ -16,16 +16,18 @@ an interactive timetable and a booking flow that writes the WhatsApp message for
 | Profile (`index.html`) | Tuition (`tuition.html`) |
 |---|---|
 | ![Profile results](docs/screenshots/profile-results.jpg) | ![Tuition hero, particles forming A*](docs/screenshots/tuition-hero.jpg) |
-| The tutor, results with a grade chart, the story, reviews, contact | Subjects, timetable, how lessons work, a worked example, quiz, fees, FAQ |
+| The tutor, results with a grade chart, the story, reviews, contact | Grades 7–13 by stage (NCE, SC, HSC), timetable, how lessons work, a worked example, quiz, fees, FAQ |
 
 Switching tabs plays a five-bar page transition; the next page builds itself out of it.
 
 ## Highlights
 
+![Subjects by stage: Grades 7–9 NCE, 10–11 SC, 12–13 HSC](docs/screenshots/tuition-subjects.jpg)
+
 | | |
 |---|---|
 | ![3D lesson carousel](docs/screenshots/tuition-carousel.jpg) | ![Timetable](docs/screenshots/tuition-timetable.jpg) |
-| **3D carousel.** Cards on a spinning cylinder, one card per scroll. | **Timetable.** Filter by form (cards flip in 3D), tap a slot to book it. |
+| **3D carousel.** Cards on a spinning cylinder, one card per scroll. | **Timetable.** Filter by grade band (cards flip in 3D), tap a slot to book it. |
 | ![Quiz](docs/screenshots/tuition-quiz.jpg) | ![Booking](docs/screenshots/booking.jpg) |
 | **Quiz.** Three real Add Maths questions with worked answers. | **Booking.** Three steps, then a ready-to-send WhatsApp or email. |
 
@@ -43,9 +45,11 @@ Switching tabs plays a five-bar page transition; the next page builds itself out
 
 The effects are heavy, so the site works hard to stay smooth:
 
-- **Half-resolution background.** The animated background is drawn at half resolution and stretched to full screen, about 75% less shader work with no visible difference.
-- **Adaptive quality.** It watches the frame time. If frames slow down it lowers the 3D resolution in steps, then trims particles. It raises quality again when there's headroom.
-- **60fps 3D on fast screens.** On 120/144Hz screens the 3D renders at about 60fps while scrolling and the UI stay at full refresh.
+- **Low-resolution background.** The animated background is drawn at 35% resolution and stretched to full screen. It's soft by nature, so the difference doesn't show.
+- **Adaptive quality.** It watches the 3D frame time every second. Below ~54fps it steps the resolution down, then trims particles and drops the grain and trail. It raises quality again when there's headroom, and remembers the right level for the device on the next visit.
+- **Light baseline.** 7,500 particles (3,500 on phones), a 2-octave background at 35% resolution, and a capped pixel ratio.
+- **FPS meter.** Add `?fps` to the URL to see live numbers.
+- **60fps 3D on fast screens.** The refresh rate is detected after start-up. On 120/144Hz screens the 3D renders at about 60fps while scrolling and the UI stay at full refresh.
 - **Unloading engine.** Off-screen sections pause their CSS animations, the whole animation clock sleeps in background tabs, and the scene throttles while the booking panel covers it.
 - **No live blur.** There are no backdrop-filter blurs over the moving WebGL layer, and no per-frame repaints of animated gradients.
 - **Small assets.** The photo is a 29 KB WebP with a JPG fallback, the JS is minified into one file, and the 3D library is preloaded.

@@ -18,3 +18,12 @@
   .n { font-size: 0.72rem; color: $muted; font-variant-numeric: tabular-nums; }
   .f { font-family: $display; font-size: 0.95rem; color: $muted; white-space: nowrap; @include down(sm) { display: none; } }
 }
+
+.subjects--3 { @include up(md) { grid-template-columns: repeat(3, 1fr); gap: 1.2rem; } }
+.subject__stage { display: block; font-size: 0.7rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--c); margin-bottom: 0.4rem; }
+.subjects--3 .subject {
+  h3 { font-size: clamp(1.25rem, 3.4vh, 2rem); }
+  .subject__codes span { font-size: 0.64rem; padding: 0.25rem 0.6rem; }
+  li { grid-template-columns: 26px 1fr auto; }
+  .f { font-size: 0.82rem; }
+}
