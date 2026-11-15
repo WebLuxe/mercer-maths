@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mercer Maths Tuition — O Level &amp; IGCSE Maths and Add Maths</title>
+  <meta name="description" content="Mercer Maths Tuition: small groups of six, one-to-one and live online. Weekly timetable, fees, a free trial lesson." />
+  <meta name="theme-color" content="#07060b" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css?v=14" />
+  <script>try{var p=sessionStorage.getItem("pt");if(p)document.documentElement.classList.add("pt-in")}catch(e){}</script>
+</head>
+<body class="is-loading" data-page="tuition">
+  <div class="pt" id="pt" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><span class="pt__label display" id="ptLabel"></span></div>
+  <canvas class="trail" id="trail" aria-hidden="true"></canvas>
+
+  <!-- All names, numbers, prices and quotes on this page are placeholder content. -->
+
+  <div class="loader" id="loader" aria-hidden="true">
+    <div class="loader__panel loader__panel--top"></div>
+    <div class="loader__panel loader__panel--bot"></div>
+    <div class="loader__inner">
+      <div class="loader__ring"><span></span><span></span><span></span><b>∑</b></div>
+      <div class="loader__word display" data-split>MERCER MATHS</div>
+      <div class="loader__count" id="loaderCount">0</div>
+      <div class="loader__bar"><i id="loaderBar"></i></div>
+      <div class="loader__status" id="loaderStatus">Sharpening pencils</div>
+    </div>
+  </div>
+
+  <canvas id="webgl" aria-hidden="true"></canvas>
+  <div class="vignette" aria-hidden="true"></div>
+  <div class="grain" aria-hidden="true"></div>
+  <div class="progress" id="progress"></div>
+  <div class="hud" aria-hidden="true"><span id="hudIdx">fig. 1</span><b id="hudFn">x² + y² + z² = r²</b></div>
+  <div class="cursor" id="cursor" aria-hidden="true"><div class="cursor__ring"></div><div class="cursor__dot"></div></div>
+  <div class="tip" id="tip" role="status"></div>
+  <nav class="dots" id="dots" aria-label="Sections"></nav>
+
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <linearGradient id="curveGrad" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0%" stop-color="#8b5cf6" /><stop offset="50%" stop-color="#22d3ee" /><stop offset="100%" stop-color="#f472b6" />
+      </linearGradient>
+    </defs>
+  </svg>
+
+  <header class="nav" id="nav">
+    <div class="wrap">
+      <a href="index.html" data-page="Profile" class="nav__logo" data-magnetic>mercer<b>.maths</b></a>
+      <nav class="tabs" aria-label="Pages">
+        <a href="index.html" data-page="Profile" class="tabs__tab">Profile</a>
+        <a href="tuition.html" data-page="Tuition" class="tabs__tab is-current" aria-current="page">Tuition</a>
+        <i class="tabs__pill" aria-hidden="true"></i>
+      </nav>
+      <a href="#contact" data-book class="status"><i></i>Jan 2027 intake <span>— 4 seats left</span></a>
+    </div>
+  </header>
+
+  <main id="top">
+    <!-- HERO -->
+    <section class="hero hero--tuition">
+      <div class="wrap">
+        <div>
+          <span class="eyebrow hero-fade">Mercer Maths Tuition · Since 2016</span>
+          <h1 class="hero__title display">
+            <span class="line" data-split>Grades that</span>
+            <span class="line" data-split>finally</span>
+            <span class="line grad" data-split>move up.</span>
+          </h1>
+          <p class="hero__role hero-fade">O Level &amp; IGCSE Mathematics and Additional Mathematics. Groups of six, one-to-one and live online, built on past papers and marked every week.</p>
+          <div class="hero__cta hero-fade">
+            <a href="#contact" data-book class="btn btn--fill" data-magnetic><span>Book a free trial</span><span>↗</span></a>
+            <a href="#timetable" class="btn btn--ghost" data-magnetic><span>See the timetable</span></a>
+          </div>
+          <div class="thero__chips hero-fade"><span><b>81%</b> A*–B in Add Maths</span><span><b>6</b> students max</span><span><b>Weekly</b> paper marking</span></div>
+        </div>
+        <div class="thero__space" aria-hidden="true"></div>
+      </div>
+      <div class="hero__scroll"><span>Scroll</span><i></i></div>
+    </section>
+
+    <div class="marquee" aria-hidden="true">
+      <div class="marquee__track">
+        <span class="marquee__item">Past papers weekly</span><span class="marquee__item">Max six per group</span><span class="marquee__item">A* Add Maths</span><span class="marquee__item">Recorded lessons</span><span class="marquee__item">Free trial</span><span class="marquee__item">O Level &amp; IGCSE</span>
+        <span class="marquee__item">Past papers weekly</span><span class="marquee__item">Max six per group</span><span class="marquee__item">A* Add Maths</span><span class="marquee__item">Recorded lessons</span><span class="marquee__item">Free trial</span><span class="marquee__item">O Level &amp; IGCSE</span>
+      </div>
+    </div>
+
+    <!-- SUBJECTS -->
+    <section class="sec" id="subjects">
+      <div class="wrap">
+        <div class="sec-head">
+          <span class="eyebrow">01 — Subjects</span>
+          <h2 class="display"><span class="reveal-line"><span>Two subjects.</span></span><span class="reveal-line"><span class="grad">Every topic.</span></span></h2>
+          <p class="reveal">Each topic is taught, practised on past paper questions, then tested again three weeks later, because that's when forgetting happens.</p>
+        </div>
+        <div class="subjects">
+          <div class="subject" style="--c:#8b5cf6">
+            <div class="subject__head"><h3>Mathematics</h3><div class="subject__codes"><span>O Level 4024</span><span>IGCSE 0580</span></div></div>
+            <ol>
+              <li><span class="n">01</span><span>Number &amp; indices</span><span class="f">aᵐ · aⁿ = aᵐ⁺ⁿ</span></li>
+              <li><span class="n">02</span><span>Algebra &amp; quadratics</span><span class="f">b² − 4ac</span></li>
+              <li><span class="n">03</span><span>Coordinate geometry</span><span class="f">y = mx + c</span></li>
+              <li><span class="n">04</span><span>Mensuration</span><span class="f">V = ⅓πr²h</span></li>
+              <li><span class="n">05</span><span>Trigonometry</span><span class="f">a² = b² + c² − 2bc cos A</span></li>
+              <li><span class="n">06</span><span>Vectors &amp; transformations</span><span class="f">|a| = √(x² + y²)</span></li>
+              <li><span class="n">07</span><span>Probability &amp; statistics</span><span class="f">P(A ∩ B)</span></li>
+            </ol>
+          </div>
+          <div class="subject" style="--c:#22d3ee">
+            <div class="subject__head"><h3>Add Maths</h3><div class="subject__codes"><span>O Level 4037</span><span>IGCSE 0606</span></div></div>
+            <ol>
+              <li><span class="n">01</span><span>Functions &amp; inverses</span><span class="f">f⁻¹(x)</span></li>
+              <li><span class="n">02</span><span>Logarithms &amp; exponentials</span><span class="f">log ab = log a + log b</span></li>
+              <li><span class="n">03</span><span>Binomial expansion</span><span class="f">(a + b)ⁿ</span></li>
+              <li><span class="n">04</span><span>Trig identities</span><span class="f">sin²θ + cos²θ = 1</span></li>
+              <li><span class="n">05</span><span>Differentiation</span><span class="f">d/dx xⁿ = nxⁿ⁻¹</span></li>
+              <li><span class="n">06</span><span>Integration</span><span class="f">∫ xⁿ dx</span></li>
+              <li><span class="n">07</span><span>Kinematics</span><span class="f">v = ds/dt</span></li>
+            </ol>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TIMETABLE -->
+    <section class="sec" id="timetable">
+      <div class="wrap">
+        <div class="sec-head">
+          <span class="eyebrow">02 — Timetable</span>
+          <h2 class="display"><span class="reveal-line"><span>Find your</span></span><span class="reveal-line"><span class="grad">slot.</span></span></h2>
+          <p class="reveal">Every group is capped at six. Pick your form, then tap a slot to book a free trial straight into it.</p>
+        </div>
+        <div class="tt">
+          <div class="tt__filters" role="tablist" aria-label="Filter by form">
+            <button role="tab" aria-selected="true" data-form="all">All forms</button><button role="tab" aria-selected="false" data-form="Form III">Form III</button><button role="tab" aria-selected="false" data-form="Form IV">Form IV</button><button role="tab" aria-selected="false" data-form="Form V">Form V</button>
+            <span class="tt__legend"><i class="is-free"></i>seat free <i></i>taken</span>
+          </div>
+          <div class="tt__grid" id="ttGrid"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- METHOD: horizontal cards -->
+    <section class="sec show" id="method">
+      <div class="show__pin" id="showPin">
+        <div class="wrap show__head">
+          <div><span class="eyebrow">03 — How lessons work</span><h2 class="display" style="margin-top:1rem">Four steps to <span class="grad">the A.</span></h2></div>
+          <div class="show__meta" aria-hidden="true"><span><b id="cardNow">01</b> / 05</span><i><em id="cardBar"></em></i></div>
+        </div>
+        <div class="show__stage" id="showStage"><div class="show__track" id="showTrack">
+          <article class="card" style="--c1:#8b5cf6;--c2:#22d3ee"><div class="card__art"></div><div class="card__idx"><span>01</span><span>Week 1</span></div><div class="card__sym">Δ</div><div><h3>Find the leaks</h3><p>A 40-minute diagnostic paper shows exactly which topics cost marks. Most students lose half their marks in three or four topics.</p><div class="card__tags"><span>Diagnostic</span><span>Day one</span></div></div></article>
+          <article class="card" style="--c1:#f472b6;--c2:#8b5cf6"><div class="card__art"></div><div class="card__idx"><span>02</span><span>Weeks 2–8</span></div><div class="card__sym">√</div><div><h3>Fix the foundations</h3><p>Algebra and fractions first, because every Add Maths question leans on them. Nobody gets rushed onto calculus.</p><div class="card__tags"><span>Algebra</span><span>Confidence</span></div></div></article>
+          <article class="card" style="--c1:#22d3ee;--c2:#34d399"><div class="card__art"></div><div class="card__idx"><span>03</span><span>Every week</span></div><div class="card__sym">∫</div><div><h3>Practise on real papers</h3><p>Every topic ends with real past paper questions, marked within the week against the examiner's mark scheme.</p><div class="card__tags"><span>Past papers</span><span>Marked weekly</span></div></div></article>
+          <article class="card" style="--c1:#fbbf24;--c2:#f472b6"><div class="card__art"></div><div class="card__idx"><span>04</span><span>Final term</span></div><div class="card__sym">π</div><div><h3>Learn the exam</h3><p>Timed papers, method marks, and the question types that come up year after year. No surprises on the day.</p><div class="card__tags"><span>Timing</span><span>Method marks</span></div></div></article>
+          <article class="card" style="--c1:#8b5cf6;--c2:#f472b6"><div class="card__art"></div><div class="card__idx"><span>05</span><span>Your turn</span></div><div class="card__sym">∞</div><div><h3>Try a free lesson</h3><p>Come to one class, take the diagnostic, and decide after. No commitment.</p><a href="#contact" data-book class="btn btn--fill" data-magnetic><span>Book a trial</span><span>↗</span></a></div></article>
+        </div></div>
+      </div>
+    </section>
+
+    <!-- WORKED EXAMPLE -->
+    <section class="sec" id="example">
+      <div class="wrap">
+        <div class="sec-head">
+          <span class="eyebrow">04 — Inside a lesson</span>
+          <h2 class="display"><span class="reveal-line"><span>Every step</span></span><span class="reveal-line"><span class="grad">written out.</span></span></h2>
+          <p class="reveal">A typical question, the way it's taught on the board: the working, the reason for each line, and the picture that makes it obvious.</p>
+        </div>
+        <div class="worked" id="worked">
+          <div class="worked__board">
+            <p class="worked__q">Solve 2x² − 5x − 3 = 0 and sketch the curve.</p>
+            <div class="worked__line"><span class="eq">2x<sup>2</sup> − 5x − 3 = 0</span><span class="note">product −6, sum −5</span></div>
+            <div class="worked__line"><span class="eq">2x<sup>2</sup> − 6x + x − 3 = 0</span><span class="note">split the middle term</span></div>
+            <div class="worked__line"><span class="eq">(2x + 1)(x − 3) = 0</span><span class="note">factor in pairs</span></div>
+            <div class="worked__line"><span class="eq">x = −<sup>1</sup>⁄<sub>2</sub> &nbsp;or&nbsp; x = 3</span><span class="note">where it crosses y = 0</span></div>
+          </div>
+          <div class="worked__plot"><svg viewBox="0 0 420 340" id="parab" role="img" aria-label="Graph of y = 2x² − 5x − 3 crossing the x-axis at −½ and 3, minimum at (1.25, −6.125)"></svg></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- QUIZ -->
+    <section class="sec" id="quiz">
+      <div class="wrap">
+        <div class="sec-head">
+          <span class="eyebrow">05 — Try one</span>
+          <h2 class="display"><span class="reveal-line"><span>Three questions.</span></span><span class="reveal-line"><span class="grad">Ninety seconds.</span></span></h2>
+          <p class="reveal">Real Add Maths, the kind that turns up in Paper 1. See how you do, then see the working.</p>
+        </div>
+        <div class="quiz" id="quizBox">
+          <div class="quiz__top"><span class="quiz__count" id="quizCount">Question 1 of 3</span><div class="quiz__dots" id="quizDots"><i></i><i></i><i></i></div></div>
+          <div class="quiz__stage" id="quizStage"></div>
+          <div class="quiz__burst" id="quizBurst" aria-hidden="true"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FEES -->
+    <section class="sec" id="fees">
+      <div class="wrap">
+        <div class="sec-head">
+          <span class="eyebrow">06 — Formats &amp; fees</span>
+          <h2 class="display"><span class="reveal-line"><span>Pick how</span></span><span class="reveal-line"><span class="grad">you learn.</span></span></h2>
+        </div>
+        <div class="formats">
+          <article class="format"><span class="format__tag">In person</span><h3>Small group</h3><div class="format__price">Rs 2,800 <small>/ month</small></div><ul><li>Maximum 6 students</li><li>2 × 90 min per week</li><li>Weekly past paper marking</li><li>Monthly note to parents</li></ul><a href="#contact" data-book="Small group" class="btn btn--ghost" data-magnetic><span>Join a group</span></a></article>
+          <article class="format format--main"><span class="format__tag">Most flexible</span><h3>One-to-one</h3><div class="format__price">Rs 1,200 <small>/ session</small></div><ul><li>60 minutes, your pace</li><li>Built from your diagnostic</li><li>Book weekly or before exams</li><li>Homework help on WhatsApp</li></ul><a href="#contact" data-book="One-to-one" class="btn btn--fill" data-magnetic><span>Book a session</span><span>↗</span></a></article>
+          <article class="format"><span class="format__tag">Online</span><h3>Live online</h3><div class="format__price">Rs 2,200 <small>/ month</small></div><ul><li>Same groups, over Zoom</li><li>Shared digital whiteboard</li><li>Every lesson recorded</li><li>Works from anywhere</li></ul><a href="#contact" data-book="Live online" class="btn btn--ghost" data-magnetic><span>Join online</span></a></article>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="sec" id="faq">
+      <div class="wrap faq-wrap">
+        <div class="sec-head">
+          <span class="eyebrow">07 — Questions</span>
+          <h2 class="display"><span class="reveal-line"><span>Parents</span></span><span class="reveal-line"><span class="grad">usually ask.</span></span></h2>
+        </div>
+        <div class="faq" id="faqList">
+          <div class="faq__item"><button class="faq__q" aria-expanded="false"><span>Which syllabus do you follow?</span><i></i></button><div class="faq__a"><p>Cambridge O Level (Maths 4024, Add Maths 4037) and IGCSE (0580, 0606). Groups are split by syllabus, so nobody sits through topics that aren't on their paper.</p></div></div>
+          <div class="faq__item"><button class="faq__q" aria-expanded="false"><span>Can my child join halfway through the year?</span><i></i></button><div class="faq__a"><p>Yes. The diagnostic paper on day one shows which earlier topics are missing, and those get covered in catch-up sessions alongside the group.</p></div></div>
+          <div class="faq__item"><button class="faq__q" aria-expanded="false"><span>What happens if a lesson is missed?</span><i></i></button><div class="faq__a"><p>Every lesson is recorded, and the notes and practice sheet are shared the same evening. A short catch-up can be booked if it's an important topic.</p></div></div>
+          <div class="faq__item"><button class="faq__q" aria-expanded="false"><span>How do I know it's working?</span><i></i></button><div class="faq__a"><p>Parents get a progress note every month with the topics covered, past paper marks, and what's next. You'll see the marks move before results day.</p></div></div>
+          <div class="faq__item"><button class="faq__q" aria-expanded="false"><span>Is the trial lesson really free?</span><i></i></button><div class="faq__a"><p>Yes. One full class plus the diagnostic paper, no payment details and no commitment. You decide afterwards.</p></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CONTACT -->
+    <section class="contact" id="contact">
+      <div class="wrap">
+        <span class="eyebrow">08 — Contact</span>
+        <h2 class="contact__big display"><span class="grad">First lesson's</span><br />on me.</h2>
+        <p class="contact__lede">Message to book a free trial class. Bring your last test paper and we'll start from there.</p>
+        <div class="contact__cta">
+          <a href="#contact" data-book class="btn btn--fill" data-magnetic><span>Book a free trial</span><span>↗</span></a>
+          <a href="mailto:hello@mercermaths.example" class="btn btn--ghost" data-magnetic><span>hello@mercermaths.example</span></a>
+        </div>
+        <dl class="contact__info">
+          <div><dt>Where</dt><dd>First floor, 22 Royal Road, and online</dd></div>
+          <div><dt>When</dt><dd>Mon–Fri 15:30–20:00 · Sat 08:00–13:00</dd></div>
+          <div><dt>Who</dt><dd>Forms III–V · O Level &amp; IGCSE</dd></div>
+        </dl>
+        <div class="contact__foot"><span>© 2026 Mercer Maths</span><span>Demo site: names, results, prices &amp; reviews are placeholders · Photo: Fábio Lucas / Unsplash</span><a href="#top">Back to top ↑</a></div>
+      </div>
+    </section>
+  </main>
+
+  <div class="book" id="book" aria-hidden="true">
+    <div class="book__scrim" data-close></div>
+    <aside class="book__panel" role="dialog" aria-modal="true" aria-labelledby="bookTitle">
+      <button class="book__x" data-close aria-label="Close">✕</button>
+      <div class="book__head">
+        <span class="eyebrow">Free trial lesson</span>
+        <div class="book__bar"><i></i><i></i><i></i></div>
+      </div>
+      <form id="bookForm" novalidate>
+        <fieldset class="book__step" data-step="0">
+          <legend class="book__q" id="bookTitle">Which subject?</legend>
+          <div class="chips" data-field="subject">
+            <button type="button">Mathematics</button><button type="button">Add Maths</button><button type="button">Both</button>
+          </div>
+          <p class="book__hint">Not sure? Pick “Both” and the diagnostic will tell us.</p>
+        </fieldset>
+        <fieldset class="book__step" data-step="1">
+          <legend class="book__q">Which form, which syllabus?</legend>
+          <div class="chips" data-field="form"><button type="button">Form III</button><button type="button">Form IV</button><button type="button">Form V</button></div>
+          <div class="chips" data-field="syllabus"><button type="button">O Level</button><button type="button">IGCSE</button><button type="button">Not sure</button></div>
+          <div class="chips" data-field="format"><button type="button">Small group</button><button type="button">One-to-one</button><button type="button">Live online</button></div>
+        </fieldset>
+        <fieldset class="book__step" data-step="2">
+          <legend class="book__q">Where do we send the details?</legend>
+          <label class="field"><span>Student's name</span><input name="name" autocomplete="name" placeholder="e.g. Priya" /></label>
+          <label class="field"><span>Parent's WhatsApp number</span><input name="phone" type="tel" autocomplete="tel" placeholder="e.g. 5 123 4567" /></label>
+          <div class="chips" data-field="day"><button type="button">Weekday evening</button><button type="button">Saturday morning</button></div>
+        </fieldset>
+        <p class="book__err" id="bookErr" role="alert"></p>
+        <div class="book__nav">
+          <button type="button" class="btn btn--ghost" id="bookBack"><span>Back</span></button>
+          <button type="submit" class="btn btn--fill" id="bookNext"><span>Next</span><span>→</span></button>
+        </div>
+      </form>
+      <div class="book__done" id="bookDone" hidden>
+        <div class="book__tick">✓</div>
+        <h3 class="book__q">Your message is ready.</h3>
+        <p>Send it and you'll get a reply with the next trial slot, usually the same day.</p>
+        <div class="book__send">
+          <a class="btn btn--fill" id="sendWa" target="_blank" rel="noopener"><span>Send on WhatsApp</span><span>↗</span></a>
+          <a class="btn btn--ghost" id="sendMail"><span>Send by email</span></a>
+        </div>
+        <pre class="book__preview" id="bookPreview"></pre>
+      </div>
+    </aside>
+  </div>
+
+  <a href="#contact" data-book class="mbar" id="mbar"><span><b>Free trial lesson</b>4 seats left for January</span><em>Book →</em></a>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js"></script>
+  <script src="js/main.js?v=14"></script>
+</body>
+</html>
