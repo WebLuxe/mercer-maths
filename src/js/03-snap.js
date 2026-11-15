@@ -92,7 +92,7 @@ if (snapOn) {
 
 // side dots: one per section, click to jump
 const dotsEl = $("#dots");
-const DOT_LABELS = { teaser: "Tuition", timetable: "Timetable", about: "Tutor", results: "Results", subjects: "Subjects", method: "Method", example: "Lesson", quiz: "Quiz", journey: "Story", students: "Students", fees: "Fees", faq: "FAQ", contact: "Contact" };
+const DOT_LABELS = { notes: "Notes", videos: "Videos", teaser: "Tuition", timetable: "Timetable", about: "Tutor", results: "Results", subjects: "Subjects", method: "Method", example: "Lesson", quiz: "Quiz", journey: "Story", students: "Students", fees: "Fees", faq: "FAQ", contact: "Contact" };
 sectionEls.forEach((el, i) => {
   const b = document.createElement("button");
   b.setAttribute("aria-label", "Go to " + (DOT_LABELS[el.id] || "Home"));

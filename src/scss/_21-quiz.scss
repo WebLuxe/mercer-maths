@@ -18,9 +18,9 @@
   &__opts { display: grid; gap: 0.8rem; @include up(sm) { grid-template-columns: 1fr 1fr; } }
   &__opt {
     position: relative; text-align: left; padding: 1.1rem 1.3rem; border-radius: 18px; font-family: $display; font-weight: 500; font-size: 1.25rem;
-    @include glass(0.04); display: flex; align-items: center; gap: 1rem; transition: border-color 0.3s, background 0.3s, transform 0.4s $ease-out;
+    @include glass(0.04); display: flex; align-items: center; gap: 1rem; transition: border-color 0.3s, background 0.3s, box-shadow 0.4s; // no transform/opacity: GSAP animates those
     b { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; font-size: 0.8rem; border: 1px solid rgba(255, 255, 255, 0.2); color: $muted; flex-shrink: 0; }
-    &:hover:not(:disabled) { border-color: rgba($a2, 0.6); transform: translateY(-2px); }
+    &:hover:not(:disabled) { border-color: rgba($a2, 0.6); box-shadow: 0 14px 40px -18px rgba($a2, 0.6); }
     &.is-right { border-color: $a2; background: rgba($a2, 0.12); box-shadow: 0 0 30px rgba($a2, 0.25); b { background: $a2; color: $bg; border-color: $a2; } }
     &.is-wrong { border-color: $a3; background: rgba($a3, 0.1); animation: shake 0.4s; b { background: $a3; color: $bg; border-color: $a3; } }
     &:disabled { cursor: default; }

@@ -1,24 +1,40 @@
 # Mercer Maths
 
-**A 3D, animated two-page website for a Maths tutor in Mauritius: Grades 7–13 (NCE, SC, HSC) and SC Add Maths.**
+**A 3D, animated three-page website for a Maths tutor in Mauritius: Grades 7–13 (NCE, SC, HSC) and SC Add Maths.**
 Particles that morph through real equations, full-screen snap scrolling, a 3D lesson carousel,
 an interactive timetable and a booking flow that writes the WhatsApp message for you.
 
-**Live:** https://webluxe.github.io/mercer-maths/ &nbsp;·&nbsp; [Tuition page](https://webluxe.github.io/mercer-maths/tuition.html)
+**Live:** https://webluxe.github.io/mercer-maths/ &nbsp;·&nbsp; [Tuition](https://webluxe.github.io/mercer-maths/tuition.html) &nbsp;·&nbsp; [Resources](https://webluxe.github.io/mercer-maths/resources.html)
 
 > **Demo content.** The tutor, results, prices, timetable and reviews are placeholders.
 > Portrait photo by Fábio Lucas on Unsplash.
 
 ![Profile page hero](docs/screenshots/profile-hero.jpg)
 
-## Two pages
+## Three pages
 
 | Profile (`index.html`) | Tuition (`tuition.html`) |
 |---|---|
 | ![Profile results](docs/screenshots/profile-results.jpg) | ![Tuition hero, particles forming A*](docs/screenshots/tuition-hero.jpg) |
 | The tutor, results with a grade chart, the story, reviews, contact | Grades 7–13 by stage (NCE, SC, HSC), timetable, how lessons work, a worked example, quiz, fees, FAQ |
 
+| Resources (`resources.html`) | |
+|---|---|
+| ![Resources hero, particles forming π](docs/screenshots/resources-hero.jpg) | ![Video lessons](docs/screenshots/resources-videos.jpg) |
+| Revision notes (PDF) and video lessons, filterable by grade stage | Videos load only when you press play (privacy-friendly YouTube embed) |
+
 Switching tabs plays a five-bar page transition; the next page builds itself out of it.
+
+## Adding notes and videos
+
+Everything on the Resources page comes from **`assets/data/resources.json`**. No code changes needed:
+
+- **A note:** put the PDF in `assets/notes/`, then add or edit an entry with `"file": "assets/notes/your-file.pdf"`.
+- **A video:** upload it to YouTube (unlisted works), then set `"youtube"` to the video ID. That's the part after `watch?v=`.
+- **Anything with an empty `file` / `youtube`** shows as *Coming soon*.
+- **`band`:** one of `7-9`, `10-11` or `12-13`. It drives the filter and the card colour.
+
+Host videos on YouTube rather than in this repo: GitHub Pages isn't built for large video files.
 
 ## Highlights
 
@@ -33,7 +49,7 @@ Switching tabs plays a five-bar page transition; the next page builds itself out
 
 **Everything else:**
 - **Live 3D background:** aurora light, a rippling graph-paper grid, shooting stars and floating maths symbols.
-- **Particle shapes:** a sphere, a torus knot, z = sin x · cos y, a saddle, a spiral, and finally the words "A*" and "JM".
+- **Particle shapes:** a sphere, a torus knot, z = sin x · cos y, a saddle, a spiral, and the words "A*", "JM" and "π". Each section owns one finished shape, and arriving there pours the particles straight from the last shape to the next in one smooth morph. They never pass through shapes in between, however fast you scroll.
 - **Scroll speed drives the motion:** the grid warps, light streaks rush past, and the view widens like a warp jump.
 - **Click anywhere:** a shockwave ripples through the grid and the particles.
 - **Snap scrolling:** one flick moves one full-screen section, with side dots and keyboard support. Phones keep normal scrolling.
@@ -50,7 +66,7 @@ The effects are heavy, so the site works hard to stay smooth:
 - **Light baseline.** 7,500 particles (3,500 on phones), a 2-octave background at 35% resolution, and a capped pixel ratio.
 - **FPS meter.** Add `?fps` to the URL to see live numbers.
 - **60fps 3D on fast screens.** The refresh rate is detected after start-up. On 120/144Hz screens the 3D renders at about 60fps while scrolling and the UI stay at full refresh.
-- **Unloading engine.** Off-screen sections pause their CSS animations, the whole animation clock sleeps in background tabs, and the scene throttles while the booking panel covers it.
+- **Unloading engine.** Off-screen sections pause their CSS animations, and the scene throttles while the booking panel or video player covers it. Quality changes are applied only while nothing is moving, and particle trims fade instead of popping.
 - **No live blur.** There are no backdrop-filter blurs over the moving WebGL layer, and no per-frame repaints of animated gradients.
 - **Small assets.** The photo is a 29 KB WebP with a JPG fallback, the JS is minified into one file, and the 3D library is preloaded.
 
@@ -59,10 +75,13 @@ The effects are heavy, so the site works hard to stay smooth:
 ```
 index.html          Profile page
 tuition.html        Tuition page
+resources.html      Resources page (notes + videos)
 assets/             What the site loads (built, don't edit by hand)
   css/style.css
   js/app.min.js
   img/              tutor.webp, tutor.jpg
+  data/resources.json   the notes + videos list (edit this)
+  notes/            note PDFs
 src/                Source code
   js/               00-core.js … 20-performance.js, joined in order at build time
   scss/             _abstracts.scss + 30 partials, entry: style.scss

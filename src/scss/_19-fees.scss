@@ -6,8 +6,8 @@
 .formats { display: grid; gap: 1.4rem; @include up(md) { grid-template-columns: repeat(3, 1fr); } }
 .format {
   position: relative; border-radius: 28px; padding: fluid(24, 36); @include glass(0.03); display: flex; flex-direction: column; gap: 1.1rem;
-  transition: transform 0.6s $ease-out;
-  &:hover { transform: translateY(-6px); }
+  transition: border-color 0.4s, box-shadow 0.5s; // no transform: GSAP tilts these
+  &:hover { box-shadow: 0 24px 60px -30px rgba($a1, 0.75); }
   &--main { background: rgba($a1, 0.08); &::before { @include conic-border(28px); } }
   &__tag { font-size: 0.72rem; letter-spacing: 0.2em; text-transform: uppercase; color: $muted; }
   &--main &__tag { @include grad-text; }

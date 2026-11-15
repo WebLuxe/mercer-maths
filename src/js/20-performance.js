@@ -8,12 +8,13 @@
     { rootMargin: "120px 0px" }
   );
   $$("main > section, .marquee, .portrait").forEach((el) => io.observe(el));
-  // page in a background tab or minimised: put the whole animation clock to sleep
-  document.addEventListener("visibilitychange", () => (document.hidden ? gsap.ticker.sleep() : gsap.ticker.wake()));
+  // (Background tabs: the browser already stops animation frames by itself. Forcing GSAP's clock to sleep
+  //  on visibilitychange was removed: it could freeze reveals mid-way on browsers that report "hidden" briefly.)
 }
 
 // add ?fps to the URL to see real numbers on your own machine
 if (/[?&]fps\b/.test(location.search)) {
+  window.__mm = { morph, u: pMat.uniforms, sceneState, perf, perfState };   // debug handle (only with ?fps)
   const box = document.createElement("div");
   box.className = "fps";
   document.body.appendChild(box);

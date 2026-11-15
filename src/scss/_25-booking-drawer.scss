@@ -35,8 +35,8 @@
 .chips { display: flex; flex-wrap: wrap; gap: 0.6rem;
   &__label { display: block; font-size: 0.72rem; color: $muted; letter-spacing: 0.16em; text-transform: uppercase; margin: 2.4vh 0 0.8rem; }
   button { padding: 0.75rem 1.15rem; border-radius: 99px; border: 1px solid rgba(255, 255, 255, 0.16); background: rgba(255, 255, 255, 0.03); font-size: 0.92rem;
-    transition: border-color 0.3s, background 0.3s, box-shadow 0.4s, transform 0.4s $ease-out;
-    &:hover { border-color: rgba($a2, 0.6); transform: translateY(-2px); }
+    transition: border-color 0.3s, background 0.3s, box-shadow 0.4s; // no transform: GSAP pops these
+    &:hover { border-color: rgba($a2, 0.6); }
     &[aria-pressed="true"] { background: $grad; border-color: transparent; color: #fff; box-shadow: 0 10px 30px -8px rgba($a1, 0.75); } } }
 .field { display: block; margin-bottom: 1.3rem;
   span { display: block; font-size: 0.72rem; color: $muted; margin-bottom: 0.5rem; letter-spacing: 0.16em; text-transform: uppercase; }

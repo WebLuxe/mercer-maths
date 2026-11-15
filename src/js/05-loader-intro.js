@@ -25,7 +25,7 @@ if (ptIn) {
   $("#loader")?.remove();
   ready.then(() => {
     document.body.classList.remove("is-loading");
-    buildTextShape(PAGE === "tuition" ? "A*" : "JM", PAGE === "tuition" ? 5.2 : 4.2);
+    buildTextShape(TEXT_SHAPE[0], TEXT_SHAPE[1]);
     intro();
     lenis?.start();
     ScrollTrigger.refresh();
@@ -35,7 +35,7 @@ if (ptIn) {
   });
 } else {
   Promise.all([ready, loadTl.then()]).then(() => {
-    buildTextShape(PAGE === "tuition" ? "A*" : "JM", PAGE === "tuition" ? 5.2 : 4.2);
+    buildTextShape(TEXT_SHAPE[0], TEXT_SHAPE[1]);
     intro();
   });
 }

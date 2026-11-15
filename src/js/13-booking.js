@@ -91,6 +91,8 @@ Parent's WhatsApp: ${phone}`;
 
 function openBook(preset) {
   if (ui.book) return;
+  clearTimeout(bookClosing);
+  bookEl.classList.remove("is-closing");
   ui.book = true;
   bookFocus = document.activeElement;
   // reopened after finishing: start a fresh booking view
@@ -109,16 +111,19 @@ function openBook(preset) {
   showBookStep(0, 1);
   setTimeout(() => $(".book__step.is-on button, .book__step.is-on input", bookEl)?.focus({ preventScroll: true }), 350);
 }
+let bookClosing = 0;
 function closeBook() {
-  if (!ui.book) return;
+  if (!bookEl.classList.contains("is-open") || bookEl.classList.contains("is-closing")) return;   // only this panel (the video player shares ui.book)
+  // state changes now; the slide-out is only cosmetic (with a timer backup if the animation clock is asleep)
+  bookEl.setAttribute("aria-hidden", "true");
+  bookEl.classList.add("is-closing");
+  ui.book = false;
+  lenis?.start();
+  bookFocus?.focus?.({ preventScroll: true });
+  const finish = () => { clearTimeout(bookClosing); bookEl.classList.remove("is-open", "is-closing"); };
+  bookClosing = setTimeout(finish, 750);
   gsap.to(bookScrim, { opacity: 0, duration: 0.4 });
-  gsap.to(bookPanel, { xPercent: 110, rotationY: -18, duration: reduce ? 0 : 0.6, ease: "expo.in", onComplete: () => {
-    bookEl.classList.remove("is-open");
-    bookEl.setAttribute("aria-hidden", "true");
-    ui.book = false;
-    lenis?.start();
-    bookFocus?.focus?.({ preventScroll: true });
-  } });
+  gsap.to(bookPanel, { xPercent: 110, rotationY: -18, duration: reduce ? 0 : 0.6, ease: "expo.in", onComplete: finish });
 }
 document.addEventListener("click", (e) => {
   const trigger = e.target.closest("[data-book]");

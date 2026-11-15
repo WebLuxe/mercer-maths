@@ -21,22 +21,35 @@ function setupScroll() {
     },
   });
 
-  // 3D: walk through the five shapes across the page
-  const sideL = isMobile ? 0 : -2.4, sideR = isMobile ? 0 : 2.4;
-  const walk = gsap.timeline({ scrollTrigger: { trigger: "main", start: "top top", end: "bottom bottom", scrub: 1.2 }, defaults: { ease: "none" } });
-  if (PAGE === "tuition") {
-    walk.to(sceneState, { x: 0, y: -0.3, morph: 4, rotX: 0.9, duration: 1 })
-      .to(sceneState, { x: sideL, y: 0, morph: 3, rotX: 0.55, duration: 1 })
-      .to(sceneState, { x: sideR, morph: 2, rotX: 0.55, duration: 1 })
-      .to(sceneState, { x: 0, morph: 1, rotX: 0.4, duration: 1 })
-      .to(sceneState, { morph: 0, z: 1.5, rotX: 0.2, duration: 1 });
-  } else {
-    walk.to(sceneState, { x: 0, blobScale: 0, morph: 1, rotX: 0.4, duration: 1 })
-      .to(sceneState, { x: sideL, morph: 2, rotX: 0.55, duration: 1 })
-      .to(sceneState, { x: sideR, morph: 3, rotX: 0.6, duration: 1 })
-      .to(sceneState, { x: 0, y: -0.4, morph: 4, rotX: 1.05, duration: 1 })
-      .to(sceneState, { y: 0.4, z: -2.5, morph: 5, rotX: 0, duration: 1 });
-  }
+  // Each section owns one finished shape + camera spot. Arriving at a section eases the scene there
+  // (time-based, so fast scrolling never drags the particles through half-made shapes).
+  const L = isMobile ? 0 : -2.5, R = isMobile ? 0 : 2.6;
+  const STATES = {
+    profile: {
+      hero: [0, R, 0, 0, 0, isMobile ? 0 : 1.5], about: [1, R, 0, 0.4, 0, 0], results: [2, 0, -0.4, 0.55, -1, 0],
+      journey: [3, L, 0, 0.6, 0, 0], students: [4, 0, -0.3, 1.05, 0, 0], teaser: [2, R, 0, 0.5, -1, 0],
+      contact: [5, 0, 0.4, 0, -2.5, 0],
+    },
+    tuition: {
+      hero: [5, isMobile ? 0 : 2.7, isMobile ? 1.2 : 0, 0, 0, 0], subjects: [4, 0, -0.3, 0.9, -1, 0], timetable: [3, L, 0, 0.55, -1, 0],
+      method: [1, 0, 0, 0.4, -2, 0], example: [2, R, 0, 0.55, 0, 0], quiz: [0, L, 0, 0.2, 0, 0], fees: [4, 0, -0.3, 1, -1, 0],
+      faq: [1, L, 0, 0.4, 0, 0], contact: [0, 0, 0, 0.2, 1.5, 0],
+    },
+    resources: {
+      hero: [5, isMobile ? 0 : 2.7, 0, 0, 0, 0], notes: [1, 0, 0, 0.4, -2.5, 0], videos: [4, 0, -0.3, 1, -1.5, 0], contact: [0, 0, 0, 0.2, 1.5, 0],
+    },
+  }[PAGE] || {};
+  const goState = (key, instant) => {
+    const s = STATES[key];
+    if (!s) return;
+    const [shape, x, y, rotX, z, blobScale] = s;
+    setShape(shape, instant);
+    gsap.to(sceneState, { x, y, rotX, z, blobScale, duration: instant ? 0 : 1.8, ease: "power3.inOut", overwrite: "auto" });
+  };
+  $$("main > section").forEach((sec) => {
+    const key = sec.classList.contains("hero") ? "hero" : sec.id;
+    ScrollTrigger.create({ trigger: sec, start: "top 55%", end: "bottom 45%", onToggle: (st) => st.isActive && goState(key) });
+  });
 
   // depth between panels: the section you're leaving eases back, shrinks and dims
   if (!reduce) {

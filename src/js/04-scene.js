@@ -28,7 +28,7 @@ const SHAPES = [
   ["fig. 3", "z = sin x · cos y"],
   ["fig. 4", "z = x² − y²"],
   ["fig. 5", "r = a·e^(bθ)"],
-  ["fig. 6", PAGE === "tuition" ? "A* = Σ effort" : "JM = f(you)"],
+  ["fig. 6", { tuition: "A* = Σ effort", resources: "π ≈ 3.14159" }[PAGE] || "JM = f(you)"],
 ];
 
 const canvas = $("#webgl");
@@ -166,6 +166,8 @@ syncMax();
 
 // ---- particles
 const COUNT = isMobile ? 3500 : 7500;
+const START_SHAPE = PAGE === "profile" ? 0 : 5;                 // tuition + resources open on their word
+const TEXT_SHAPE = { tuition: ["A*", 5.2], resources: ["π", 3.6] }[PAGE] || ["JM", 4.2];
 const A = new Float32Array(COUNT * 3), B = new Float32Array(COUNT * 3), C = new Float32Array(COUNT * 3),
       D = new Float32Array(COUNT * 3), E = new Float32Array(COUNT * 3), F = new Float32Array(COUNT * 3);
 const rnd = new Float32Array(COUNT), col = new Float32Array(COUNT * 3);
@@ -207,24 +209,27 @@ const pMat = new THREE.ShaderMaterial({
   transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
   uniforms: {
     uTime: { value: 0 }, uMorph: { value: 0 }, uIntro: { value: 0 }, uVel: { value: 0 },
+    uFrom: { value: START_SHAPE }, uTo: { value: START_SHAPE }, uT: { value: 1 }, uKeep: { value: 1.06 },
     uMouse: { value: new THREE.Vector3(99, 99, 0) }, uShock: { value: new THREE.Vector3(99, 99, 0) }, uShockAge: { value: 10 },
     uSize: { value: 34 * dpr },
   },
   vertexShader: /* glsl */ `
     ${NOISE}
-    uniform float uTime, uMorph, uIntro, uSize, uVel, uShockAge; uniform vec3 uMouse, uShock;
+    uniform float uTime, uMorph, uIntro, uSize, uVel, uShockAge, uFrom, uTo, uT, uKeep; uniform vec3 uMouse, uShock;
     attribute vec3 aB, aC, aD, aE, aF, aCol; attribute float aRnd;
     varying vec3 vCol; varying float vAlpha;
-    float st(float k){ return smoothstep(0., 1., clamp((uMorph - k) * 1.3 - aRnd * .3, 0., 1.)); }
+    vec3 shapeAt(float k){
+      if (k < .5) return position; if (k < 1.5) return aB; if (k < 2.5) return aC;
+      if (k < 3.5) return aD; if (k < 4.5) return aE; return aF;
+    }
     void main(){
-      vec3 p = mix(position, aB, st(0.));
-      p = mix(p, aC, st(1.));
-      p = mix(p, aD, st(2.));
-      p = mix(p, aE, st(3.));
-      p = mix(p, aF, st(4.));
+      // each particle leaves a little later than the last, so the shape pours rather than jumps
+      float tt = smoothstep(0., 1., clamp(uT * 1.35 - aRnd * .35, 0., 1.));
+      vec3 p = mix(shapeAt(uFrom), shapeAt(uTo), tt);
+      p += vec3(sin(aRnd * 41.), cos(aRnd * 29.), sin(aRnd * 17. + 1.)) * sin(tt * 3.14159) * .55;   // swirl mid-flight
       p *= mix(6.0 + aRnd * 6.0, 1.0, uIntro);
       float n = snoise(p * .45 + uTime * .15);
-      p += normalize(p + .0001) * n * (.22 + uVel * .9);          // shape breathes harder while scrolling
+      p += normalize(p + .0001) * n * (.22 + uVel * .3);          // breathes a little more while scrolling
       vec4 mv = modelViewMatrix * vec4(p, 1.);
       vec3 d = mv.xyz - uMouse; float dl = length(d.xy);
       mv.xy += normalize(d.xy + .0001) * smoothstep(1.6, 0., dl) * .9;
@@ -232,8 +237,9 @@ const pMat = new THREE.ShaderMaterial({
       float wave = smoothstep(.9, 0., abs(sl - uShockAge * 5.)) * exp(-uShockAge * 2.2);
       mv.xy += normalize(sd + .0001) * wave * 1.4;
       gl_Position = projectionMatrix * mv;
-      gl_PointSize = uSize * (.35 + aRnd * .9) * (1. + wave * 1.5) / -mv.z;
-      vCol = aCol; vAlpha = (.45 + n * .5 + wave) * uIntro;
+      float keep = 1. - smoothstep(uKeep - .06, uKeep, aRnd);       // low-power tier fades particles out
+      gl_PointSize = uSize * (.35 + aRnd * .9) * (1. + wave * 1.5) / -mv.z * step(.001, keep);
+      vCol = aCol; vAlpha = (.45 + n * .5 + wave) * uIntro * keep;
     }`,
   fragmentShader: /* glsl */ `
     varying vec3 vCol; varying float vAlpha;
@@ -246,12 +252,32 @@ const pMat = new THREE.ShaderMaterial({
 const points = new THREE.Points(pGeo, pMat);
 points.frustumCulled = false;
 const perfState = { low: false };
-const goLow = () => {
+const goLow = (instant) => {
   perfState.low = true;
-  pGeo.setDrawRange(0, Math.floor(COUNT * 0.6));
+  gsap.to(pMat.uniforms.uKeep, { value: 0.6, duration: instant ? 0 : 1.8, ease: "power2.inOut" });
   document.documentElement.classList.add("low-power");
 };
-if (savedQ?.low) goLow();
+if (savedQ?.low) goLow(true);
+
+// ---- shape queue: always one direct morph at a time, never through the shapes in between
+const morph = { from: START_SHAPE, to: START_SHAPE, target: START_SHAPE, tween: null };
+function setShape(k, instant) {
+  morph.target = k;
+  const u = pMat.uniforms;
+  if (instant) {
+    morph.tween?.kill(); morph.tween = null;
+    morph.from = morph.to = k; u.uFrom.value = u.uTo.value = k; u.uT.value = 1;
+    updateHud(k);
+    return;
+  }
+  if (morph.tween) { morph.tween.timeScale(2.4); return; }       // finish the current pour quickly, then go on
+  if (morph.target === morph.to) return;
+  morph.from = morph.to; morph.to = morph.target;
+  u.uFrom.value = morph.from; u.uTo.value = morph.to; u.uT.value = 0;
+  updateHud(morph.to);
+  morph.tween = gsap.to(u.uT, { value: 1, duration: reduce ? 0 : 1.6, ease: "power2.inOut",
+    onComplete: () => { morph.tween = null; setShape(morph.target); } });
+}
 world.add(points);
 
 // ---- liquid blob (desktop only; detail 40 looks identical to 96 at this size, at a fraction of the cost)
@@ -344,7 +370,7 @@ function buildTextShape(str, width) {
   }
   pGeo.attributes.aF.needsUpdate = true;
 }
-const sceneState = PAGE === "tuition"
+const sceneState = PAGE !== "profile"
   ? { morph: 5, rotX: 0, x: isMobile ? 0 : 2.7, y: isMobile ? 1.2 : 0, z: 0, blobScale: 0 }
   : { morph: 0, rotX: 0, x: isMobile ? 0 : 2.6, y: 0, z: 0, blobScale: isMobile ? 0 : 1.5 };
 if (isMobile) blob.visible = false;
@@ -394,14 +420,23 @@ function watchPerf() {
   const avg = perf.acc / perf.frames;
   perf.frames = 0; perf.acc = 0;
   perf.avg = avg;
-  if (avg > 18.5 && dpr > 0.75) { dpr = Math.max(0.75, dpr - 0.25); applyDpr(); saveQ(); }     // under ~54fps: step down
-  else if (avg > 18.5 && !perfState.low) { goLow(); saveQ(); }
-  else if (avg < 11 && dpr < DPR_MAX && !perfState.low) { dpr = Math.min(DPR_MAX, dpr + 0.25); applyDpr(); saveQ(); }
+  if (avg > 18.5 && dpr > 0.75) perf.pending = "down";            // under ~54fps
+  else if (avg > 18.5 && !perfState.low) perf.pending = "low";
+  else if (avg < 11 && dpr < DPR_MAX && !perfState.low) perf.pending = "up";
+}
+// quality changes wait until nothing is moving, so they never show as a jump
+function applyPendingQuality() {
+  if (!perf.pending || motion.vel > 0.02 || snap.busy || morph.tween) return;
+  if (perf.pending === "down") { dpr = Math.max(0.75, dpr - 0.25); applyDpr(); }
+  else if (perf.pending === "up") { dpr = Math.min(DPR_MAX, dpr + 0.25); applyDpr(); }
+  else if (perf.pending === "low") goLow();
+  perf.pending = null;
+  saveQ();
 }
 
 // ---- one render loop, driven by GSAP's ticker (same frame as Lenis + ScrollTrigger)
 const clock = new THREE.Clock(), ndc = new THREE.Vector3(), tmp = new THREE.Vector3();
-let prevScroll = scrollY, spin = 0;
+let prevScroll = scrollY, spin = 0, spinDir = 1;
 // measure the screen's refresh rate once
 let frameNo = 0, renderEvery = 1;
 {
@@ -426,12 +461,13 @@ function render() {
   const dt = Math.min(clock.getDelta(), 0.05);
   const t = clock.elapsedTime;
   watchPerf();
+  applyPendingQuality();
 
   // scroll speed (0 = still, ~1 = flicking through sections)
   const sy = scrollY, rawV = lenis ? Math.abs(lenis.velocity) / 45 : Math.abs(sy - prevScroll) / 45;
   if (sy !== prevScroll) motion.dir = sy > prevScroll ? 1 : -1;
   prevScroll = sy;
-  motion.vel += (Math.min(rawV, 1.5) - motion.vel) * 0.08;
+  motion.vel += (Math.min(rawV, 1.2) - motion.vel) * 0.05;
   const v = reduce ? 0 : motion.vel;
 
   mouse.x += (mouse.tx - mouse.x) * 0.06;
@@ -447,11 +483,11 @@ function render() {
 
   const pu = pMat.uniforms;
   pu.uTime.value = t;
-  pu.uMorph.value = sceneState.morph;
+
   pu.uVel.value = v;
   pu.uShockAge.value = t - motion.shockT;
   blobMat.uniforms.uTime.value = t;
-  updateHud(Math.round(sceneState.morph));
+
 
   if (mouse.seen) {
     ndc.set(mouse.x, mouse.y, 0.5).unproject(camera).sub(camera.position).normalize();
@@ -460,9 +496,10 @@ function render() {
     pu.uMouse.value.copy(tmp.applyMatrix4(camera.matrixWorldInverse));
   }
 
-  spin += dt * (0.06 + v * 0.9) * motion.dir;
+  spinDir += (motion.dir - spinDir) * 0.04;                       // direction changes ease, never flip
+  spin += dt * (0.06 + v * 0.3) * spinDir;
   world.position.set(sceneState.x, sceneState.y, sceneState.z);
-  const tw = Math.min(1, Math.max(0, sceneState.morph - 4));
+  const ut = pu.uT.value, tw = (morph.to === 5 ? ut : 0) + (morph.from === 5 ? 1 - ut : 0);   // how much the word is showing
   points.rotation.y = (spin + mouse.x * 0.3) * (1 - tw) + mouse.x * 0.35 * tw;
   points.rotation.x = (sceneState.rotX + mouse.y * 0.15) * (1 - tw) - mouse.y * 0.2 * tw;
   if (blob.visible = sceneState.blobScale > 0.01) {
@@ -473,7 +510,7 @@ function render() {
   // symbols drift upwards, rush past while scrolling, wrap around
   for (const s of symbols) {
     const u = s.userData;
-    s.position.y += (u.vy + v * 9 * motion.dir) * dt;
+    s.position.y += (u.vy + v * 4 * spinDir) * dt;
     if (s.position.y > 8) s.position.y = -8;
     if (s.position.y < -8) s.position.y = 8;
     s.material.rotation += u.vr * dt;
@@ -483,7 +520,7 @@ function render() {
   symGroup.position.y = -mouse.y * 0.4;
 
   // warp: widen the lens a touch at speed
-  const fov = 45 + v * 9;
+  const fov = 45 + v * 4;
   if (Math.abs(fov - camera.fov) > 0.01) { camera.fov = fov; camera.updateProjectionMatrix(); }
   camera.position.x += (mouse.x * 0.4 - camera.position.x) * 0.05;
   camera.position.y += (mouse.y * 0.3 - camera.position.y) * 0.05;
@@ -500,3 +537,4 @@ addEventListener("resize", () => {
   renderer.setSize(innerWidth, innerHeight);
   syncBgRes();
 });
+updateHud(START_SHAPE);

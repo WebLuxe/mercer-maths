@@ -1,0 +1,21 @@
+{
+  "_howto": "Add notes and videos here. Notes: put the PDF in assets/notes/ and set \"file\" to e.g. \"assets/notes/quadratics.pdf\". Videos: upload to YouTube (unlisted is fine) and set \"youtube\" to the video ID, e.g. \"dQw4w9WgXcQ\". Leave file/youtube empty to show the card as Coming soon. band is one of 7-9, 10-11, 12-13.",
+  "notes": [
+    { "title": "Fractions, decimals and percentages", "band": "7-9", "grade": "Grade 7", "pages": 6, "file": "" },
+    { "title": "Solving linear equations", "band": "7-9", "grade": "Grade 8", "pages": 5, "file": "" },
+    { "title": "Angles, triangles and polygons", "band": "7-9", "grade": "Grade 9 · NCE", "pages": 7, "file": "" },
+    { "title": "Quadratics and the discriminant", "band": "10-11", "grade": "SC Maths", "pages": 8, "file": "" },
+    { "title": "Logarithms on one page", "band": "10-11", "grade": "SC Add Maths", "pages": 4, "file": "" },
+    { "title": "Differentiation: rules and rates", "band": "10-11", "grade": "SC Add Maths", "pages": 9, "file": "" },
+    { "title": "Integration techniques", "band": "12-13", "grade": "A Level · Pure 3", "pages": 10, "file": "" },
+    { "title": "Complex numbers and the Argand diagram", "band": "12-13", "grade": "A Level · Pure 3", "pages": 8, "file": "" }
+  ],
+  "videos": [
+    { "title": "Percentages without a calculator", "band": "7-9", "grade": "Grade 8", "length": "6:40", "youtube": "" },
+    { "title": "Factorising quadratics in four minutes", "band": "10-11", "grade": "SC Maths", "length": "4:12", "youtube": "" },
+    { "title": "Logarithms: why they work", "band": "10-11", "grade": "SC Add Maths", "length": "9:05", "youtube": "" },
+    { "title": "Differentiation from first principles", "band": "10-11", "grade": "SC Add Maths", "length": "11:30", "youtube": "" },
+    { "title": "Integration by parts, step by step", "band": "12-13", "grade": "A Level · Pure 3", "length": "13:20", "youtube": "" },
+    { "title": "Projectiles in mechanics", "band": "12-13", "grade": "A Level · Mechanics", "length": "8:45", "youtube": "" }
+  ]
+}
