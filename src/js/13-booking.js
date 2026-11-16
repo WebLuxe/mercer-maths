@@ -65,7 +65,7 @@ bookBack.addEventListener("click", () => bookStep > 0 && showBookStep(bookStep -
 
 function finishBooking() {
   const name = bookForm.name.value.trim(), phone = bookForm.phone.value.trim();
-  const msg = `Hi Mercer Maths! I'd like to book a free trial lesson.
+  const msg = `Hi Kavish Maths! I'd like to book a free trial lesson.
 
 Student: ${name}
 Subject: ${booking.subject}
@@ -75,7 +75,7 @@ Best time: ${booking.day}
 Parent's WhatsApp: ${phone}`;
   $("#bookPreview").textContent = msg;
   $("#sendWa").href = "https://wa.me/?text=" + encodeURIComponent(msg);
-  $("#sendMail").href = "mailto:hello@mercermaths.example?subject=" + encodeURIComponent("Free trial lesson: " + name) + "&body=" + encodeURIComponent(msg);
+  $("#sendMail").href = "mailto:hello@kavishmaths.example?subject=" + encodeURIComponent("Free trial lesson: " + name) + "&body=" + encodeURIComponent(msg);
   bookBars.forEach((b) => b.classList.add("is-on"));
   gsap.to(bookForm, { opacity: 0, y: -20, duration: 0.3, onComplete: () => {
     bookForm.hidden = true;

@@ -3,6 +3,9 @@
 import { readdirSync, readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { execSync } from "node:child_process";
 
+// Chapters + notes: assets/data/chapters.json, sample PDFs, and the PDF reader (see tools/notes.cjs)
+execSync("node tools/notes.cjs", { stdio: "inherit" });
+
 mkdirSync("assets/js", { recursive: true });
 mkdirSync("assets/css", { recursive: true });
 

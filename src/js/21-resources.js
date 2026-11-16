@@ -2,15 +2,9 @@
    Resources: notes + videos, listed in assets/data/resources.json
    Videos never load until someone presses play (privacy-friendly embed).
 ================================================================== */
-if ($("#notesGrid")) {
+if ($("#videosGrid")) {
   const esc = (t) => String(t ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 
-  const noteCard = (n) => {
-    const ready = !!n.file;
-    const open = ready ? `<a class="ncard" href="${esc(n.file)}" download data-band="${esc(n.band)}">` : `<div class="ncard is-soon" data-band="${esc(n.band)}">`;
-    return `${open}<span class="ncard__top"><span class="ncard__type">PDF</span><span class="ncard__grade b-${esc(n.band)}">${esc(n.grade)}</span></span>
-      <b>${esc(n.title)}</b><span class="ncard__foot"><span>${esc(n.pages)} pages</span><span class="ncard__go">${ready ? "Download ↓" : "Coming soon"}</span></span>${ready ? "</a>" : "</div>"}`;
-  };
   const videoCard = (v) => `<button class="vid${v.youtube ? "" : " is-soon"}" data-band="${esc(v.band)}" data-yt="${esc(v.youtube)}" data-title="${esc(v.title)}">
       <span class="vid__thumb b-${esc(v.band)}"><i class="vid__play" aria-hidden="true"></i><span class="vid__len">${esc(v.length)}</span></span>
       <b>${esc(v.title)}</b><span class="vid__meta">${esc(v.grade)}${v.youtube ? "" : " · Coming soon"}</span></button>`;
@@ -60,20 +54,16 @@ if ($("#notesGrid")) {
   fetch("assets/data/resources.json", { cache: "no-cache" })
     .then((r) => r.json())
     .then((data) => {
-      $("#notesGrid").innerHTML = (data.notes || []).map(noteCard).join("");
       $("#videosGrid").innerHTML = (data.videos || []).map(videoCard).join("");
-      wireFilter($('[data-lib="notes"]'), () => $$("#notesGrid > *"));
       wireFilter($('[data-lib="videos"]'), () => $$("#videosGrid > *"));
       $$("#videosGrid .vid").forEach((b) => b.addEventListener("click", () => {
         if (b.dataset.yt) openVideo(b.dataset.yt, b.dataset.title);
         else gsap.fromTo(b, { x: -8 }, { x: 0, duration: 0.6, ease: "elastic.out(1, 0.3)" });
       }));
-      ["#notesGrid", "#videosGrid"].forEach((g) =>
-        gsap.from(`${g} > *`, { y: 50, opacity: 0, rotationX: -25, transformPerspective: 900, duration: 1, stagger: 0.06, ease: "expo.out", scrollTrigger: { trigger: g, start: "top 88%" } })
-      );
+      gsap.from("#videosGrid > *", { y: 50, opacity: 0, rotationX: -25, transformPerspective: 900, duration: 1, stagger: 0.06, ease: "expo.out", scrollTrigger: { trigger: "#videosGrid", start: "top 88%" } });
       ScrollTrigger.refresh();
     })
     .catch(() => {
-      $("#notesGrid").innerHTML = `<p class="lib__err">The list couldn't load. If you opened the file directly, run it through a web server instead (npm run serve).</p>`;
+      $("#videosGrid").innerHTML = `<p class="lib__err">The list couldn't load. If you opened the file directly, run it through a web server instead (npm run serve).</p>`;
     });
 }

@@ -1,9 +1,14 @@
 {
   "name": "mercer-maths",
   "private": true,
-  "description": "Two-page 3D animated site for a Maths & Add Maths tutor (demo content).",
+  "description": "Kavish Maths: three-page 3D animated site for a Maths & Add Maths tutor (demo content).",
   "scripts": {
     "build": "node build.mjs",
+    "notes": "node tools/demo-notes.cjs",
     "serve": "python -m http.server 4823"
+  },
+  "devDependencies": {
+    "pdfjs-dist": "3.11.174",
+    "playwright-core": "1.48.2"
   }
 }

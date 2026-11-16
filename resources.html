@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Resources — Mercer Maths notes &amp; video lessons, Grades 7–13</title>
+  <title>Resources — Kavish Maths notes &amp; video lessons, Grades 7–13</title>
   <meta name="description" content="Free Maths revision notes and short video lessons for Grades 7–13 in Mauritius: NCE, SC Maths and Add Maths, HSC A Level." />
   <meta name="theme-color" content="#07060b" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -26,7 +26,7 @@
     <div class="loader__panel loader__panel--bot"></div>
     <div class="loader__inner">
       <div class="loader__ring"><span></span><span></span><span></span><b>∑</b></div>
-      <div class="loader__word display" data-split>MERCER MATHS</div>
+      <div class="loader__word display" data-split>KAVISH MATHS</div>
       <div class="loader__count" id="loaderCount">0</div>
       <div class="loader__bar"><i id="loaderBar"></i></div>
       <div class="loader__status" id="loaderStatus">Sharpening pencils</div>
@@ -52,7 +52,7 @@
 
   <header class="nav" id="nav">
     <div class="wrap">
-      <a href="index.html" data-page="Profile" class="nav__logo" data-magnetic>mercer<b>.maths</b></a>
+      <a href="index.html" data-page="Profile" class="nav__logo" data-magnetic>kavish<b>.maths</b></a>
       <nav class="tabs" aria-label="Pages">
         <a href="index.html" data-page="Profile" class="tabs__tab">Profile</a>
         <a href="tuition.html" data-page="Tuition" class="tabs__tab">Tuition</a>
@@ -74,12 +74,12 @@
             <span class="line" data-split>smarter,</span>
             <span class="line grad" data-split>not longer.</span>
           </h1>
-          <p class="hero__role hero-fade">Revision notes and short video lessons for Grades 7 to 13, sorted by stage. Free to download, with new ones added every week.</p>
+          <p class="hero__role hero-fade">Notes for every chapter from Grade 7 to 13, readable right on the page, plus short video lessons. Sorted by grade and course.</p>
           <div class="hero__cta hero-fade">
             <a href="#notes" class="btn btn--fill" data-magnetic><span>Browse the notes</span><span>↓</span></a>
             <a href="#videos" class="btn btn--ghost" data-magnetic><span>Watch a lesson</span></a>
           </div>
-          <div class="thero__chips hero-fade"><span><b>PDF</b> notes</span><span><b>NCE · SC · HSC</b></span><span><b>Free</b> to download</span></div>
+          <div class="thero__chips hero-fade"><span><b>PDF</b> notes</span><span><b>NCE · SC · HSC</b></span><span><b>Read</b> on any device</span></div>
         </div>
         <div class="thero__space" aria-hidden="true"></div>
       </div>
@@ -91,14 +91,16 @@
       <div class="wrap">
         <div class="sec-head">
           <span class="eyebrow">01 — Notes</span>
-          <h2 class="display"><span class="reveal-line"><span>Notes that</span></span><span class="reveal-line"><span class="grad">actually help.</span></span></h2>
-          <p class="reveal">One topic per sheet: the method, a worked example, then practice questions with answers. Pick your stage.</p>
+          <h2 class="display"><span class="reveal-line"><span>Every chapter.</span></span><span class="reveal-line"><span class="grad">Every grade.</span></span></h2>
+          <p class="reveal">Pick your grade and course, then open a chapter to read its notes right here, on any device. Cambridge O Level and A Level chapters follow the official syllabus.</p>
         </div>
-        <div class="lib">
-          <div class="tt__filters lib__filters" role="tablist" aria-label="Filter by grade" data-lib="notes">
-            <button role="tab" aria-selected="true" data-band="all">All grades</button><button role="tab" aria-selected="false" data-band="7-9">Grades 7–9</button><button role="tab" aria-selected="false" data-band="10-11">Grades 10–11</button><button role="tab" aria-selected="false" data-band="12-13">Grades 12–13</button>
+        <div class="lib chx" id="chx">
+          <div class="tt__filters lib__filters" role="tablist" aria-label="Choose your grades" data-lib="chapters">
+            <button role="tab" aria-selected="false" data-band="7-9">Grades 7–9</button><button role="tab" aria-selected="true" data-band="10-11">Grades 10–11</button><button role="tab" aria-selected="false" data-band="12-13">Grades 12–13</button>
           </div>
-          <div class="lib__grid lib__grid--notes" id="notesGrid" aria-live="polite"></div>
+          <div class="chx__courses" id="chCourses" role="tablist" aria-label="Choose a course"></div>
+          <div class="chx__info" id="chInfo"></div>
+          <div class="chx__list" id="chList" aria-live="polite"></div>
         </div>
       </div>
     </section>
@@ -128,14 +130,14 @@
         <p class="contact__lede">Message to book a free trial class. Bring your last test paper and we'll start from there.</p>
         <div class="contact__cta">
           <a href="#contact" data-book class="btn btn--fill" data-magnetic><span>Book a free trial</span><span>↗</span></a>
-          <a href="mailto:hello@mercermaths.example" class="btn btn--ghost" data-magnetic><span>hello@mercermaths.example</span></a>
+          <a href="mailto:hello@kavishmaths.example" class="btn btn--ghost" data-magnetic><span>hello@kavishmaths.example</span></a>
         </div>
         <dl class="contact__info">
           <div><dt>Where</dt><dd>First floor, 22 Royal Road, and online</dd></div>
           <div><dt>When</dt><dd>Mon–Fri 15:30–20:00 · Sat 08:00–13:00</dd></div>
           <div><dt>Who</dt><dd>Grades 7–13 · NCE, SC &amp; HSC</dd></div>
         </dl>
-        <div class="contact__foot"><span>© 2026 Mercer Maths</span><span>Demo site: names, results, prices &amp; reviews are placeholders · Photo: Fábio Lucas / Unsplash</span><a href="#top">Back to top ↑</a></div>
+        <div class="contact__foot"><span>© 2026 Kavish Maths</span><span>Demo site: names, results, prices &amp; reviews are placeholders · Photo: Fábio Lucas / Unsplash</span><a href="#top">Back to top ↑</a></div>
       </div>
     </section>
   </main>
@@ -194,6 +196,18 @@
       <div class="vmodal__frame" id="vframe"></div>
       <p class="vmodal__title" id="vtitle"></p>
     </div>
+  </div>
+  <div class="rdr" id="rdr" aria-hidden="true">
+    <div class="rdr__bar">
+      <button class="rdr__i" data-rclose aria-label="Close the notes">←</button>
+      <div class="rdr__t"><b id="rdrT"></b><small id="rdrS"></small></div>
+      <span class="rdr__pg" id="rdrPg" aria-live="polite"></span>
+      <button class="rdr__i" data-rzoom="out" aria-label="Zoom out">−</button>
+      <button class="rdr__i" data-rzoom="in" aria-label="Zoom in">+</button>
+      <a class="rdr__i" id="rdrDl" download aria-label="Download the notes">↓</a>
+    </div>
+    <div class="rdr__tabs" id="rdrTabs" role="tablist" aria-label="Notes in this chapter"></div>
+    <div class="rdr__pages" id="rdrPages" tabindex="0" data-lenis-prevent></div>
   </div>
   <a href="#contact" data-book class="mbar" id="mbar"><span><b>Free trial lesson</b>4 seats left for January</span><em>Book →</em></a>
 

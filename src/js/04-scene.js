@@ -28,7 +28,7 @@ const SHAPES = [
   ["fig. 3", "z = sin x · cos y"],
   ["fig. 4", "z = x² − y²"],
   ["fig. 5", "r = a·e^(bθ)"],
-  ["fig. 6", { tuition: "A* = Σ effort", resources: "π ≈ 3.14159" }[PAGE] || "JM = f(you)"],
+  ["fig. 6", { tuition: "A* = Σ effort", resources: "π ≈ 3.14159" }[PAGE] || "KS = f(you)"],
 ];
 
 const canvas = $("#webgl");
@@ -167,7 +167,7 @@ syncMax();
 // ---- particles
 const COUNT = isMobile ? 3500 : 7500;
 const START_SHAPE = PAGE === "profile" ? 0 : 5;                 // tuition + resources open on their word
-const TEXT_SHAPE = { tuition: ["A*", 5.2], resources: ["π", 3.6] }[PAGE] || ["JM", 4.2];
+const TEXT_SHAPE = { tuition: ["A*", 5.2], resources: ["π", 3.6] }[PAGE] || ["KS", 4.2];
 const A = new Float32Array(COUNT * 3), B = new Float32Array(COUNT * 3), C = new Float32Array(COUNT * 3),
       D = new Float32Array(COUNT * 3), E = new Float32Array(COUNT * 3), F = new Float32Array(COUNT * 3);
 const rnd = new Float32Array(COUNT), col = new Float32Array(COUNT * 3);

@@ -1,4 +1,4 @@
-# Mercer Maths
+# Kavish Maths
 
 **A 3D, animated three-page website for a Maths tutor in Mauritius: Grades 7–13 (NCE, SC, HSC) and SC Add Maths.**
 Particles that morph through real equations, full-screen snap scrolling, a 3D lesson carousel,
@@ -25,16 +25,18 @@ an interactive timetable and a booking flow that writes the WhatsApp message for
 
 Switching tabs plays a five-bar page transition; the next page builds itself out of it.
 
-## Adding notes and videos
+## Chapters and notes
 
-Everything on the Resources page comes from **`assets/data/resources.json`**. No code changes needed:
+The Resources page lists every chapter for Grades 7–13: Grade 7, Grade 8, Grade 9 NCE, O Level Maths 4024, Add Maths 4037 and A Level 9709 (Pure 1, Pure 3, Mechanics, Statistics). A chapter opens its notes in a reader on the page (PDF.js), so notes work on phones too.
 
-- **A note:** put the PDF in `assets/notes/`, then add or edit an entry with `"file": "assets/notes/your-file.pdf"`.
-- **A video:** upload it to YouTube (unlisted works), then set `"youtube"` to the video ID. That's the part after `watch?v=`.
-- **Anything with an empty `file` / `youtube`** shows as *Coming soon*.
-- **`band`:** one of `7-9`, `10-11` or `12-13`. It drives the filter and the card colour.
+- **Chapters** are listed in `tools/syllabus.cjs`.
+- **Kavish's notes:** put the PDF in `assets/notes/<course>/` named like the chapter (e.g. `assets/notes/o-maths/16-variation.pdf`), or list any file name in that chapter's `files`. Then run `npm run build`, which prints which chapters have notes.
+- **Demo notes** are written in `tools/notes-demo/<course>.json`. Run `npm run notes` to turn them into PDFs (needs Edge or Chrome).
+- **Every other chapter** gets a labelled two-page sample PDF, made by the build.
 
-Host videos on YouTube rather than in this repo: GitHub Pages isn't built for large video files.
+## Adding videos
+
+Videos come from **`assets/data/resources.json`**. Upload to YouTube (unlisted works), then set `"youtube"` to the video ID, the part after `watch?v=`. An empty `youtube` shows as *Coming soon*. `band` is one of `7-9`, `10-11` or `12-13`.
 
 ## Highlights
 
@@ -49,7 +51,7 @@ Host videos on YouTube rather than in this repo: GitHub Pages isn't built for la
 
 **Everything else:**
 - **Live 3D background:** aurora light, a rippling graph-paper grid, shooting stars and floating maths symbols.
-- **Particle shapes:** a sphere, a torus knot, z = sin x · cos y, a saddle, a spiral, and the words "A*", "JM" and "π". Each section owns one finished shape, and arriving there pours the particles straight from the last shape to the next in one smooth morph. They never pass through shapes in between, however fast you scroll.
+- **Particle shapes:** a sphere, a torus knot, z = sin x · cos y, a saddle, a spiral, and the words "A*", "KS" and "π". Each section owns one finished shape, and arriving there pours the particles straight from the last shape to the next in one smooth morph. They never pass through shapes in between, however fast you scroll.
 - **Scroll speed drives the motion:** the grid warps, light streaks rush past, and the view widens like a warp jump.
 - **Click anywhere:** a shockwave ripples through the grid and the particles.
 - **Snap scrolling:** one flick moves one full-screen section, with side dots and keyboard support. Phones keep normal scrolling.
@@ -92,7 +94,9 @@ build.mjs           Build script
 ## Develop
 
 ```bash
-npm run build      # src → assets (esbuild + sass, fetched via npx)
+npm install        # once: PDF.js and the demo-notes renderer
+npm run build      # chapters + notes, then src → assets (esbuild + sass, fetched via npx)
+npm run notes      # demo notes JSON → PDFs
 npm run serve      # http://127.0.0.1:4823
 ```
 

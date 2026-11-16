@@ -1,4 +1,4 @@
-// Mercer Maths — stylesheet entry. Partials load in this order.
+// Kavish Maths — stylesheet entry. Partials load in this order.
 // Build: npm run build   (or: npx sass src/scss/style.scss assets/css/style.css --style=compressed)
 @use "01-base" as *;
 @use "02-background-layers" as *;
@@ -31,3 +31,4 @@
 @use "29-teaser" as *;
 @use "30-timetable" as *;
 @use "31-resources" as *;
+@use "32-chapters" as *;
