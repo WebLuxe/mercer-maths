@@ -166,6 +166,7 @@ syncMax();
 
 // ---- particles
 const COUNT = isMobile ? 3500 : 7500;
+const P_SIZE = isMobile ? 48 : 52;                              // point size: big enough that the shapes read clearly
 const START_SHAPE = PAGE === "profile" ? 0 : 5;                 // tuition + resources open on their word
 const TEXT_SHAPE = { tuition: ["A*", 5.2], resources: ["π", 3.6] }[PAGE] || ["KS", 4.2];
 const A = new Float32Array(COUNT * 3), B = new Float32Array(COUNT * 3), C = new Float32Array(COUNT * 3),
@@ -211,7 +212,7 @@ const pMat = new THREE.ShaderMaterial({
     uTime: { value: 0 }, uMorph: { value: 0 }, uIntro: { value: 0 }, uVel: { value: 0 },
     uFrom: { value: START_SHAPE }, uTo: { value: START_SHAPE }, uT: { value: 1 }, uKeep: { value: 1.06 },
     uMouse: { value: new THREE.Vector3(99, 99, 0) }, uShock: { value: new THREE.Vector3(99, 99, 0) }, uShockAge: { value: 10 },
-    uSize: { value: 34 * dpr },
+    uSize: { value: P_SIZE * dpr },
   },
   vertexShader: /* glsl */ `
     ${NOISE}
@@ -239,14 +240,16 @@ const pMat = new THREE.ShaderMaterial({
       gl_Position = projectionMatrix * mv;
       float keep = 1. - smoothstep(uKeep - .06, uKeep, aRnd);       // low-power tier fades particles out
       gl_PointSize = uSize * (.35 + aRnd * .9) * (1. + wave * 1.5) / -mv.z * step(.001, keep);
-      vCol = aCol; vAlpha = (.45 + n * .5 + wave) * uIntro * keep;
+      vCol = aCol; vAlpha = (.78 + n * .28 + wave) * uIntro * keep;   // steady brightness: noise only shimmers it
     }`,
   fragmentShader: /* glsl */ `
     varying vec3 vCol; varying float vAlpha;
     void main(){
       float d = length(gl_PointCoord - .5);
-      float a = smoothstep(.5, .0, d);
-      gl_FragColor = vec4(vCol * (1. + a), a * a * vAlpha);
+      if (d > .5) discard;
+      float glow = smoothstep(.5, .0, d), core = smoothstep(.2, .02, d);
+      // a crisp bright core inside a soft coloured halo
+      gl_FragColor = vec4(vCol * (1.05 + core * .85), (glow * glow * .5 + core * .8) * vAlpha);
     }`,
 });
 const points = new THREE.Points(pGeo, pMat);
@@ -407,7 +410,7 @@ const applyDpr = () => {
   renderer.setPixelRatio(dpr);
   renderer.setSize(innerWidth, innerHeight);
   syncBgRes();
-  pMat.uniforms.uSize.value = 34 * dpr;
+  pMat.uniforms.uSize.value = P_SIZE * dpr;
 };
 const perf = { frames: 0, acc: 0, last: performance.now(), warm: performance.now() + 2000 };
 const saveQ = () => { try { localStorage.setItem(QKEY, JSON.stringify({ dpr, low: perfState.low })); } catch (e) {} };

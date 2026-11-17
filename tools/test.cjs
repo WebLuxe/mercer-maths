@@ -184,6 +184,39 @@ async function phone(br) {
   await ctx.close();
 }
 
+// real browser windows on common laptops/monitors (screen size minus tabs, address bar and taskbar)
+const LAPTOPS = [[1280, 650], [1366, 625], [1440, 790], [1536, 730], [1600, 780], [1920, 960], [2560, 1300], [1024, 640]];
+async function laptops(br) {
+  console.log(`\nLaptop & desktop windows: every section fits, nothing overlaps`);
+  for (const [w, h] of LAPTOPS) {
+    const ctx = await br.newContext({ viewport: { width: w, height: h }, deviceScaleFactor: w === 1440 ? 2 : 1 });
+    const p = await ctx.newPage();
+    const bad = [];
+    for (const pg of ["index.html", "tuition.html", "resources.html"]) {
+      await p.goto(B + pg); await ready(p); await p.waitForTimeout(3500);   // let the hero intro settle (letters rise from below)
+      const r = await p.evaluate(() => {
+        const out = [];
+        if (document.documentElement.scrollWidth > innerWidth) out.push("sideways scroll");
+        document.querySelectorAll("main > section:not(.show)").forEach((s) => {
+          const over = s.scrollHeight - s.clientHeight;
+          if (over > 2) out.push(`#${s.id || "hero"} overflows by ${over}px`);
+        });
+        // the hero's text must sit between the nav and the bottom of the screen
+        const navB = document.querySelector(".nav .wrap").getBoundingClientRect().bottom;
+        const items = [...document.querySelectorAll(".hero .wrap > div:first-child > *")].map((e) => e.getBoundingClientRect());
+        const top = Math.min(...items.map((b) => b.top)), bot = Math.max(...items.map((b) => b.bottom));
+        if (top < navB + 4) out.push(`hero text starts under the nav (${Math.round(top)} < ${Math.round(navB)})`);
+        if (bot > innerHeight - 4) out.push(`hero text runs off the bottom (${Math.round(bot)} > ${innerHeight})`);
+        return out;
+      });
+      r.forEach((x) => bad.push(`${pg} ${x}`));
+    }
+    await p.screenshot({ path: `${OUT}/laptop-${w}x${h}.png` });
+    check(bad.length === 0, `${w}x${h}${bad.length ? ": " + bad.join("; ") : ""}`);
+    await ctx.close();
+  }
+}
+
 async function offline(br) {
   console.log(`\nNo third-party scripts (everything but Google Fonts blocked)`);
   const ctx = await br.newContext({ viewport: { width: 1440, height: 900 } });
@@ -220,6 +253,7 @@ async function slowPhone(br) {
   try {
     await desktop(br, 1440, 900);
     await desktop(br, 1280, 720);
+    await laptops(br);
     await phone(br);
     await offline(br);
     await slowPhone(br);

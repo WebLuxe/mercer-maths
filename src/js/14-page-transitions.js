@@ -1,24 +1,32 @@
 /* ==================================================================
-   Page transitions: five glowing bars sweep in, the next page builds out of them
+   Page transitions: five liquid columns rise to cover, then rise away on the next page
 ================================================================== */
+const ptLabel = (text) => {
+  $("#ptLabel").innerHTML = [...text].map((c) => `<span class="c">${c === " " ? "&nbsp;" : c.replace(/[&<>]/g, "")}</span>`).join("");
+  return $$("#ptLabel .c");
+};
+// GSAP owns these transforms from the start (so it never stacks its offset on top of the CSS one)
+gsap.set("#pt i", { y: 0, yPercent: document.documentElement.classList.contains("pt-in") ? 0 : 105 });
 function revealPage() {
   let label = "";
   try { label = sessionStorage.getItem("pt") || ""; sessionStorage.removeItem("pt"); } catch (e) {}
-  $("#ptLabel").textContent = label;
-  gsap.timeline({ onComplete: () => document.documentElement.classList.remove("pt-in") })
-    .set("#pt i", { scaleY: 1, transformOrigin: "50% 0%" })
-    .set("#ptLabel", { opacity: 1, y: 0 })
-    .to("#ptLabel", { opacity: 0, y: -50, duration: 0.45, ease: "power3.in" }, 0.15)
-    .to("#pt i", { scaleY: 0, duration: 0.95, stagger: 0.07, ease: "expo.inOut" }, 0.3);
+  const chars = ptLabel(label);
+  gsap.set("#pt i", { y: 0, yPercent: 0 });
+  gsap.set(chars, { y: 0, yPercent: 0 });
+  document.documentElement.classList.remove("pt-in");
+  gsap.timeline({ onComplete: () => gsap.set("#pt i", { yPercent: 105 }) })
+    .to(chars, { yPercent: -110, duration: 0.55, stagger: 0.03, ease: "power3.in" }, 0.1)
+    .to("#pt i", { yPercent: -105, duration: 1.15, stagger: { each: 0.07, from: "center" }, ease: "expo.inOut" }, 0.3);
 }
 function leaveTo(url, label) {
   try { sessionStorage.setItem("pt", label); } catch (e) {}
-  $("#ptLabel").textContent = label;
+  const chars = ptLabel(label);
   lenis?.stop();
+  if (reduce) { location.href = url; return; }
   gsap.timeline({ onComplete: () => (location.href = url) })
-    .fromTo("#pt i", { scaleY: 0, transformOrigin: "50% 100%" }, { scaleY: 1, duration: 0.8, stagger: 0.06, ease: "expo.inOut" })
-    .fromTo("#ptLabel", { opacity: 0, y: 70, scale: 0.9 }, { opacity: 1, y: 0, scale: 1, duration: 0.6, ease: "expo.out" }, "-=0.35")
-    .to({}, { duration: 0.12 });
+    .fromTo("#pt i", { yPercent: 105 }, { yPercent: 0, duration: 0.9, stagger: { each: 0.06, from: "edges" }, ease: "expo.inOut" })
+    .fromTo(chars, { y: 0, yPercent: 110 }, { yPercent: 0, duration: 0.6, stagger: 0.035, ease: "expo.out" }, "-=0.4")
+    .to({}, { duration: 0.1 });
 }
 document.addEventListener("click", (e) => {
   const a = e.target.closest("a[data-page]");
@@ -35,7 +43,7 @@ document.addEventListener("click", (e) => {
 });
 addEventListener("pageshow", (e) => {                     // back button from the browser cache
   if (!e.persisted) return;
-  gsap.set("#pt i", { scaleY: 0 });
-  gsap.set("#ptLabel", { opacity: 0 });
+  gsap.set("#pt i", { yPercent: 105 });
+  $("#ptLabel").innerHTML = "";
   lenis?.start();
 });

@@ -14,7 +14,7 @@
     &:hover { background: rgba(255, 255, 255, 0.6); span { opacity: 1; transform: translate(0, -50%); } }
     &.is-on { height: 30px; background: $grad; box-shadow: 0 0 14px rgba($a1, 0.7); } }
 }
-.vignette { position: fixed; inset: 0; z-index: 1; pointer-events: none; background: radial-gradient(ellipse at center, transparent 40%, rgba($bg, 0.85) 100%); }
+.vignette { position: fixed; inset: 0; z-index: 1; pointer-events: none; background: radial-gradient(ellipse at center, transparent 55%, rgba($bg, 0.6) 100%); }
 .hud {
   position: fixed; left: 16px; bottom: 16px; z-index: 5; pointer-events: none; display: flex; gap: 0.7rem; align-items: center;
   padding: 0.45rem 0.9rem; border-radius: 99px; @include glass-blur(0.04); font-size: 0.72rem; color: $muted;

@@ -4,7 +4,7 @@
 
 // ---------- base ----------
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { color-scheme: dark; }
+html { color-scheme: dark; overflow-x: clip; }   // nothing (e.g. the skewed marquee) can nudge the page sideways
 html.lenis, html.lenis body { height: auto; }
 .lenis.lenis-smooth { scroll-behavior: auto !important; }
 body {

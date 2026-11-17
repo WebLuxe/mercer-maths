@@ -5,16 +5,20 @@
 // ==========================================================
 //  PAGE TRANSITION
 // ==========================================================
-.pt { position: fixed; inset: 0; z-index: 250; display: flex; pointer-events: none;
-  i { flex: 1; transform: scaleY(0); transform-origin: 50% 100%;
-    &:nth-child(1) { background: linear-gradient(#1a1030, $a1); } &:nth-child(2) { background: linear-gradient(#0d1a2c, #3b82f6); }
-    &:nth-child(3) { background: linear-gradient(#082028, $a2); } &:nth-child(4) { background: linear-gradient(#1a1030, #a855f7); }
-    &:nth-child(5) { background: linear-gradient(#2a0c20, $a3); } }
-  &__label { position: absolute; left: 50%; top: 50%; translate: -50% -50%; font-size: clamp(3rem, 12vw, 11rem); color: #fff; opacity: 0;
-    text-shadow: 0 10px 60px rgba(0, 0, 0, 0.35); white-space: nowrap; }
+// Five rounded columns rise through the screen like liquid: up to cover on the way out,
+// and on the next page they keep rising off the top to reveal it. Transforms only (cheap).
+.pt { position: fixed; inset: 0; z-index: 250; display: flex; align-items: center; pointer-events: none; overflow: hidden;
+  i { flex: 1; height: 175vh; margin: 0 -1px; border-radius: 999px; transform: translateY(105%); will-change: transform;
+    box-shadow: 0 0 60px rgba(0, 0, 0, 0.35);
+    &:nth-child(1) { background: linear-gradient(#2a1650, $a1 45%, #1a1030); } &:nth-child(2) { background: linear-gradient(#123a6e, #3b82f6 45%, #0d1a2c); }
+    &:nth-child(3) { background: linear-gradient(#0b4452, $a2 45%, #082028); } &:nth-child(4) { background: linear-gradient(#2c1650, #a855f7 45%, #1a1030); }
+    &:nth-child(5) { background: linear-gradient(#4a1438, $a3 45%, #2a0c20); } }
+  &__label { position: absolute; left: 50%; top: 50%; translate: -50% -50%; display: flex; overflow: hidden; padding: 0.08em 0.04em;
+    font-size: clamp(3rem, 12vw, 11rem); color: #fff; white-space: nowrap;
+    .c { display: inline-block; transform: translateY(110%); } }
 }
-.pt-in .pt i { transform: scaleY(1); }
-.pt-in .pt__label { opacity: 1; }
+.pt-in .pt i { transform: none; }
+.pt-in .pt__label .c { transform: none; }
 .pt-in .loader { display: none; }
 
 // cursor trail

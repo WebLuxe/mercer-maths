@@ -124,3 +124,17 @@ $panel: "(min-width: 900px) and (min-height: 560px)";
     &__foot { margin-top: 5vh; padding-top: 2vh; } }
   .btn { padding: clamp(0.75rem, 1.8vh, 1rem) clamp(1.3rem, 1.8vw, 1.8rem); }
 }
+
+// short laptop windows (e.g. 1366×768 with browser bars ≈ 625px tall): tighten vertical rhythm so every panel fits
+@media (min-width: 900px) and (min-height: 560px) and (max-height: 700px) {
+  :root { --gap: clamp(0.7rem, 2.4vh, 1.4rem); }
+  .worked__board, .worked__plot { padding: clamp(0.8rem, 2.4vh, 1.4rem); }
+  .worked__line { padding: clamp(0.3rem, 1vh, 0.6rem) 0; }
+  .worked .eq { font-size: clamp(1.1rem, 3.2vh, 1.6rem); }
+  .worked__plot svg { max-height: 42vh; }
+  // heroes: smaller headline and spacing so the eyebrow never slides under the nav
+  .hero__title { font-size: clamp(2.6rem, min(6.4vw, 10.6vh), 6rem); margin: 1.4vh 0; }
+  .hero__role { font-size: clamp(0.9rem, 2.5vh, 1.05rem); line-height: 1.5; }
+  .hero__cta { margin-top: 2.6vh; }
+  .thero__chips { margin-top: 2.2vh; }
+}
