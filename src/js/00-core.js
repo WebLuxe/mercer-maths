@@ -1,4 +1,5 @@
-const THREE = await import("https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js");
+const THREE = await import(new URL("assets/vendor/three/three.module.min.js", document.baseURI).href);
+window.__kmBoot = true;   // the app is running (see the safety net at the end of each page)
 const { gsap, ScrollTrigger, Lenis } = window;
 gsap.registerPlugin(ScrollTrigger);
 ScrollTrigger.config({ ignoreMobileResize: true });

@@ -5,16 +5,23 @@
 if ($("#videosGrid")) {
   const esc = (t) => String(t ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 
-  const videoCard = (v) => `<button class="vid${v.youtube ? "" : " is-soon"}" data-band="${esc(v.band)}" data-yt="${esc(v.youtube)}" data-title="${esc(v.title)}">
-      <span class="vid__thumb b-${esc(v.band)}"><i class="vid__play" aria-hidden="true"></i><span class="vid__len">${esc(v.length)}</span></span>
-      <b>${esc(v.title)}</b><span class="vid__meta">${esc(v.grade)}${v.youtube ? "" : " · Coming soon"}</span></button>`;
+  const videoCard = (v) => `<button class="vid${v.youtube ? "" : " is-soon"}" data-band="${esc(v.band)}" data-yt="${esc(v.youtube)}" data-title="${esc(v.title)}"${v.youtube ? "" : ' aria-disabled="true"'}>
+      <span class="vid__thumb b-${esc(v.band)}">${v.youtube ? '<i class="vid__play" aria-hidden="true"></i>' : '<span class="vid__soon">Coming soon</span>'}<span class="vid__len">${esc(v.length)}</span></span>
+      <b>${esc(v.title)}</b><span class="vid__meta">${esc(v.grade)}${v.youtube ? "" : " · being recorded"}</span></button>`;
 
-  const wireFilter = (bar, items) => $$("button", bar).forEach((btn) => btn.addEventListener("click", () => {
+  // a grade filter shows only that grade's videos (no dimmed leftovers, and nothing else moves)
+  const wireFilter = (bar, items) => bar.addEventListener("click", (e) => {
+    const btn = e.target.closest("button[data-band]");
+    if (!btn || btn.getAttribute("aria-selected") === "true") return;
     $$("button", bar).forEach((x) => x.setAttribute("aria-selected", String(x === btn)));
     const want = btn.dataset.band, els = items();
-    els.forEach((el) => el.classList.toggle("is-dim", want !== "all" && el.dataset.band !== want));
-    if (!reduce) gsap.fromTo(els, { y: 24, opacity: 0 }, { y: 0, opacity: (i, el) => (el.classList.contains("is-dim") ? 0.14 : 1), duration: 0.6, stagger: 0.03, ease: "expo.out", clearProps: "opacity,transform" });
-  }));
+    gsap.killTweensOf(els);
+    els.forEach((el) => { el.hidden = want !== "all" && el.dataset.band !== want; gsap.set(el, { clearProps: "opacity,transform" }); });
+    const shown = els.filter((el) => !el.hidden);
+    $("#videosGrid .lib__err")?.remove();
+    if (!shown.length) $("#videosGrid").insertAdjacentHTML("beforeend", `<p class="lib__err">No videos for this grade yet.</p>`);
+    if (!reduce) gsap.fromTo(shown, { y: 18, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, stagger: 0.04, ease: "expo.out", clearProps: "opacity,transform" });
+  });
 
   // ---- video player modal (iframe created on open, destroyed on close)
   const modal = $("#vmodal"), frame = $("#vframe");
@@ -55,12 +62,12 @@ if ($("#videosGrid")) {
     .then((r) => r.json())
     .then((data) => {
       $("#videosGrid").innerHTML = (data.videos || []).map(videoCard).join("");
-      wireFilter($('[data-lib="videos"]'), () => $$("#videosGrid > *"));
+      wireFilter($('[data-lib="videos"]'), () => $$("#videosGrid > .vid"));
       $$("#videosGrid .vid").forEach((b) => b.addEventListener("click", () => {
         if (b.dataset.yt) openVideo(b.dataset.yt, b.dataset.title);
         else gsap.fromTo(b, { x: -8 }, { x: 0, duration: 0.6, ease: "elastic.out(1, 0.3)" });
       }));
-      gsap.from("#videosGrid > *", { y: 50, opacity: 0, rotationX: -25, transformPerspective: 900, duration: 1, stagger: 0.06, ease: "expo.out", scrollTrigger: { trigger: "#videosGrid", start: "top 88%" } });
+      if (!reduce) gsap.from("#videosGrid > .vid", { y: 50, opacity: 0, rotationX: -25, transformPerspective: 900, duration: 1, stagger: 0.06, ease: "expo.out", clearProps: "opacity,transform", scrollTrigger: { trigger: "#videosGrid", start: "top 88%", once: true } });
       ScrollTrigger.refresh();
     })
     .catch(() => {

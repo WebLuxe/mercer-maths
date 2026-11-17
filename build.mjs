@@ -6,6 +6,18 @@ import { execSync } from "node:child_process";
 // Chapters + notes: assets/data/chapters.json, sample PDFs, and the PDF reader (see tools/notes.cjs)
 execSync("node tools/notes.cjs", { stdio: "inherit" });
 
+// Libraries are served from this site (no CDN): if a CDN is blocked or down, the site still works.
+// Versions are pinned in package.json.
+for (const [from, to] of [
+  ["node_modules/three/build/three.module.min.js", "assets/vendor/three/three.module.min.js"],
+  ["node_modules/gsap/dist/gsap.min.js", "assets/vendor/gsap/gsap.min.js"],
+  ["node_modules/gsap/dist/ScrollTrigger.min.js", "assets/vendor/gsap/ScrollTrigger.min.js"],
+  ["node_modules/lenis/dist/lenis.min.js", "assets/vendor/lenis/lenis.min.js"],
+]) {
+  mkdirSync(to.slice(0, to.lastIndexOf("/")), { recursive: true });
+  writeFileSync(to, readFileSync(from));
+}
+
 mkdirSync("assets/js", { recursive: true });
 mkdirSync("assets/css", { recursive: true });
 

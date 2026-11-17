@@ -70,3 +70,13 @@
 
 // a closing panel can't be clicked while it fades
 .vmodal.is-closing, .book.is-closing { pointer-events: none; }
+
+// filtered-out videos are removed from the grid, not dimmed
+.vid[hidden] { display: none; }
+.lib__grid--videos { align-content: start; }
+.vid__soon { font-size: 0.7rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; padding: 0.4rem 0.8rem; border-radius: 99px; background: rgba(5, 4, 10, 0.55); border: 1px solid rgba(255, 255, 255, 0.18); color: $ink; }
+.vid.is-soon .vid__thumb { filter: saturate(0.6); }
+@media (min-width: 900px) and (min-height: 560px) {
+  // two rows' worth of room is always kept, so picking a grade with fewer videos doesn't shift the section
+  .lib__grid--videos { min-height: calc(2 * (clamp(78px, 12.8vh, 175px) + 4.75rem) + 0.9rem); }
+}

@@ -47,6 +47,9 @@ function intro() {
       document.body.classList.remove("is-loading");
       lenis?.start();
       ScrollTrigger.refresh();
+      // a link like resources.html#notes, opened directly: go there once the page can scroll
+      const target = location.hash.length > 1 && document.getElementById(location.hash.slice(1));
+      if (target) lenis ? lenis.scrollTo(target, { duration: 1.2, force: true }) : target.scrollIntoView();
     },
   });
   tl.to(".loader__inner", { y: -40, opacity: 0, duration: 0.6, ease: "power3.in" })

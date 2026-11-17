@@ -27,3 +27,43 @@
   li { grid-template-columns: 26px 1fr auto; }
   .f { font-size: 0.82rem; }
 }
+
+// ---- full chapter lists (filled from assets/data/chapters.json by 23-subjects.js)
+.subject { display: flex; flex-direction: column; }
+.subject__courses { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-bottom: 0.7rem; position: relative;
+  button { padding: 0.32rem 0.7rem; border-radius: 99px; border: 1px solid rgba(255, 255, 255, 0.16); font-size: 0.76rem; color: $muted; transition: color 0.3s, border-color 0.3s, background 0.3s;
+    small { font-size: 0.66rem; opacity: 0.7; margin-left: 0.15rem; }
+    &:hover { color: $ink; border-color: var(--c); }
+    &[aria-selected="true"] { color: #fff; border-color: transparent; background: color-mix(in srgb, var(--c) 34%, transparent); } } }
+.subject__list { position: relative;
+  li { padding: 0 !important; display: block; transition: none; &:hover { padding: 0; } }
+  li > a { display: grid; grid-template-columns: 26px 1fr auto; gap: 0.8rem; align-items: baseline; padding: clamp(0.4rem, 1vh, 0.7rem) 0.3rem; color: inherit; text-decoration: none; transition: padding 0.4s $ease-out;
+    &:hover, &:focus-visible { padding-left: 0.8rem; outline: none; .f { color: var(--c); } } }
+  .f { font-size: 0.72rem !important; font-family: inherit !important; opacity: 0.8; }
+  .subject__part { padding: 0.8rem 0.3rem 0.3rem !important; border-bottom: 0; font-size: 0.64rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--c); }
+  .subject__part:first-child { padding-top: 0.2rem !important; } }
+.subject__more { display: flex; justify-content: space-between; align-items: center; gap: 0.8rem; margin-top: 0.7rem; padding-top: 0.7rem; border-top: 1px solid $line; font-size: 0.76rem; color: $muted; position: relative;
+  a { color: var(--c); font-weight: 600; text-decoration: none; &:hover { text-decoration: underline; } } }
+
+// desktop panels: the cards fill the screen below the heading and each list scrolls inside its card
+@media (min-width: 900px) and (min-height: 560px) {
+  #subjects { justify-content: flex-start;
+    > .wrap { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+    .sec-head { flex: none; }
+    .subjects { flex: 1; min-height: 0; grid-template-rows: minmax(0, 1fr); } }
+  .subjects--3 .subject { min-height: 0; padding-bottom: clamp(0.8rem, 2vh, 1.4rem); }
+  .subject__list { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; margin-right: -0.5rem; padding-right: 0.5rem;
+    mask-image: linear-gradient(to bottom, #000 calc(100% - 28px), transparent); -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 28px), transparent);
+    scrollbar-width: thin; scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+    &::-webkit-scrollbar { width: 5px; } &::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); border-radius: 5px; } }
+}
+
+// phones (no panels): first rows only until "Show all" is tapped
+.subject__all { display: none; }
+@media not all and (min-width: 900px) and (min-height: 560px) {
+  .subject__list:not(.is-all) > li:nth-child(n + 10) { display: none; }
+  .subject__all { display: block; flex: 1 1 100%; padding: 0.7rem; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.14); color: $ink; font-size: 0.85rem; font-weight: 600; text-align: center;
+    &:hover { border-color: var(--c); } }
+  .subject__more { flex-wrap: wrap; }
+  .subject__all + .subject__count { display: none; }
+}

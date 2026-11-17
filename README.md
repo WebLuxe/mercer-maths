@@ -98,6 +98,11 @@ npm install        # once: PDF.js and the demo-notes renderer
 npm run build      # chapters + notes, then src → assets (esbuild + sass, fetched via npx)
 npm run notes      # demo notes JSON → PDFs
 npm run serve      # http://127.0.0.1:4823
+npm test           # browser tests on desktop + phone sizes (needs Edge or Chrome)
 ```
+
+Three.js, GSAP and Lenis are served from `assets/vendor/` (copied from `node_modules` by the build), so the site works even if a CDN is blocked. If the app can't start for any reason, the loader steps aside after 10 seconds instead of trapping the visitor.
+
+Bookings go to WhatsApp **+230 5923 8436** (`src/js/13-booking.js` and the contact sections).
 
 Built with [Three.js](https://threejs.org), [GSAP](https://gsap.com) + ScrollTrigger, [Lenis](https://lenis.darkroom.engineering) and Sass.

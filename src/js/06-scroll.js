@@ -112,7 +112,7 @@ function setupScroll() {
   // subjects
   $$(".subject").forEach((s) => {
     gsap.from(s, { y: 80, opacity: 0, rotateX: -12, duration: 1.3, ease: "expo.out", scrollTrigger: { trigger: s, start: "top 88%" } });
-    gsap.from(s.querySelectorAll("li"), { x: -30, opacity: 0, duration: 0.9, stagger: 0.06, ease: "expo.out", scrollTrigger: { trigger: s, start: "top 70%" } });
+    gsap.from([...s.querySelectorAll("li")].slice(0, 10), { x: -30, opacity: 0, duration: 0.9, stagger: 0.06, ease: "expo.out", clearProps: "opacity,transform", scrollTrigger: { trigger: s, start: "top 70%", once: true } });
   });
 
   setupWorked();

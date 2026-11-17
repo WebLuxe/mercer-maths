@@ -27,6 +27,13 @@ const carouselStops = (sec) => {
   const range = sec.bottom - sec.top - innerHeight, n = $$("#showTrack .card").length;
   return Array.from({ length: n }, (_, k) => sec.top + (range * k) / (n - 1));
 };
+// a box that scrolls by itself (the chapter list) gets the wheel first, until it reaches its end
+const innerScroller = (el, dir) => {
+  const box = el?.closest?.("[data-scroll-box]");
+  if (!box || box.scrollHeight <= box.clientHeight + 1) return null;
+  const room = dir > 0 ? box.scrollHeight - box.clientHeight - box.scrollTop : box.scrollTop;
+  return room > 1 ? box : null;
+};
 function snapStep(dir, delta) {
   const secs = sectionBounds(), vh = innerHeight;
   const y = lenis.targetScroll;
@@ -65,11 +72,15 @@ function snapStep(dir, delta) {
 if (snapOn) {
   addEventListener("wheel", (e) => {
     if (ui.book || !lenis || !snapActive() || document.body.classList.contains("is-loading")) return;
-    e.preventDefault();
-    e.stopImmediatePropagation();
     const now = performance.now(), gap = now - snap.lastWheel;
     snap.lastWheel = now;
     if (gap > 220) { snap.consumed = false; snap.edge = false; }   // a new gesture started
+    e.stopImmediatePropagation();
+    if (!snap.busy && Math.abs(e.deltaY) >= 1 && innerScroller(e.target, Math.sign(e.deltaY))) {
+      snap.consumed = true;                                         // the list scrolls natively; this gesture can't also snap
+      return;                                                       // (no preventDefault: the browser scrolls the box)
+    }
+    e.preventDefault();
     if (snap.busy || snap.consumed) return;                        // swallow trackpad inertia
     let d = e.deltaY;
     if (e.deltaMode === 1) d *= 32; else if (e.deltaMode === 2) d *= innerHeight;
@@ -79,7 +90,7 @@ if (snapOn) {
 
   addEventListener("keydown", (e) => {
     if (ui.book || !lenis || !snapActive() || document.body.classList.contains("is-loading")) return;
-    if (e.target.closest("input, textarea, select, [contenteditable]")) return;
+    if (e.target.closest("input, textarea, select, [contenteditable], [data-scroll-box]")) return;
     let dir = { ArrowDown: 1, PageDown: 1, " ": 1, ArrowUp: -1, PageUp: -1 }[e.key];
     if (!dir || (e.key === " " && e.target.closest("button, a"))) return;
     if (e.key === " " && e.shiftKey) dir = -1;

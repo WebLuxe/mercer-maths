@@ -6,13 +6,12 @@
   <title>Kavish Maths Tuition — Maths for Grades 7–13, Mauritius</title>
   <meta name="description" content="Kavish Maths Tuition, Mauritius: Maths for Grades 7–13 (NCE, SC, HSC) and SC Add Maths. Small groups of six, one-to-one and live online. Weekly timetable, fees, a free trial lesson." />
   <meta name="theme-color" content="#07060b" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22%3E%3Crect width=%2264%22 height=%2264%22 rx=%2216%22 fill=%22%2307060b%22/%3E%3Ctext x=%2232%22 y=%2246%22 font-family=%22Arial%22 font-size=%2240%22 font-weight=%22700%22 text-anchor=%22middle%22 fill=%22%2322d3ee%22%3E%E2%88%91%3C/text%3E%3C/svg%3E" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="preconnect" href="https://cdnjs.cloudflare.com" />
-  <link rel="preconnect" href="https://unpkg.com" />
-  <link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js" crossorigin />
+  <link rel="modulepreload" href="assets/vendor/three/three.module.min.js" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="assets/css/style.css?v=18" />
+  <link rel="stylesheet" href="assets/css/style.css?v=20" />
   <script>try{var p=sessionStorage.getItem("pt");if(p)document.documentElement.classList.add("pt-in")}catch(e){}</script>
 </head>
 <body class="is-loading" data-page="tuition">
@@ -102,7 +101,7 @@
           <p class="reveal">From first algebra to A Level calculus. Every topic is taught, practised on past paper questions, then tested again three weeks later, because that's when forgetting happens.</p>
         </div>
         <div class="subjects subjects--3">
-          <div class="subject" style="--c:#f472b6">
+          <div class="subject" style="--c:#f472b6" data-band="7-9">
             <div class="subject__head"><div><span class="subject__stage">Grades 7–9 · NCE</span><h3>Lower secondary</h3></div><div class="subject__codes"><span>National Certificate</span><span>of Education</span></div></div>
             <ol>
               <li><span class="n">01</span><span>Number &amp; fractions</span><span class="f">¾ + ⅙</span></li>
@@ -113,7 +112,7 @@
               <li><span class="n">06</span><span>Data &amp; statistics</span><span class="f">mean, mode</span></li>
             </ol>
           </div>
-          <div class="subject" style="--c:#8b5cf6">
+          <div class="subject" style="--c:#8b5cf6" data-band="10-11">
             <div class="subject__head"><div><span class="subject__stage">Grades 10–11 · SC</span><h3>Maths + Add Maths</h3></div><div class="subject__codes"><span>Maths 4024</span><span>Add Maths 4037</span></div></div>
             <ol>
               <li><span class="n">01</span><span>Quadratics</span><span class="f">b² − 4ac</span></li>
@@ -124,7 +123,7 @@
               <li><span class="n">06</span><span>Probability</span><span class="f">P(A ∩ B)</span></li>
             </ol>
           </div>
-          <div class="subject" style="--c:#22d3ee">
+          <div class="subject" style="--c:#22d3ee" data-band="12-13">
             <div class="subject__head"><div><span class="subject__stage">Grades 12–13 · HSC</span><h3>A Level Maths</h3></div><div class="subject__codes"><span>Cambridge 9709</span><span>Pure · Mech · Stats</span></div></div>
             <ol>
               <li><span class="n">01</span><span>Pure Maths 1 &amp; 3</span><span class="f">f(x)</span></li>
@@ -251,14 +250,15 @@
         <p class="contact__lede">Message to book a free trial class. Bring your last test paper and we'll start from there.</p>
         <div class="contact__cta">
           <a href="#contact" data-book class="btn btn--fill" data-magnetic><span>Book a free trial</span><span>↗</span></a>
-          <a href="mailto:hello@kavishmaths.example" class="btn btn--ghost" data-magnetic><span>hello@kavishmaths.example</span></a>
+          <a href="https://wa.me/23059238436?text=Hello%2C%20I%27d%20like%20to%20ask%20about%20Maths%20tuition." target="_blank" rel="noopener" class="btn btn--ghost" data-magnetic><span>WhatsApp +230 5923 8436</span><span>↗</span></a>
         </div>
         <dl class="contact__info">
           <div><dt>Where</dt><dd>First floor, 22 Royal Road, and online</dd></div>
+          <div><dt>WhatsApp</dt><dd><a href="https://wa.me/23059238436" target="_blank" rel="noopener">+230 5923 8436</a></dd></div>
           <div><dt>When</dt><dd>Mon–Fri 15:30–20:00 · Sat 08:00–13:00</dd></div>
           <div><dt>Who</dt><dd>Grades 7–13 · NCE, SC &amp; HSC</dd></div>
         </dl>
-        <div class="contact__foot"><span>© 2026 Kavish Maths</span><span>Demo site: names, results, prices &amp; reviews are placeholders · Photo: Fábio Lucas / Unsplash</span><a href="#top">Back to top ↑</a></div>
+        <div class="contact__foot"><span>© 2026 Kavish Maths</span><span class="credit">Website built by <a href="https://webluxe.github.io/WebLuxe/" target="_blank" rel="noopener">WebLuxe</a> · made by Sungkur Doorgesh</span><span>Demo site: names, results, prices &amp; reviews are placeholders · Photo: Fábio Lucas / Unsplash</span><a href="#top">Back to top ↑</a></div>
       </div>
     </section>
   </main>
@@ -311,9 +311,10 @@
 
   <a href="#contact" data-book class="mbar" id="mbar"><span><b>Free trial lesson</b>4 seats left for January</span><em>Book →</em></a>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-  <script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js"></script>
-  <script src="assets/js/app.min.js?v=18"></script>
+  <script src="assets/vendor/gsap/gsap.min.js"></script>
+  <script src="assets/vendor/gsap/ScrollTrigger.min.js"></script>
+  <script src="assets/vendor/lenis/lenis.min.js"></script>
+  <script src="assets/js/app.min.js?v=20"></script>
+  <script>/* safety net: if the app could not start (a script blocked or failed), never leave the visitor stuck on the loader */setTimeout(function(){if(window.__kmBoot)return;var l=document.getElementById("loader"),t=document.getElementById("pt");l&&l.remove();t&&(t.style.display="none");document.body.classList.remove("is-loading");document.documentElement.classList.remove("pt-in")},10000)</script>
 </body>
 </html>

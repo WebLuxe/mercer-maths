@@ -63,3 +63,25 @@ html.rdr-on, html.rdr-on body { overflow: hidden; }
   canvas { display: block; width: 100%; height: 100%; } }
 .rdr__msg { display: grid; justify-items: center; gap: 1rem; padding: 18vh 1.2rem; text-align: center; color: $muted; }
 .rdr__spin { width: 34px; height: 34px; border-radius: 50%; border: 3px solid rgba(255, 255, 255, 0.15); border-top-color: $a2; animation: spin 0.8s linear infinite; }
+
+// ---- desktop panel mode: the notes section stays exactly one screen.
+// The heading, grade tabs, course tabs and search never move; only the chapter list scrolls,
+// inside its own box. (Before, a long course overflowed the section and spilled over Videos,
+// and every grade switch re-centred the whole block, so the tabs jumped around.)
+@media (min-width: 900px) and (min-height: 560px) {
+  #notes { justify-content: flex-start;
+    > .wrap { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+    .sec-head { flex: none; margin-bottom: clamp(0.8rem, 2.4vh, 1.6rem);
+      h2 { font-size: clamp(2rem, min(4.2vw, 6.4vh), 4.4rem); } } }
+  .chx { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+  .chx > .lib__filters, .chx__courses, .chx__info { flex: none; }
+  .chx__courses { margin-bottom: clamp(0.6rem, 1.6vh, 1rem); }
+  .chx__info { padding: clamp(0.55rem, 1.4vh, 0.95rem) 1.1rem; margin-bottom: clamp(0.4rem, 1vh, 0.8rem); }
+  .chx__list { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 0 0.4rem 1.2rem 0; margin-right: -0.4rem;
+    // soft fade at the bottom edge so it's obvious the list scrolls
+    mask-image: linear-gradient(to bottom, transparent, #000 14px, #000 calc(100% - 36px), transparent);
+    -webkit-mask-image: linear-gradient(to bottom, transparent, #000 14px, #000 calc(100% - 36px), transparent);
+    scrollbar-width: thin; scrollbar-color: rgba(255, 255, 255, 0.22) transparent;
+    &::-webkit-scrollbar { width: 6px; } &::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.22); border-radius: 6px; }
+    .chx__part:first-child { margin-top: 0.7rem; } }
+}

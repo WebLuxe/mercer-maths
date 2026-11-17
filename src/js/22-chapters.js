@@ -10,6 +10,18 @@ if ($("#chList")) {
   let stages = [], course = null, filter = "";
   const store = { get: (k) => { try { return localStorage.getItem(k); } catch (e) { return null; } }, set: (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} } };
   const chaptersOf = (c) => c.parts.flatMap((p) => p.ch);
+  // desktop panels: the list is its own scroll box (03-snap.js gives it the wheel first)
+  const boxMode = () => {
+    const on = panelMQ.matches;
+    list.toggleAttribute("data-scroll-box", on);
+    list.toggleAttribute("data-lenis-prevent", on);
+    list.tabIndex = on ? 0 : -1;
+  };
+  boxMode();
+  panelMQ.addEventListener?.("change", boxMode);
+  // page height only changes when the list isn't boxed (phones); re-measure once, after typing stops
+  let refreshT = 0;
+  const remeasure = () => { if (panelMQ.matches) return; clearTimeout(refreshT); refreshT = setTimeout(() => ScrollTrigger.refresh(), 250); };
   const tag = { real: "Kavish’s notes", demo: "Notes", sample: "Sample" };
 
   // ---------------------------------------------------------------- reader
@@ -157,9 +169,11 @@ if ($("#chList")) {
       const rows = p.ch.filter((ch) => !f || (ch.t + " " + ch.s.join(" ")).toLowerCase().includes(f));
       return rows.length ? `<div class="chx__part"><h3>${esc(p.name)}<span>${p.ch.length}</span></h3><div class="chx__rows">${rows.map(row).join("")}</div></div>` : "";
     }).join("");
+    gsap.killTweensOf($$(".chr", list));
     list.innerHTML = html || `<p class="lib__err">No chapter matches “${esc(filter.trim())}”.</p>`;
-    if (animate && !reduce) gsap.fromTo($$(".chr", list).slice(0, 18), { y: 22, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, stagger: 0.025, ease: "expo.out", clearProps: "opacity,transform" });
-    ScrollTrigger.refresh();
+    if (animate) list.scrollTop = 0;
+    if (animate && !reduce) gsap.fromTo($$(".chr", list).slice(0, 14), { y: 16, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, stagger: 0.02, ease: "expo.out", clearProps: "opacity,transform" });
+    remeasure();
   };
   const pick = (c) => {
     if (!c || c === course) return;
@@ -185,10 +199,18 @@ if ($("#chList")) {
     .then((r) => r.json())
     .then((data) => {
       stages = data;
-      const all = stages.flatMap((s) => s.courses), want = new URLSearchParams(location.search).get("course") || store.get("kt_course");
+      const q = new URLSearchParams(location.search), all = stages.flatMap((s) => s.courses), want = q.get("course") || store.get("kt_course");
       course = all.find((c) => c.id === want) || all.find((c) => c.id === "add-maths") || all[0];
+      if (q.get("course") && course.id === q.get("course")) store.set("kt_course", course.id);
+      // ?course=add-maths&ch=4 (from the Tuition page) opens that chapter's notes once the page has arrived
+      const deep = q.get("ch") && chaptersOf(course).find((x) => x.n === +q.get("ch"));
+      if (q.has("ch")) { q.delete("ch"); const rest = q.toString(); history.replaceState(history.state, "", location.pathname + (rest ? "?" + rest : "") + location.hash); }
+      if (deep) {
+        const go = () => (document.body.classList.contains("is-loading") || document.documentElement.classList.contains("pt-in") ? setTimeout(go, 150) : R.open(deep, course));
+        go();
+      }
       drawCourses(); drawInfo(); drawList(false);
-      gsap.from("#chList .chr", { y: 40, opacity: 0, duration: 0.9, stagger: 0.02, ease: "expo.out", scrollTrigger: { trigger: "#chList", start: "top 88%" } });
+      if (!reduce) gsap.from($$(".chr", list).slice(0, 14), { y: 40, opacity: 0, duration: 0.9, stagger: 0.02, ease: "expo.out", clearProps: "opacity,transform", scrollTrigger: { trigger: "#chList", start: "top 92%", once: true } });
     })
     .catch(() => { list.innerHTML = `<p class="lib__err">The chapters couldn’t load. If you opened the file directly, run it through a web server instead (npm run serve).</p>`; });
 }

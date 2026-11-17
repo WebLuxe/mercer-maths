@@ -74,7 +74,7 @@ Format: ${booking.format}
 Best time: ${booking.day}
 Parent's WhatsApp: ${phone}`;
   $("#bookPreview").textContent = msg;
-  $("#sendWa").href = "https://wa.me/?text=" + encodeURIComponent(msg);
+  $("#sendWa").href = "https://wa.me/23059238436?text=" + encodeURIComponent(msg);
   $("#sendMail").href = "mailto:hello@kavishmaths.example?subject=" + encodeURIComponent("Free trial lesson: " + name) + "&body=" + encodeURIComponent(msg);
   bookBars.forEach((b) => b.classList.add("is-on"));
   gsap.to(bookForm, { opacity: 0, y: -20, duration: 0.3, onComplete: () => {
