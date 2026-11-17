@@ -219,12 +219,12 @@ const pMat = new THREE.ShaderMaterial({
   uniforms: {
     uTime: { value: 0 }, uMorph: { value: 0 }, uIntro: { value: 0 }, uVel: { value: 0 },
     uFrom: { value: FIRST_SHAPE }, uTo: { value: FIRST_SHAPE }, uT: { value: 1 }, uKeep: { value: 1.06 },
-    uMouse: { value: new THREE.Vector3(99, 99, 0) }, uShock: { value: new THREE.Vector3(99, 99, 0) }, uShockAge: { value: 10 }, uShockAmp: { value: 1 },
+    uMouse: { value: new THREE.Vector3(99, 99, 0) }, uShock: { value: new THREE.Vector3(99, 99, 0) }, uShockAge: { value: 10 }, uShockAmp: { value: 1 }, uSwirl: { value: 1 }, uBoost: { value: 1 },
     uSize: { value: P_SIZE * dpr },
   },
   vertexShader: /* glsl */ `
     ${NOISE}
-    uniform float uTime, uMorph, uIntro, uSize, uVel, uShockAge, uShockAmp, uFrom, uTo, uT, uKeep; uniform vec3 uMouse, uShock;
+    uniform float uTime, uMorph, uIntro, uSize, uVel, uShockAge, uShockAmp, uSwirl, uBoost, uFrom, uTo, uT, uKeep; uniform vec3 uMouse, uShock;
     attribute vec3 aB, aC, aD, aE, aF, aG, aCol; attribute float aRnd;
     varying vec3 vCol; varying float vAlpha;
     vec3 shapeAt(float k){
@@ -235,7 +235,7 @@ const pMat = new THREE.ShaderMaterial({
       // each particle leaves a little later than the last, so the shape pours rather than jumps
       float tt = smoothstep(0., 1., clamp(uT * 1.35 - aRnd * .35, 0., 1.));
       vec3 p = mix(shapeAt(uFrom), shapeAt(uTo), tt);
-      p += vec3(sin(aRnd * 41.), cos(aRnd * 29.), sin(aRnd * 17. + 1.)) * sin(tt * 3.14159) * .55;   // swirl mid-flight
+      p += vec3(sin(aRnd * 41.), cos(aRnd * 29.), sin(aRnd * 17. + 1.)) * sin(tt * 3.14159) * .55 * uSwirl;   // swirl mid-flight
       p *= mix(6.0 + aRnd * 6.0, 1.0, uIntro);
       float n = snoise(p * .45 + uTime * .15);
       float word = mix(step(4.5, uFrom), step(4.5, uTo), tt);     // 1 while a word (page word or logo) is showing
@@ -249,7 +249,7 @@ const pMat = new THREE.ShaderMaterial({
       gl_Position = projectionMatrix * mv;
       float keep = 1. - smoothstep(uKeep - .06, uKeep, aRnd);       // low-power tier fades particles out
       gl_PointSize = uSize * (.35 + aRnd * .9) * (1. + wave * 1.5) / -mv.z * step(.001, keep);
-      vCol = aCol; vAlpha = (.78 + n * .28 + wave) * uIntro * keep;   // steady brightness: noise only shimmers it
+      vCol = aCol; vAlpha = (.78 + n * .28 + wave) * uIntro * keep * uBoost;   // steady brightness: noise only shimmers it
     }`,
   fragmentShader: /* glsl */ `
     varying vec3 vCol; varying float vAlpha;
@@ -282,7 +282,10 @@ function setShape(k, instant) {
     updateHud(k);
     return;
   }
-  if (morph.tween) { morph.tween.timeScale(2.4); return; }       // finish the current pour quickly, then go on
+  if (morph.tween) {                                            // a different shape was asked for mid-pour:
+    if (k !== morph.to) morph.tween.timeScale(2.4);               // finish this pour quickly, then go on
+    return;                                                       // (asking again for the same shape changes nothing)
+  }
   if (morph.target === morph.to) return;
   morph.from = morph.to; morph.to = morph.target;
   u.uFrom.value = morph.from; u.uTo.value = morph.to; u.uT.value = 0;
@@ -321,7 +324,8 @@ world.add(blob);
 
 { // background dust
   const n = 500, g = new THREE.BufferGeometry(), a = new Float32Array(n * 3);
-  for (let i = 0; i < n * 3; i++) a[i] = (Math.random() - 0.5) * 60;
+  // spread wide, but never within 7 units of the camera (z = 9): a dust speck right at the lens is drawn as a big grey square
+  for (let i = 0; i < n; i++) { a[i * 3] = (Math.random() - 0.5) * 60; a[i * 3 + 1] = (Math.random() - 0.5) * 60; a[i * 3 + 2] = -30 + Math.random() * 32; }
   g.setAttribute("position", new THREE.BufferAttribute(a, 3));
   scene.add(new THREE.Points(g, new THREE.PointsMaterial({ size: 0.03, color: 0x9a94b8, transparent: true, opacity: 0.5, depthWrite: false })));
 }
@@ -385,6 +389,22 @@ function buildLogoShape() {
     G[i * 3 + 2] = (Math.random() - 0.5) * 0.35;
   }
   pGeo.attributes.aG.needsUpdate = true;
+  // the same word drawn solid, exactly over the particles (screen px per canvas px = k), so it reads on any screen
+  const over = $("#loaderLogo");
+  if (over) {
+    const r = Math.min(devicePixelRatio || 1, 2), sw = innerWidth, sh = innerHeight, k = (sc * sh) / visH;
+    over.width = sw * r; over.height = sh * r;
+    const o = over.getContext("2d");
+    o.scale(r, r);
+    const ox = sw / 2 - cx * k, oy = sh / 2 - (0.25 * sh) / visH - cy * k;   // canvas (0,0) on screen
+    const gr = o.createLinearGradient(ox + minX * k, 0, ox + maxX * k, 0);
+    gr.addColorStop(0, "#a78bfa"); gr.addColorStop(0.5, "#67e8f9"); gr.addColorStop(1, "#f9a8d4");
+    o.fillStyle = gr; o.textAlign = "center"; o.textBaseline = "middle";
+    o.shadowColor = "rgba(34, 211, 238, 0.55)"; o.shadowBlur = 28;
+    o.font = `700 ${(wide ? 200 : 250) * k}px "Space Grotesk", sans-serif`;
+    const put = (t, y) => o.fillText(t, ox + (W / 2) * k, oy + y * k);
+    if (wide) put("KAVISH MATHS", H / 2); else { put("KAVISH", H / 2 - 140); put("MATHS", H / 2 + 140); }
+  }
   return ((maxY - minY) * sc) / visH;                          // logo height as a share of the screen
 }
 function buildTextShape(str, width) {

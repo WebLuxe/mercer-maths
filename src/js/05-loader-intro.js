@@ -17,6 +17,7 @@ const setCount = () => {
   $("#loaderStatus").textContent = statuses[v >= 100 ? 3 : Math.min(2, Math.floor(v / 34))];
 };
 const ptIn = document.documentElement.classList.contains("pt-in");
+let keepAfterIntro = 1.06;
 if (ptIn) {
   $("#loader")?.remove();
   ready.then(() => {
@@ -33,9 +34,19 @@ if (ptIn) {
   // the logo is drawn in the site's display font, so wait for that font first (a fraction of a second)
   const font = (document.fonts?.load('700 200px "Space Grotesk"') ?? Promise.resolve()).catch(() => {});
   const assembled = font.then(() => new Promise((done) => {
+    // do the one-off heavy work now, behind the veil, so nothing stalls a frame once things move:
+    // compile every 3D material (the blob is hidden until the hero, so it would compile mid-pour) and decode the portrait
+    const blobWas = blob.visible;
+    blob.visible = true; renderer.compile(scene, camera); blob.visible = blobWas;
+    $$(".hero img").forEach((im) => im.decode?.().catch(() => {}));
     const h = buildLogoShape();
+    buildTextShape(TEXT_SHAPE[0], TEXT_SHAPE[1]);             // the page's own word too, now rather than at the blast
+    makeSymbols();                                            // the floating maths symbols (still invisible) too
     $("#loader").style.setProperty("--logo-h", h || 0.2);
-    pMat.uniforms.uSize.value = P_SIZE * dpr * 1.2;           // slightly fuller points while they spell the name
+    const u = pMat.uniforms;
+    u.uSize.value = P_SIZE * dpr * 1.35;                     // fuller…
+    u.uBoost.value = 1.5;                                     // …and brighter points while they spell the name
+    keepAfterIntro = u.uKeep.value; u.uKeep.value = 1.06;     // every particle takes part, even on the lighter quality tier
     const tl = gsap.timeline({ onComplete: done });
     if (reduce) tl.timeScale(3);
     tl.to(".loader__veil", { opacity: 0, duration: 0.8, ease: "power2.out" })
@@ -43,12 +54,12 @@ if (ptIn) {
       .to(bgMat.uniforms.uIntro, { value: 0.4, duration: 2, ease: "power2.out" }, 0.1)  // the room stays dim: the logo is the light
       .from(".loader__foot", { opacity: 0, y: 10, duration: 0.6, ease: "power2.out" }, 0.2)
       .to(count, { v: 100, duration: 1.8, ease: "power2.inOut", onUpdate: setCount }, 0.1)
+      .fromTo("#loaderLogo", { opacity: 0, scale: 1.04 }, { opacity: 0.92, scale: 1, duration: 1.1, ease: "power2.out" }, 0.75)  // the particles fuse into solid letters
       .from(".loader__tag span, .loader__tag em", { yPercent: 120, opacity: 0, duration: 1, stagger: 0.12, ease: "expo.out" }, 0.9)
-      .to({}, { duration: 0.35 });                                                       // hold the logo a beat
+      .to({}, { duration: 0.5 });                                                        // hold the logo a beat
   }));
   Promise.all([ready, assembled]).then(() => {
     $(".loader__veil")?.remove();
-    buildTextShape(TEXT_SHAPE[0], TEXT_SHAPE[1]);
     intro();
   });
 }
@@ -69,35 +80,50 @@ function intro() {
   const loader = $("#loader");
   if (loader) {
     // the logo draws in a breath, then a shockwave blasts it apart and the letters pour into the page's shape
-    tl.to(points.scale, { x: 1.06, y: 1.06, z: 1.06, duration: 0.4, ease: "power2.in" })
+    const u = pMat.uniforms, POUR = 2.2;
+    tl.to(points.scale, { x: 1.05, y: 1.05, z: 1.05, duration: 0.45, ease: "power2.in" })
+      .to("#loaderLogo", { opacity: 1, scale: 1.03, duration: 0.45, ease: "power2.in" }, 0)            // the word glows up…
       .to(".loader__tag > *", { yPercent: -120, opacity: 0, duration: 0.4, stagger: 0.05, ease: "power2.in" }, 0)
       .to(".loader__foot, .loader__bar", { opacity: 0, duration: 0.35 }, 0)
+      .addLabel("blast")
       .call(() => {
-        pMat.uniforms.uShock.value.set(0, 0, 0);
-        pMat.uniforms.uShockAmp.value = 2.6;              // a big one for the intro (clicks get the normal one)
-        gsap.to(pMat.uniforms.uShockAmp, { value: 1, duration: 0.1, delay: 1.6 });
+        u.uShock.value.set(0, 0, 0);
+        u.uShockAmp.value = 1.8;                           // a bigger ring than a click
         motion.shockT = clock.getElapsedTime();
         bgMat.uniforms.uRipple.value.set(0.5, 0.5);
         bgMat.uniforms.uRippleT.value = bgMat.uniforms.uTime.value;
-        setShape(START_SHAPE);                          // the letters pour into the page's shape on impact…
-        morph.tween?.timeScale(1.6);                    // …quickly, so they never settle back into the logo
-        setupScroll();                                  // the hero takes over its spot in the scene
-        gsap.to(sceneState, { ...HERO_SPOT, duration: 1.8, ease: "power3.inOut", overwrite: "auto" });
-      })
-      .to(points.scale, { x: 1, y: 1, z: 1, duration: 1, ease: "expo.out" })
-      .to(pMat.uniforms.uSize, { value: P_SIZE * dpr, duration: 1.2, ease: "power2.out" }, "<")
-      .to(bgMat.uniforms.uIntro, { value: 1, duration: 1.8, ease: "power2.out" }, "<")
-      .call(() => document.documentElement.classList.remove("intro"), null, "<0.5")
-      .addLabel("build", "<")
-      .call(unlock, null, "build+=0.6");
+        // one controlled pour from the logo to the page's shape (set directly, so nothing can rush it)
+        morph.tween?.kill();
+        morph.from = LOGO; morph.to = morph.target = START_SHAPE;
+        u.uFrom.value = LOGO; u.uTo.value = START_SHAPE; u.uT.value = 0;
+        updateHud(START_SHAPE);
+        morph.tween = gsap.to(u.uT, { value: 1, duration: POUR, ease: "power2.inOut", onComplete: () => { morph.tween = null; setShape(morph.target); } });
+        gsap.to(sceneState, { ...HERO_SPOT, duration: POUR, ease: "power3.inOut", overwrite: "auto" });
+      }, null, "blast")
+      .to("#loaderLogo", { opacity: 0, scale: 1.1, duration: 0.3, ease: "power1.out" }, "blast")          // …and shatters with the particles
+      .to(u.uSwirl, { value: 0.3, duration: 0.01 }, "blast")                                                // a calm, coherent pour (no random detours)
+      .to(points.scale, { x: 1, y: 1, z: 1, duration: 1.2, ease: "expo.out" }, "blast")
+      .to(u.uSize, { value: P_SIZE * dpr, duration: POUR, ease: "power2.inOut" }, "blast")
+      .to(u.uBoost, { value: 1, duration: POUR, ease: "power2.inOut" }, "blast")
+      .to(u.uShockAmp, { value: 1, duration: 0.4 }, "blast+=1.4")
+      .to(bgMat.uniforms.uIntro, { value: 1, duration: 1.8, ease: "power2.out" }, "blast")
+      .call(() => document.documentElement.classList.remove("intro"), null, "blast+=0.7")
+      .addLabel("build", "blast+=0.7")
+      // the scroll engine and unlock wait until the particles have landed, so nothing hitches mid-pour
+      .call(() => {
+        gsap.to(u.uSwirl, { value: 1, duration: 0.6 });
+        gsap.to(u.uKeep, { value: keepAfterIntro, duration: 1.2, ease: "power2.inOut" });
+        setupScroll();
+        unlock();
+      }, null, "blast+=" + (POUR + 0.05));
   } else {
     tl.addLabel("build", 0.15)
       .to(pMat.uniforms.uIntro, { value: 1, duration: 2.6, ease: "expo.out" }, "build")
       .to(bgMat.uniforms.uIntro, { value: 1, duration: 2.2, ease: "power2.out" }, "build");
   }
   // the page builds itself: the words, then the details
-  tl.call(makeSymbols, null, "build")
-    .to(symState, { alpha: 1, duration: 2.5, ease: "power2.out" }, "build+=0.2")
+  if (!loader) tl.call(makeSymbols, null, "build");
+  tl.to(symState, { alpha: 1, duration: 2.5, ease: "power2.out" }, "build+=0.2")
     .from(".hero__title .ch", { yPercent: 120, rotate: 12, duration: 1.3, stagger: 0.03, ease: "expo.out" }, "build+=0.05")
     .fromTo(".nav", { yPercent: -100, opacity: 0 }, { yPercent: 0, opacity: 1, duration: 1, ease: "expo.out" }, "<0.1")
     .call(() => scramble($(".hero .eyebrow")), null, "<")
