@@ -29,6 +29,7 @@ const SHAPES = [
   ["fig. 4", "z = x² − y²"],
   ["fig. 5", "r = a·e^(bθ)"],
   ["fig. 6", { tuition: "A* = Σ effort", resources: "π ≈ 3.14159" }[PAGE] || "KS = f(you)"],
+  ["fig. 0", "Kavish Maths"],                                    // the intro logotype
 ];
 
 const canvas = $("#webgl");
@@ -167,10 +168,15 @@ syncMax();
 // ---- particles
 const COUNT = isMobile ? 3500 : 7500;
 const P_SIZE = isMobile ? 48 : 52;                              // point size: big enough that the shapes read clearly
+// first visit: the particles assemble into the KAVISH MATHS logotype (shape 6) before the page builds.
+// After a page transition there's no loader, and the page's own shape is used straight away.
+const LOGO_INTRO = !!$("#loader") && !document.documentElement.classList.contains("pt-in");
+const LOGO = 6;                                                  // the logotype shape slot
 const START_SHAPE = PAGE === "profile" ? 0 : 5;                 // tuition + resources open on their word
+const FIRST_SHAPE = LOGO_INTRO ? LOGO : START_SHAPE;
 const TEXT_SHAPE = { tuition: ["A*", 5.2], resources: ["π", 3.6] }[PAGE] || ["KS", 4.2];
 const A = new Float32Array(COUNT * 3), B = new Float32Array(COUNT * 3), C = new Float32Array(COUNT * 3),
-      D = new Float32Array(COUNT * 3), E = new Float32Array(COUNT * 3), F = new Float32Array(COUNT * 3);
+      D = new Float32Array(COUNT * 3), E = new Float32Array(COUNT * 3), F = new Float32Array(COUNT * 3), G = new Float32Array(COUNT * 3);
 const rnd = new Float32Array(COUNT), col = new Float32Array(COUNT * 3);
 const palette = [new THREE.Color("#8b5cf6"), new THREE.Color("#22d3ee"), new THREE.Color("#f472b6"), new THREE.Color("#ffffff")];
 const golden = Math.PI * (3 - Math.sqrt(5));
@@ -202,6 +208,8 @@ pGeo.setAttribute("aC", new THREE.BufferAttribute(C, 3));
 pGeo.setAttribute("aD", new THREE.BufferAttribute(D, 3));
 pGeo.setAttribute("aE", new THREE.BufferAttribute(E, 3));
 F.set(A);
+G.set(A);
+pGeo.setAttribute("aG", new THREE.BufferAttribute(G, 3));
 pGeo.setAttribute("aF", new THREE.BufferAttribute(F, 3));
 pGeo.setAttribute("aRnd", new THREE.BufferAttribute(rnd, 1));
 pGeo.setAttribute("aCol", new THREE.BufferAttribute(col, 3));
@@ -210,18 +218,18 @@ const pMat = new THREE.ShaderMaterial({
   transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
   uniforms: {
     uTime: { value: 0 }, uMorph: { value: 0 }, uIntro: { value: 0 }, uVel: { value: 0 },
-    uFrom: { value: START_SHAPE }, uTo: { value: START_SHAPE }, uT: { value: 1 }, uKeep: { value: 1.06 },
-    uMouse: { value: new THREE.Vector3(99, 99, 0) }, uShock: { value: new THREE.Vector3(99, 99, 0) }, uShockAge: { value: 10 },
+    uFrom: { value: FIRST_SHAPE }, uTo: { value: FIRST_SHAPE }, uT: { value: 1 }, uKeep: { value: 1.06 },
+    uMouse: { value: new THREE.Vector3(99, 99, 0) }, uShock: { value: new THREE.Vector3(99, 99, 0) }, uShockAge: { value: 10 }, uShockAmp: { value: 1 },
     uSize: { value: P_SIZE * dpr },
   },
   vertexShader: /* glsl */ `
     ${NOISE}
-    uniform float uTime, uMorph, uIntro, uSize, uVel, uShockAge, uFrom, uTo, uT, uKeep; uniform vec3 uMouse, uShock;
-    attribute vec3 aB, aC, aD, aE, aF, aCol; attribute float aRnd;
+    uniform float uTime, uMorph, uIntro, uSize, uVel, uShockAge, uShockAmp, uFrom, uTo, uT, uKeep; uniform vec3 uMouse, uShock;
+    attribute vec3 aB, aC, aD, aE, aF, aG, aCol; attribute float aRnd;
     varying vec3 vCol; varying float vAlpha;
     vec3 shapeAt(float k){
       if (k < .5) return position; if (k < 1.5) return aB; if (k < 2.5) return aC;
-      if (k < 3.5) return aD; if (k < 4.5) return aE; return aF;
+      if (k < 3.5) return aD; if (k < 4.5) return aE; if (k < 5.5) return aF; return aG;
     }
     void main(){
       // each particle leaves a little later than the last, so the shape pours rather than jumps
@@ -230,13 +238,14 @@ const pMat = new THREE.ShaderMaterial({
       p += vec3(sin(aRnd * 41.), cos(aRnd * 29.), sin(aRnd * 17. + 1.)) * sin(tt * 3.14159) * .55;   // swirl mid-flight
       p *= mix(6.0 + aRnd * 6.0, 1.0, uIntro);
       float n = snoise(p * .45 + uTime * .15);
-      p += normalize(p + .0001) * n * (.22 + uVel * .3);          // breathes a little more while scrolling
+      float word = mix(step(4.5, uFrom), step(4.5, uTo), tt);     // 1 while a word (page word or logo) is showing
+      p += normalize(p + .0001) * n * (.22 + uVel * .3) * (1. - word * .7);   // breathes (less on words, so letters stay crisp)
       vec4 mv = modelViewMatrix * vec4(p, 1.);
       vec3 d = mv.xyz - uMouse; float dl = length(d.xy);
       mv.xy += normalize(d.xy + .0001) * smoothstep(1.6, 0., dl) * .9;
       vec2 sd = mv.xy - uShock.xy; float sl = length(sd);          // click shockwave
       float wave = smoothstep(.9, 0., abs(sl - uShockAge * 5.)) * exp(-uShockAge * 2.2);
-      mv.xy += normalize(sd + .0001) * wave * 1.4;
+      mv.xy += normalize(sd + .0001) * wave * 1.4 * uShockAmp;
       gl_Position = projectionMatrix * mv;
       float keep = 1. - smoothstep(uKeep - .06, uKeep, aRnd);       // low-power tier fades particles out
       gl_PointSize = uSize * (.35 + aRnd * .9) * (1. + wave * 1.5) / -mv.z * step(.001, keep);
@@ -263,7 +272,7 @@ const goLow = (instant) => {
 if (savedQ?.low) goLow(true);
 
 // ---- shape queue: always one direct morph at a time, never through the shapes in between
-const morph = { from: START_SHAPE, to: START_SHAPE, target: START_SHAPE, tween: null };
+const morph = { from: FIRST_SHAPE, to: FIRST_SHAPE, target: FIRST_SHAPE, tween: null };
 function setShape(k, instant) {
   morph.target = k;
   const u = pMat.uniforms;
@@ -352,6 +361,32 @@ function makeSymbols() {
 }
 
 // sample the pixels of a word into particle targets
+// the intro logotype: KAVISH MATHS in particles, one line on wide screens, two on narrow ones
+function buildLogoShape() {
+  const W = 1400, H = 640, c = document.createElement("canvas");
+  c.width = W; c.height = H;
+  const x = c.getContext("2d"), wide = innerWidth / innerHeight > 1.05;
+  x.fillStyle = "#fff"; x.textAlign = "center"; x.textBaseline = "middle";
+  if (wide) { x.font = '700 200px "Space Grotesk", sans-serif'; x.fillText("KAVISH MATHS", W / 2, H / 2); }
+  else { x.font = '700 250px "Space Grotesk", sans-serif'; x.fillText("KAVISH", W / 2, H / 2 - 140); x.fillText("MATHS", W / 2, H / 2 + 140); }
+  const d = x.getImageData(0, 0, W, H).data, pts = [];
+  for (let y = 0; y < H; y += 2) for (let X = 0; X < W; X += 2) if (d[(y * W + X) * 4 + 3] > 128) pts.push(X, y);
+  if (!pts.length) return 0;
+  let minX = W, maxX = 0, minY = H, maxY = 0;
+  for (let k = 0; k < pts.length; k += 2) { minX = Math.min(minX, pts[k]); maxX = Math.max(maxX, pts[k]); minY = Math.min(minY, pts[k + 1]); maxY = Math.max(maxY, pts[k + 1]); }
+  // fit the word to the screen: the view at z = 0 is 2·9·tan(22.5°) units tall
+  const visH = 2 * camera.position.z * Math.tan((camera.fov * Math.PI) / 360), visW = visH * camera.aspect;
+  const sc = Math.min((visW * (wide ? 0.78 : 0.86)) / (maxX - minX), (visH * 0.42) / (maxY - minY));
+  const cx = (minX + maxX) / 2, cy = (minY + maxY) / 2, n = pts.length / 2;
+  for (let i = 0; i < COUNT; i++) {
+    const k = ((Math.random() * n) | 0) * 2;
+    G[i * 3] = (pts[k] - cx) * sc;
+    G[i * 3 + 1] = -(pts[k + 1] - cy) * sc + 0.25;
+    G[i * 3 + 2] = (Math.random() - 0.5) * 0.35;
+  }
+  pGeo.attributes.aG.needsUpdate = true;
+  return ((maxY - minY) * sc) / visH;                          // logo height as a share of the screen
+}
 function buildTextShape(str, width) {
   const W = 1024, H = 512, c = document.createElement("canvas");
   c.width = W; c.height = H;
@@ -377,6 +412,8 @@ const sceneState = PAGE !== "profile"
   ? { morph: 5, rotX: 0, x: isMobile ? 0 : 2.7, y: isMobile ? 1.2 : 0, z: 0, blobScale: 0 }
   : { morph: 0, rotX: 0, x: isMobile ? 0 : 2.6, y: 0, z: 0, blobScale: isMobile ? 0 : 1.5 };
 if (isMobile) blob.visible = false;
+const HERO_SPOT = { ...sceneState };                            // where the hero puts the scene
+if (LOGO_INTRO) Object.assign(sceneState, { x: 0, y: 0, z: 0, rotX: 0, blobScale: 0 });   // the logo sits dead centre
 const mouse = { x: 0, y: 0, tx: 0, ty: 0, seen: false };
 addEventListener("pointermove", (e) => {
   mouse.tx = (e.clientX / innerWidth) * 2 - 1;
@@ -502,7 +539,7 @@ function render() {
   spinDir += (motion.dir - spinDir) * 0.04;                       // direction changes ease, never flip
   spin += dt * (0.06 + v * 0.3) * spinDir;
   world.position.set(sceneState.x, sceneState.y, sceneState.z);
-  const ut = pu.uT.value, tw = (morph.to === 5 ? ut : 0) + (morph.from === 5 ? 1 - ut : 0);   // how much the word is showing
+  const ut = pu.uT.value, tw = (morph.to >= 5 ? ut : 0) + (morph.from >= 5 ? 1 - ut : 0);   // how much a word (page word or logo) is showing
   points.rotation.y = (spin + mouse.x * 0.3) * (1 - tw) + mouse.x * 0.35 * tw;
   points.rotation.x = (sceneState.rotX + mouse.y * 0.15) * (1 - tw) - mouse.y * 0.2 * tw;
   if (blob.visible = sceneState.blobScale > 0.01) {
