@@ -23,4 +23,21 @@ if (finePointer && !reduce) {
     });
     el.addEventListener("pointerleave", () => { rx(0); ry(0); el.classList.remove("is-tilting"); });
   });
+
+  // The smaller pieces (timetable slots, chapter rows, video cards) don't tilt, but their edge catches the same
+  // light. They are drawn and redrawn by other files, so one listener on the page serves them all. It measures at
+  // most once a frame, and only while the pointer is moving over one of them.
+  let lit = null, last = null, raf = 0;
+  document.addEventListener("pointermove", (e) => {
+    const el = e.target.closest?.(".slot, .chr, .vid");
+    if (!el) return;
+    lit = el; last = e;
+    if (raf) return;
+    raf = requestAnimationFrame(() => {
+      raf = 0;
+      const r = lit.getBoundingClientRect();
+      lit.style.setProperty("--gx", (last.clientX - r.left).toFixed(1) + "px");
+      lit.style.setProperty("--gy", (last.clientY - r.top).toFixed(1) + "px");
+    });
+  }, { passive: true });
 }

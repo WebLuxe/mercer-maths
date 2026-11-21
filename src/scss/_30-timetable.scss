@@ -7,9 +7,10 @@
 // ==========================================================
 .tt__filters { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; margin-bottom: clamp(1rem, 2.6vh, 1.6rem);
   button { padding: 0.55rem 1.05rem; border-radius: 99px; border: 1px solid rgba(255, 255, 255, 0.16); background: rgba(255, 255, 255, 0.03); font-size: 0.85rem;
-    transition: border-color 0.3s, background 0.3s, box-shadow 0.4s;
+    transition: border-color 0.3s, background 0.3s, box-shadow 0.4s, scale 0.35s $ease-back;
     &:hover { border-color: rgba($a2, 0.6); }
-    &[aria-selected="true"] { background: $grad; border-color: transparent; color: #fff; box-shadow: 0 8px 26px -8px rgba($a1, 0.75); } } }
+    &[aria-selected="true"] { background: $grad; border-color: transparent; color: #fff; box-shadow: 0 8px 26px -8px rgba($a1, 0.75); }
+    @include press(0.94); } }
 .tt__legend { margin-left: auto; font-size: 0.75rem; color: $muted; display: flex; align-items: center; gap: 0.45rem;
   i { width: 8px; height: 8px; border-radius: 50%; background: rgba(255, 255, 255, 0.18); margin-left: 0.4rem; }
   i.is-free { background: $a2; box-shadow: 0 0 8px $a2; }
@@ -20,7 +21,10 @@
   .tt__long { opacity: 0.5; @include down(lg) { display: none; } } }
 .slot {
   position: relative; overflow: hidden; text-align: left; padding: clamp(0.7rem, 1.8vh, 1rem); border-radius: 16px; @include glass(0.03);
-  display: flex; flex-direction: column; gap: 0.15rem; transition: border-color 0.3s, box-shadow 0.4s, filter 0.45s; // no transform/opacity: GSAP flips these
+  display: flex; flex-direction: column; gap: 0.15rem;
+  // no transform/opacity here: GSAP flips these. The hover lift and the press use the separate translate / scale properties.
+  transition: border-color 0.3s, box-shadow 0.4s, filter 0.45s, translate 0.4s $ease-out, scale 0.35s $ease-back;
+  @include press(0.96);
   &__time { font-family: $display; font-weight: 700; font-size: clamp(1.05rem, 2.6vh, 1.4rem); letter-spacing: -0.02em; }
   b { font-weight: 600; font-size: 0.86rem; }
   &__meta { font-size: 0.72rem; color: $muted; }
@@ -29,6 +33,7 @@
     i.is-free { background: $a2; box-shadow: 0 0 6px rgba($a2, 0.85); } }
   &__left { font-size: 0.7rem; color: $a2; margin-top: 0.3rem; }
   &:hover:not(.is-full) { border-color: rgba($a2, 0.6); box-shadow: 0 14px 40px -18px rgba($a2, 0.6); }
+  @media (hover: hover) { &:hover:not(.is-full) { translate: 0 -3px !important; } }
   &.is-full { opacity: 0.55; .slot__left { color: $a3; } }
   &.is-dim { opacity: 0.14; filter: grayscale(1); pointer-events: none; }
   &--online::after { content: "online"; position: absolute; top: 0.6rem; right: 0.6rem; font-size: 0.6rem; letter-spacing: 0.12em; text-transform: uppercase;

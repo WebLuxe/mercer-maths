@@ -4,34 +4,49 @@
 
 // ---------- quiz ----------
 @keyframes shake { 20%, 60% { transform: translateX(-8px); } 40%, 80% { transform: translateX(8px); } }
+@keyframes optPulse { 0% { scale: 1; } 35% { scale: 1.035; } 100% { scale: 1; } }   // the right answer, shown after a wrong pick (scale: GSAP owns transform)
 .quiz {
   position: relative; border-radius: 28px; padding: fluid(22, 44); @include glass(0.03); overflow: hidden; max-width: 900px;
   &::after { content: ""; position: absolute; width: 50%; aspect-ratio: 1; right: -15%; top: -40%; border-radius: 50%; background: $a1; filter: blur(110px); opacity: 0.25; pointer-events: none; }
   &__top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.6rem; }
   &__count { font-size: 0.75rem; letter-spacing: 0.2em; text-transform: uppercase; color: $muted; }
+  // progress: a finished question's bar fills from the left; the current one stands a little taller
   &__dots { display: flex; gap: 6px;
-    i { width: 28px; height: 4px; border-radius: 4px; background: $line; transition: background 0.4s;
-      &.is-done { background: $grad; } &.is-now { background: rgba($ink, 0.5); } } }
+    i { position: relative; width: 28px; height: 4px; border-radius: 4px; background: $line; overflow: hidden; transition: background 0.4s, scale 0.45s $ease-back;
+      &::after { content: ""; position: absolute; inset: 0; background: $grad; transform: scaleX(0); transform-origin: left; transition: transform 0.6s $ease-out; }
+      &.is-done::after { transform: scaleX(1); }
+      &.is-now { background: rgba($ink, 0.5); scale: 1 1.7; } } }
   &__stage { position: relative; min-height: 22rem; }
   &__q { font-family: $display; font-weight: 700; letter-spacing: -0.03em; font-size: fluid(28, 52); line-height: 1.05; margin-bottom: 1.8rem;
     sub, sup { font-size: 0.55em; } }
   &__opts { display: grid; gap: 0.8rem; @include up(sm) { grid-template-columns: 1fr 1fr; } }
   &__opt {
-    position: relative; text-align: left; padding: 1.1rem 1.3rem; border-radius: 18px; font-family: $display; font-weight: 500; font-size: 1.25rem;
-    @include glass(0.04); display: flex; align-items: center; gap: 1rem; transition: border-color 0.3s, background 0.3s, box-shadow 0.4s; // no transform/opacity: GSAP animates those
-    b { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; font-size: 0.8rem; border: 1px solid rgba(255, 255, 255, 0.2); color: $muted; flex-shrink: 0; }
+    position: relative; isolation: isolate; overflow: hidden; text-align: left; padding: 1.1rem 1.3rem; border-radius: 18px; font-family: $display; font-weight: 500; font-size: 1.25rem;
+    @include glass(0.04); display: flex; align-items: center; gap: 1rem;
+    transition: border-color 0.3s, background 0.3s, box-shadow 0.4s, scale 0.35s $ease-back; // no transform/opacity: GSAP animates those
+    @include press(0.97);
+    b { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; font-size: 0.8rem; border: 1px solid rgba(255, 255, 255, 0.2); color: $muted; flex-shrink: 0; transition: background 0.3s, color 0.3s, border-color 0.3s; }
+    // the sweep that fills the option you got right
+    &::before { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(90deg, rgba($a2, 0.3), rgba($a2, 0.04)); transform: scaleX(0); transform-origin: left; transition: transform 0.55s $ease-out; }
     &:hover:not(:disabled) { border-color: rgba($a2, 0.6); box-shadow: 0 14px 40px -18px rgba($a2, 0.6); }
-    &.is-right { border-color: $a2; background: rgba($a2, 0.12); box-shadow: 0 0 30px rgba($a2, 0.25); b { background: $a2; color: $bg; border-color: $a2; } }
+    &.is-right { border-color: $a2; background: rgba($a2, 0.12); box-shadow: 0 0 30px rgba($a2, 0.25); b { background: $a2; color: $bg; border-color: $a2; font-size: 0.95rem; font-weight: 700; } }
+    &.is-picked.is-right::before { transform: scaleX(1); }
+    &.is-right:not(.is-picked) { animation: optPulse 0.7s $ease-out 0.25s 1; }
     &.is-wrong { border-color: $a3; background: rgba($a3, 0.1); animation: shake 0.4s; b { background: $a3; color: $bg; border-color: $a3; } }
-    &:disabled { cursor: default; }
+    &:disabled { cursor: default; scale: 1; }
   }
   &__why { margin-top: 1.4rem; padding: 1rem 1.2rem; border-radius: 16px; border-left: 2px solid $a2; background: rgba(255, 255, 255, 0.03); color: rgba($ink, 0.85); font-size: 0.95rem;
     strong { @include grad-text; font-weight: 600; } }
   &__next { margin-top: 1.4rem; }
   &__end { text-align: center; padding: 1rem 0;
-    .score { font-family: $display; font-weight: 700; font-size: fluid(90, 170); line-height: 1; letter-spacing: -0.05em; @include grad-text; }
+    // the score sits inside a ring that draws round to the share you got right (10-quiz.js)
+    .score { position: relative; width: var(--ring, #{fluid(150, 210)}); aspect-ratio: 1; margin: 0 auto; display: grid; place-items: center;
+      font-family: $display; font-weight: 700; line-height: 1; letter-spacing: -0.05em; font-size: calc(var(--ring, #{fluid(150, 210)}) * 0.44);
+      svg { position: absolute; inset: 0; width: 100%; height: 100%; rotate: -90deg; overflow: visible; }
+      circle { fill: none; stroke-width: 5; }
+      .score__track { stroke: rgba(255, 255, 255, 0.09); }
+      .score__arc { stroke: url(#curveGrad); stroke-linecap: round; stroke-dasharray: 1; stroke-dashoffset: 1; filter: drop-shadow(0 0 7px rgba($a2, 0.7)); }
+      small { font-size: 0.42em; color: $muted; letter-spacing: -0.02em; margin-left: 0.08em; } }
     p { color: $muted; max-width: 40ch; margin: 1rem auto 1.8rem; }
     .row { display: flex; flex-wrap: wrap; gap: 0.8rem; justify-content: center; } }
-  &__burst { position: absolute; inset: 0; pointer-events: none; overflow: hidden;
-    span { position: absolute; font-family: $display; font-weight: 700; font-size: 1.6rem; } }
 }

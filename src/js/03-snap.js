@@ -140,6 +140,17 @@ if (!reduce && Lenis) {
 }
 if (!lenis) addEventListener("scroll", () => updateDots(), { passive: true });
 updateDots();
+// from here on, when the section changes its dot says its name for a moment, then tucks the label away again
+{
+  let flashed = null, flashT = 0;
+  bus.on("section:change", ({ i }) => {
+    clearTimeout(flashT);
+    flashed?.classList.remove("is-flash");
+    flashed = dotBtns[i];
+    flashed.classList.add("is-flash");
+    flashT = setTimeout(() => flashed.classList.remove("is-flash"), 1200);
+  });
+}
 $$('a[href^="#"]').forEach((a) =>
   a.addEventListener("click", (e) => {
     const id = a.getAttribute("href");

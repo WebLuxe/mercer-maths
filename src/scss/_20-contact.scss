@@ -4,14 +4,19 @@
 
 // ---------- contact ----------
 .contact { text-align: center; padding: fluid(110, 190) 0 3rem;
-  &__big { font-size: fluid(52, 170); margin: 1.5rem 0 1.2rem; }
+  &__big { font-size: fluid(52, 170); margin: 1.5rem 0 1.2rem;
+    // its two lines get masks from the script (setupHeadings) so the letters can rise out of them; the masks must not add height
+    .reveal-line { margin-bottom: -0.06em; } }
   &__lede { color: $muted; max-width: 46ch; margin: 0 auto 2.6rem; }
-  &__cta { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.8rem; }
+  &__cta { position: relative; display: flex; flex-wrap: wrap; justify-content: center; gap: 0.8rem; }
   &__info { display: grid; gap: 1rem; margin-top: 4rem; text-align: left; @include up(md) { grid-template-columns: repeat(4, 1fr); }
     div { border-radius: 20px; padding: 1.3rem 1.5rem; @include glass(0.03); }
     dt { font-size: 0.72rem; letter-spacing: 0.2em; text-transform: uppercase; color: $muted; margin-bottom: 0.4rem; } }
   &__foot { margin-top: 5rem; padding-top: 2rem; border-top: 1px solid $line; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 1rem; color: $muted; font-size: 0.8rem; }
 }
+
+// one soft ring that expands from the main button once the panel has landed (placed and animated by setupScroll)
+.cta-ring { position: absolute; border-radius: 99px; border: 1.5px solid rgba(255, 255, 255, 0.85); box-shadow: 0 0 18px rgba($a2, 0.7), inset 0 0 12px rgba($a1, 0.5); pointer-events: none; }
 
 .contact__foot .credit a { color: $ink; text-decoration: underline; text-decoration-color: rgba(255, 255, 255, 0.3); text-underline-offset: 3px; transition: text-decoration-color 0.3s;
   &:hover { text-decoration-color: $a2; } }

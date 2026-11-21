@@ -9,6 +9,10 @@
   --cw: min(78vw, 400px, 44vh);
   position: relative; height: calc(var(--cw) * 1.25 + 6vh); perspective: 1600px; perspective-origin: 50% 35%;
 }
+// a soft pool of light on the "floor" under the front card (a still decoration; the low-power tier drops it)
+.show__stage::after { content: ""; position: absolute; left: 50%; bottom: 0; z-index: -1; width: calc(var(--cw) * 1.7); height: 9vh; translate: -50% 35%; border-radius: 50%; pointer-events: none;
+  background: radial-gradient(closest-side, rgba($a1, 0.5), rgba($a2, 0.16) 55%, transparent); filter: blur(14px); }
+.low-power .show__stage::after { display: none; }
 .show__track { position: absolute; left: 50%; top: 50%; width: 0; height: 0; padding: 0 !important; display: block; transform-style: preserve-3d; }
 .show .card {
   position: absolute; width: var(--cw); height: calc(var(--cw) * 1.25); max-height: none; aspect-ratio: auto;
@@ -16,6 +20,9 @@
   backface-visibility: hidden; -webkit-backface-visibility: hidden; cursor: pointer;
   transition: box-shadow 0.6s $ease-out, border-color 0.6s;
   &.is-front { cursor: default; border-color: rgba(255, 255, 255, 0.22); box-shadow: 0 40px 100px -30px rgba($a1, 0.65), 0 0 0 1px rgba(255, 255, 255, 0.05); }
+  // a band of light that crosses the card once when it reaches the front (setupCarousel plays it; it waits off to the left)
+  &::after { content: ""; position: absolute; inset: 0; z-index: 2; pointer-events: none; translate: -110% 0;
+    background: linear-gradient(105deg, transparent 38%, rgba(255, 255, 255, 0.2) 50%, transparent 62%); }
 }
 .show__meta {
   display: flex; align-items: center; gap: 1rem; font-family: $display; color: $muted; font-size: 0.9rem;
@@ -24,12 +31,20 @@
   em { display: block; height: 100%; background: $grad; transform-origin: left; transform: scaleX(0); }
 }
 
-// glare layer injected on tilting cards
+// glare layer injected on tilting cards: a soft light under the pointer, and the same light catching the card's
+// edge (a 1px ring just inside the border, cut out with a mask, lit only near the pointer)
 .glare {
   position: absolute; inset: 0; border-radius: inherit; pointer-events: none; z-index: 3; opacity: 0; transition: opacity 0.5s;
   background: radial-gradient(420px circle at var(--gx, 50%) var(--gy, 50%), rgba(255, 255, 255, 0.11), transparent 45%);
+  &::after { content: ""; position: absolute; inset: 0; border-radius: inherit; @include edge-light(280px); }
 }
 .is-tilting .glare { opacity: 1; }
+// the smaller pieces get the lit edge too (timetable slots, chapter rows, video cards). 12-tilt.js feeds --gx / --gy
+// from one listener on the page; nothing happens while the pointer rests.
+@media (hover: hover) {
+  .slot::before, .chr::before, .vid::before { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; opacity: 0; transition: opacity 0.4s; @include edge-light(170px); }
+  .slot:hover::before, .chr:hover::before, .vid:not(.is-soon):hover::before { opacity: 1; }
+}
 
 // active nav link
 .nav__links a.is-active { color: $ink; &::after { transform: scaleX(1); transform-origin: left; } }

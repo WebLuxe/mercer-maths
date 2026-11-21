@@ -17,7 +17,9 @@ if (finePointer && !reduce) {
     pts[0].x += (mx - pts[0].x) * 0.65; pts[0].y += (my - pts[0].y) * 0.65;
     for (let i = 1; i < N; i++) { pts[i].x += (pts[i - 1].x - pts[i].x) * 0.42; pts[i].y += (pts[i - 1].y - pts[i].y) * 0.42; }
     cx.clearRect(0, 0, cv.width, cv.height);
-    if (++still > 90) { live = false; return; }          // stops drawing when the mouse rests
+    // stops drawing when the mouse rests: as soon as the tail has caught up with the pointer (all that would be left
+    // is a dot under the cursor, right where its label sits), or after a second and a half at the latest
+    if (++still > 90 || Math.abs(pts[N - 1].x - mx) + Math.abs(pts[N - 1].y - my) < 0.6) { live = false; return; }
     cx.globalCompositeOperation = "lighter";
     cx.lineCap = "round";
     for (let i = 1; i < N; i++) {

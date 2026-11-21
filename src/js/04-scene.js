@@ -54,18 +54,26 @@ scene.add(world);
 // shared motion state, fed by scroll speed and clicks
 const motion = { vel: 0, dir: 1, shockT: -10 };
 
+// One mood per section: a small hue turn shared by the particles and the aurora, so each section has its own
+// tint while the violet / cyan / pink family stays. Stored as (cos, sin) so the shaders never run trig per pixel.
+const hueU = { value: new THREE.Vector2(1, 0) };
+const HUE = /* glsl */ `
+uniform vec2 uHue;
+vec3 hueTurn(vec3 c){ const vec3 k = vec3(.57735); return c * uHue.x + cross(k, c) * uHue.y + k * dot(k, c) * (1. - uHue.x); }`;   // a turn about the grey axis
+
 // ---- living background: aurora + nebula + warped graph paper + click ripples + comets + speed streaks
 const bgMat = new THREE.ShaderMaterial({
   depthTest: false, depthWrite: false,
   uniforms: {
     uTime: { value: 0 }, uScroll: { value: 0 }, uIntro: { value: 0 }, uVel: { value: 0 }, uDir: { value: 1 },
     uRes: { value: new THREE.Vector2(innerWidth, innerHeight) }, uMouse: { value: new THREE.Vector2(0.5, 0.5) },
-    uRipple: { value: new THREE.Vector2(0.5, 0.5) }, uRippleT: { value: -10 },
+    uRipple: { value: new THREE.Vector2(0.5, 0.5) }, uRippleT: { value: -10 }, uCharge: { value: 0 }, uHue: hueU,
   },
   vertexShader: /* glsl */ `void main(){ gl_Position = vec4(position.xy, 0., 1.); }`,
   fragmentShader: /* glsl */ `
     ${NOISE}
-    uniform float uTime, uScroll, uIntro, uVel, uDir, uRippleT; uniform vec2 uRes, uMouse, uRipple;
+    ${HUE}
+    uniform float uTime, uScroll, uIntro, uVel, uDir, uRippleT, uCharge; uniform vec2 uRes, uMouse, uRipple;
     float fbm(vec3 p){ float a = .5, s = 0.; for (int i = 0; i < 2; i++){ s += a * snoise(p); p *= 2.03; a *= .5; } return s; }
     float hash(float n){ return fract(sin(n) * 43758.5453); }
 
@@ -92,18 +100,19 @@ const bgMat = new THREE.ShaderMaterial({
       vec3 base = vec3(.027, .024, .043);
       vec3 col = base;
 
-      // click ripple: an expanding ring that bends the grid
+      // click ripple: an expanding ring that bends the grid, with a fainter second ring trailing it
       vec2 rp = (uRipple - .5) * vec2(asp, 1.);
-      float age = uTime - uRippleT;
+      float age = uTime - uRippleT, age2 = age - .17;
       float rd = length(p - rp);
       float ring = step(0., age) * smoothstep(.07, 0., abs(rd - age * .85)) * exp(-age * 1.4);
+      float echo = step(0., age2) * smoothstep(.05, 0., abs(rd - age2 * .85)) * exp(-age2 * 1.9) * .42;
 
-      // aurora ribbons (hue drifts with scroll, brighter while scrolling fast)
+      // aurora ribbons (hue drifts with scroll, brighter while scrolling fast; the section's mood turns both colours)
       float n = fbm(vec3(p * 1.3, t + uScroll * 1.5));
       float b1 = smoothstep(.32, 0., abs(p.y * .9 + .25 * sin(p.x * 2.2 + t * 6. + n * 2.) + n * .35 - .18));
       float b2 = smoothstep(.42, 0., abs(p.y + .3 * cos(p.x * 1.6 - t * 5. + n * 2.5) - n * .4 + .38));
-      vec3 c1 = mix(vec3(.545, .361, .965), vec3(.133, .827, .933), .5 + .5 * sin(uScroll * 6.283 + t * 2.));
-      vec3 c2 = mix(vec3(.957, .447, .714), vec3(.545, .361, .965), .5 + .5 * cos(uScroll * 4.4 - t * 1.5));
+      vec3 c1 = hueTurn(mix(vec3(.545, .361, .965), vec3(.133, .827, .933), .5 + .5 * sin(uScroll * 6.283 + t * 2.)));
+      vec3 c2 = hueTurn(mix(vec3(.957, .447, .714), vec3(.545, .361, .965), .5 + .5 * cos(uScroll * 4.4 - t * 1.5)));
       float boost = 1. + v * 1.4;
       col += (c1 * b1 * .17 + c2 * b2 * .12) * boost;
 
@@ -120,9 +129,13 @@ const bgMat = new THREE.ShaderMaterial({
       vec2 m = (uMouse - .5) * vec2(asp, 1.);
       float md = length(p - m);
       float mask = smoothstep(1.15, .15, length(p));
-      col += vec3(.75, .72, .95) * grid * (.03 * mask + .13 * smoothstep(.55, 0., md) + v * .05 + ring * .5);
+      col += vec3(.75, .72, .95) * grid * (.03 * mask + .13 * smoothstep(.55, 0., md) + v * .05 + (ring + echo) * .5);
       col += vec3(.35, .25, .75) * smoothstep(.55, 0., md) * .1;
-      col += mix(c1, c2, .5) * ring * .45;
+      vec3 cm = mix(c1, c2, .5);
+      col += cm * (ring + echo) * .45;
+
+      // hold to charge: light gathers at the cursor while a ring closes in on it
+      col += cm * uCharge * (smoothstep(.36, 0., md) * .3 + smoothstep(.02, 0., abs(md - mix(.42, .06, uCharge))) * .55);
 
       // speed streaks while scrolling
       float s = max(snoise(vec3(p.x * 55., p.y * 1.1 + uTime * 2.5 * uDir, 1.7)), 0.);
@@ -220,11 +233,12 @@ const pMat = new THREE.ShaderMaterial({
     uTime: { value: 0 }, uMorph: { value: 0 }, uIntro: { value: 0 }, uVel: { value: 0 },
     uFrom: { value: FIRST_SHAPE }, uTo: { value: FIRST_SHAPE }, uT: { value: 1 }, uKeep: { value: 1.06 },
     uMouse: { value: new THREE.Vector3(99, 99, 0) }, uShock: { value: new THREE.Vector3(99, 99, 0) }, uShockAge: { value: 10 }, uShockAmp: { value: 1 }, uSwirl: { value: 1 }, uBoost: { value: 1 },
-    uSize: { value: P_SIZE * dpr },
+    uSize: { value: P_SIZE * dpr }, uHeat: { value: 1 }, uPull: { value: 0 }, uHole: { value: 1 }, uHue: hueU,
   },
   vertexShader: /* glsl */ `
     ${NOISE}
-    uniform float uTime, uMorph, uIntro, uSize, uVel, uShockAge, uShockAmp, uSwirl, uBoost, uFrom, uTo, uT, uKeep; uniform vec3 uMouse, uShock;
+    ${HUE}
+    uniform float uTime, uMorph, uIntro, uSize, uVel, uShockAge, uShockAmp, uSwirl, uBoost, uFrom, uTo, uT, uKeep, uHeat, uPull, uHole; uniform vec3 uMouse, uShock;
     attribute vec3 aB, aC, aD, aE, aF, aG, aCol; attribute float aRnd;
     varying vec3 vCol; varying float vAlpha;
     vec3 shapeAt(float k){
@@ -234,22 +248,35 @@ const pMat = new THREE.ShaderMaterial({
     void main(){
       // each particle leaves a little later than the last, so the shape pours rather than jumps
       float tt = smoothstep(0., 1., clamp(uT * 1.35 - aRnd * .35, 0., 1.));
+      float fly = sin(tt * 3.14159);                              // 0 at rest in a shape, 1 half-way between two
       vec3 p = mix(shapeAt(uFrom), shapeAt(uTo), tt);
-      p += vec3(sin(aRnd * 41.), cos(aRnd * 29.), sin(aRnd * 17. + 1.)) * sin(tt * 3.14159) * .55 * uSwirl;   // swirl mid-flight
+      p += vec3(sin(aRnd * 41.), cos(aRnd * 29.), sin(aRnd * 17. + 1.)) * fly * .55 * uSwirl;   // swirl mid-flight
       p *= mix(6.0 + aRnd * 6.0, 1.0, uIntro);
       float n = snoise(p * .45 + uTime * .15);
       float word = mix(step(4.5, uFrom), step(4.5, uTo), tt);     // 1 while a word (page word or logo) is showing
       p += normalize(p + .0001) * n * (.22 + uVel * .3) * (1. - word * .7);   // breathes (less on words, so letters stay crisp)
       vec4 mv = modelViewMatrix * vec4(p, 1.);
+      // the cursor (or a finger) parts the particles. While the mouse is held down they fall toward it instead,
+      // spiralling as they go: each one travels a share of its own distance, so none is ever pulled past the centre
       vec3 d = mv.xyz - uMouse; float dl = length(d.xy);
-      mv.xy += normalize(d.xy + .0001) * smoothstep(1.6, 0., dl) * .9;
+      float pull = min(dl * .78, smoothstep(7., 0., dl) * 2.3) * uPull;
+      float turn = uPull * 2.6 * smoothstep(5.5, 0., dl);
+      vec2 q = d.xy * cos(turn) + vec2(-d.y, d.x) * sin(turn);
+      mv.xy = uMouse.xy + q * ((dl + smoothstep(1.6, 0., dl) * .9 * uHole * (1. - uPull) - pull) / max(dl, .0001));
       vec2 sd = mv.xy - uShock.xy; float sl = length(sd);          // click shockwave
       float wave = smoothstep(.9, 0., abs(sl - uShockAge * 5.)) * exp(-uShockAge * 2.2);
       mv.xy += normalize(sd + .0001) * wave * 1.4 * uShockAmp;
       gl_Position = projectionMatrix * mv;
       float keep = 1. - smoothstep(uKeep - .06, uKeep, aRnd);       // low-power tier fades particles out
-      gl_PointSize = uSize * (.35 + aRnd * .9) * (1. + wave * 1.5) / -mv.z * step(.001, keep);
-      vCol = aCol; vAlpha = (.78 + n * .28 + wave) * uIntro * keep * uBoost;   // steady brightness: noise only shimmers it
+      // living particles: hot while in flight between two shapes (bigger, brighter, whiter, cooling as they land),
+      // the near side of the cloud a touch brighter than the far side, and each one twinkling at its own pace
+      float heat = fly * uHeat;
+      float near = clamp((mv.z - modelViewMatrix[3].z) * .3, -1., 1.);
+      float twinkle = sin(uTime * (1.1 + aRnd * 2.3) + aRnd * 83.) * (.15 - word * .08);
+      float crowd = 1. - uPull * .45 * smoothstep(2.2, 0., dl);     // gathered at the cursor they'd add up to a white blob
+      gl_PointSize = uSize * (.35 + aRnd * .9) * (1. + wave * 1.5) * (1. + heat * .3) / -mv.z * step(.001, keep);
+      vCol = mix(hueTurn(aCol), vec3(1.), heat * .4);
+      vAlpha = (.78 + n * .28 + wave) * uIntro * keep * uBoost * (1. + twinkle) * (1. + near * .2) * (1. + heat * .45) * crowd;   // steady brightness: noise only shimmers it
     }`,
   fragmentShader: /* glsl */ `
     varying vec3 vCol; varying float vAlpha;
@@ -323,12 +350,22 @@ const blobMat = new THREE.ShaderMaterial({
 const blob = new THREE.Mesh(new THREE.IcosahedronGeometry(1.25, isMobile ? 12 : 24), blobMat);
 world.add(blob);
 
+const dustShift = { value: 0 };                                  // how far the dust has slid with the scroll (world units)
 { // background dust
   const n = 500, g = new THREE.BufferGeometry(), a = new Float32Array(n * 3);
   // spread wide, but never within 7 units of the camera (z = 9): a dust speck right at the lens is drawn as a big grey square
   for (let i = 0; i < n; i++) { a[i * 3] = (Math.random() - 0.5) * 60; a[i * 3 + 1] = (Math.random() - 0.5) * 60; a[i * 3 + 2] = -30 + Math.random() * 32; }
   g.setAttribute("position", new THREE.BufferAttribute(a, 3));
-  scene.add(new THREE.Points(g, new THREE.PointsMaterial({ size: 0.03, color: 0x9a94b8, transparent: true, opacity: 0.5, depthWrite: false })));
+  const mat = new THREE.PointsMaterial({ size: 0.03, color: 0x9a94b8, transparent: true, opacity: 0.5, depthWrite: false });
+  // real parallax: the dust slides up as the page scrolls down and wraps round its 60-unit field, so it never runs out.
+  // Perspective does the rest: specks near the camera pass quickly, far ones barely move.
+  mat.onBeforeCompile = (sh) => {
+    sh.uniforms.uShift = dustShift;
+    sh.vertexShader = "uniform float uShift;\n" + sh.vertexShader.replace("#include <begin_vertex>", "#include <begin_vertex>\n  transformed.y = mod(transformed.y + uShift + 30., 60.) - 30.;");
+  };
+  const dust = new THREE.Points(g, mat);
+  dust.frustumCulled = false;                                    // its box no longer says where the wrapped points are
+  scene.add(dust);
 }
 
 // ---- floating maths symbols in 3D space (built after fonts load, see makeSymbols)
@@ -439,29 +476,145 @@ const mouse = { x: 0, y: 0, tx: 0, ty: 0, seen: false };
 addEventListener("pointermove", (e) => {
   mouse.tx = (e.clientX / innerWidth) * 2 - 1;
   mouse.ty = -(e.clientY / innerHeight) * 2 + 1;
-  mouse.seen = true;
+  if (e.pointerType !== "touch") mouse.seen = true;              // a finger parts the particles only while it's down (see finger, below)
 }, { passive: true });
+
+// a point on the screen (-1..1 each way) → the matching point in the camera's space, at the depth of the particle cloud
+const viewPoint = (nx, ny, out) => {
+  ndc.set(nx, ny, 0.5).unproject(camera).sub(camera.position).normalize();
+  const dist = (camera.position.z - world.position.z) / -ndc.z;
+  return out.copy(camera.position).add(ndc.multiplyScalar(dist)).applyMatrix4(camera.matrixWorldInverse);
+};
 
 // click anywhere: ripple through the grid + shockwave through the particles
 addEventListener("pointerdown", (e) => {
   if (reduce) return;
+  const pu = pMat.uniforms, touch = e.pointerType === "touch";
   bgMat.uniforms.uRipple.value.set(e.clientX / innerWidth, 1 - e.clientY / innerHeight);
   bgMat.uniforms.uRippleT.value = bgMat.uniforms.uTime.value;
-  pMat.uniforms.uShock.value.copy(pMat.uniforms.uMouse.value);
+  // a mouse click shocks from where the particles already part; a finger has no such spot yet, so it shocks from where it lands
+  if (touch) viewPoint((e.clientX / innerWidth) * 2 - 1, -(e.clientY / innerHeight) * 2 + 1, pu.uShock.value);
+  else pu.uShock.value.copy(pu.uMouse.value);
+  if (!document.body.classList.contains("is-loading")) {         // (during the intro the blast sets its own, bigger wave)
+    gsap.killTweensOf(pu.uShockAmp);
+    pu.uShockAmp.value = touch ? 0.65 : 1;                       // a softer wave for a finger: every scroll starts with a touch
+  }
   motion.shockT = clock.getElapsedTime();
   bus.emit("shock", { x: e.clientX, y: e.clientY, target: e.target });
 }, { passive: true });
 
+// ---- hold to charge (mouse): hold the button down and the particles fall toward the cursor while light gathers
+// there; let go and a shockwave throws them back out, stronger the longer you held. A quick click is untouched:
+// charging only begins after the button has been down for a moment.
+const charge = { v: 0, on: false, timer: 0, x: 0, y: 0 };
+const chargeEnd = (fire) => {
+  clearTimeout(charge.timer);
+  charge.timer = 0;
+  if (!charge.on) return;
+  charge.on = false;
+  document.documentElement.classList.remove("is-charging");
+  const power = charge.v, pu = pMat.uniforms, bu = bgMat.uniforms;
+  if (fire) {
+    pu.uShock.value.copy(pu.uMouse.value);
+    pu.uShockAmp.value = 1 + power * 1.7;
+    motion.shockT = clock.getElapsedTime();
+    bu.uRipple.value.copy(bu.uMouse.value);
+    bu.uRippleT.value = bu.uTime.value;
+    gsap.to(pu.uShockAmp, { value: 1, duration: 0.4, delay: 1.3, overwrite: true });   // back to a click-sized shock once this one has passed
+  }
+  // every "charge:start" is answered by exactly one "charge:release": fired with its power, or cancelled (power 0)
+  bus.emit("charge:release", fire ? { power } : { power: 0, cancelled: true });
+  gsap.to(charge, { v: 0, duration: fire ? 0.4 : 0.7, ease: fire ? "power3.out" : "power2.inOut", overwrite: true });
+};
+if (!reduce) {
+  addEventListener("pointerdown", (e) => {
+    chargeEnd(false);
+    if (e.pointerType !== "mouse" || e.button !== 0 || ui.book || document.body.classList.contains("is-loading")) return;
+    if (e.target.closest?.("input, textarea, select, .book, .rdr, .vmodal")) return;
+    charge.x = e.clientX; charge.y = e.clientY;
+    charge.timer = setTimeout(() => {
+      charge.timer = 0;
+      if (ui.book) return;
+      charge.on = true;
+      // from here the drag belongs to the gravity well, not to selecting text (html.is-charging: user-select none)
+      document.documentElement.classList.add("is-charging");
+      getSelection?.()?.removeAllRanges();
+      bus.emit("charge:start");
+      gsap.to(charge, { v: 1, duration: 1.5, ease: "power2.out", overwrite: true });
+    }, 160);
+  }, { passive: true });
+  // press and drag straight away means "select this text": that stays a plain drag, and no charge begins
+  addEventListener("pointermove", (e) => {
+    if (charge.timer && Math.hypot(e.clientX - charge.x, e.clientY - charge.y) > 6) { clearTimeout(charge.timer); charge.timer = 0; }
+  }, { passive: true });
+  addEventListener("pointerup", () => chargeEnd(true), { passive: true });
+  // anything that takes the press away ends it quietly: no shockwave, the particles just drift back
+  for (const ev of ["pointercancel", "blur", "contextmenu", "dragstart"]) addEventListener(ev, () => chargeEnd(false));
+  document.addEventListener("visibilitychange", () => chargeEnd(false));
+  for (const ev of ["book:open", "video:open", "reader:open", "page:leave"]) bus.on(ev, () => chargeEnd(false));
+}
+
+// ---- phones: while a finger is on the screen the particles part around it (also mid-scroll: touchmove keeps
+// coming after the browser has taken the gesture, when pointer events stop). Shortly after it lifts, the gap closes.
+const finger = { on: false, k: 0, x: 0, y: 0, tx: 0, ty: 0, timer: 0 };
+// …and the scene leans a little with the phone itself. The first reading is the neutral pose; nothing asks for permission.
+const tilt = { x: 0, y: 0, tx: 0, ty: 0, b0: null, g0: 0 };
+if (!reduce) {
+  const track = (e) => {
+    const t = e.touches[0];
+    if (!t || document.body.classList.contains("is-loading")) return;
+    finger.tx = (t.clientX / innerWidth) * 2 - 1;
+    finger.ty = -(t.clientY / innerHeight) * 2 + 1;
+    if (!finger.on && finger.k < 0.05) { finger.x = finger.tx; finger.y = finger.ty; }   // a new touch starts where it lands (no slide from the last one)
+    clearTimeout(finger.timer);
+    finger.on = true;
+  };
+  const lift = (e) => { if (!e.touches.length) { clearTimeout(finger.timer); finger.timer = setTimeout(() => (finger.on = false), 180); } };
+  addEventListener("touchstart", track, { passive: true });
+  addEventListener("touchmove", track, { passive: true });
+  addEventListener("touchend", lift, { passive: true });
+  addEventListener("touchcancel", lift, { passive: true });
+  if (!finePointer) addEventListener("deviceorientation", (e) => {
+    if (e.beta == null || e.gamma == null) return;
+    const land = innerWidth > innerHeight, side = land ? e.beta : e.gamma, fwd = land ? e.gamma : e.beta;
+    if (tilt.b0 === null) { tilt.b0 = fwd; tilt.g0 = side; }
+    tilt.b0 += (fwd - tilt.b0) * 0.004;                          // the neutral pose follows slowly, so a new way of holding the phone becomes "level" again
+    tilt.g0 += (side - tilt.g0) * 0.004;
+    tilt.tx = gsap.utils.clamp(-1, 1, (side - tilt.g0) / 22);
+    tilt.ty = gsap.utils.clamp(-1, 1, (fwd - tilt.b0) / 22);
+  }, { passive: true });
+}
+
 // HUD: names the shape currently on screen
 const hudFn = $("#hudFn"), hudIdx = $("#hudIdx");
-let hudShape = 0;
+let hudShape = 0, hudBtn = null;
+const hudLabel = () => hudBtn?.setAttribute("aria-label", `Show the next shape. Now showing ${SHAPES[hudShape][0]}: ${SHAPES[hudShape][1]}`);
 function updateHud(k) {
   if (k === hudShape) return;
   hudShape = k;
+  hudLabel();
   gsap.timeline()
     .to(hudFn, { yPercent: -80, opacity: 0, duration: 0.2, ease: "power2.in" })
     .call(() => { hudIdx.textContent = SHAPES[k][0]; hudFn.textContent = SHAPES[k][1]; })
     .fromTo(hudFn, { yPercent: 80, opacity: 0 }, { yPercent: 0, opacity: 1, duration: 0.45, ease: "power3.out" });
+}
+// On desktop the pill is a real button: press it and the particles pour into the next of the six shapes.
+// (The section's own shape returns at the next section change. On touch screens it stays a plain label.)
+if (finePointer) {
+  const old = $(".hud");
+  hudBtn = document.createElement("button");
+  hudBtn.type = "button";
+  hudBtn.className = "hud hud--btn";
+  hudBtn.append(...old.childNodes);
+  hudBtn.insertAdjacentHTML("beforeend", `<i class="hud__go" aria-hidden="true"></i>`);
+  old.replaceWith(hudBtn);
+  hudLabel();
+  hudBtn.addEventListener("click", () => {
+    if (document.body.classList.contains("is-loading")) return;
+    const k = (morph.target + 1) % LOGO;                          // 0…5: the logotype (slot 6) is the intro's alone
+    setShape(k);
+    bus.emit("hud:next", { shape: k });
+  });
 }
 
 // ---- adaptive quality: drop resolution if frames get slow, raise it back when there's headroom
@@ -496,9 +649,56 @@ function applyPendingQuality() {
   saveQ();
 }
 
+// ---- the scene has mass: it lags behind a scroll and springs back, and the camera makes a small move with every snap
+const mass = { x: 0, v: 0 };                                     // a soft spring chasing the signed scroll speed
+const camFx = { dolly: 0, roll: 0 };                             // snap move: a step back and a slight roll, in world units / radians
+const sceneFx = { warp: 0 };                                     // extra "speed" on top of the scroll's: the jump between pages
+bus.on("snap:go", ({ dur, dir }) => {
+  if (reduce) return;
+  const out = dur * 0.5;
+  gsap.killTweensOf(camFx);
+  gsap.timeline()
+    .to(camFx, { dolly: 0.42, roll: dir * 0.018, duration: out, ease: "sine.inOut" })
+    // the way back overshoots just as the panel lands, then settles
+    .to(camFx, { dolly: 0, duration: out + 0.3, ease: "back.out(1.5)" }, out)
+    .to(camFx, { roll: 0, duration: out + 0.3, ease: "back.out(2.6)" }, out);
+});
+// leaving for another page: the particles rush outward and fade as the columns rise, so the two pages read as one jump
+bus.on("page:leave", () => {
+  if (reduce) return;
+  gsap.to(pMat.uniforms.uIntro, { value: 0, duration: 0.85, ease: "power2.in", overwrite: true });
+  gsap.to(sceneFx, { warp: 1, duration: 0.6, ease: "power2.out", overwrite: true });
+});
+addEventListener("pageshow", (e) => {                            // back from the browser's page cache: the scene as it was
+  if (!e.persisted) return;
+  gsap.killTweensOf([pMat.uniforms.uIntro, sceneFx]);
+  pMat.uniforms.uIntro.value = 1;
+  sceneFx.warp = 0;
+});
+
+// ---- a mood per section (see hueU): eased on every section change, and set for the section the page starts in
+{
+  const MOODS = {
+    profile: { about: 0.25, results: -0.32, journey: 0.4, students: -0.16, teaser: 0.3 },
+    tuition: { subjects: 0.28, timetable: -0.3, method: 0.12, example: -0.42, quiz: 0.38, fees: -0.2, faq: 0.25 },
+    resources: { notes: -0.3, videos: 0.35 },
+  }[PAGE] || {};                                                 // radians; heroes and contact keep the brand colours as they are
+  const mood = { a: 0 };
+  const paint = () => hueU.value.set(Math.cos(mood.a), Math.sin(mood.a));
+  const setMood = (id, instant) => {
+    const a = MOODS[id] || 0;
+    if (instant || reduce) { gsap.killTweensOf(mood); mood.a = a; paint(); }
+    else gsap.to(mood, { a, duration: 1.6, ease: "power2.inOut", overwrite: true, onUpdate: paint });
+  };
+  let started = !LOGO_INTRO;                                     // the logo intro keeps the brand colours; the mood arrives with the page
+  bus.on("section:change", ({ id }) => started && setMood(id));
+  bus.on("intro:done", () => { if (!started) { started = true; setMood(sectionEls[activeDot]?.id); } });
+  if (started) setMood(sectionEls[activeDot]?.id, true);
+}
+
 // ---- one render loop, driven by GSAP's ticker (same frame as Lenis + ScrollTrigger)
-const clock = new THREE.Clock(), ndc = new THREE.Vector3(), tmp = new THREE.Vector3();
-let prevScroll = scrollY, spin = 0, spinDir = 1;
+const clock = new THREE.Clock(), ndc = new THREE.Vector3();
+let prevScroll = scrollY, spin = 0, spinDir = 1, scrollLag = scrollY, viewH = innerHeight;
 // measure the screen's refresh rate once
 let frameNo = 0, renderEvery = 1;
 {
@@ -526,14 +726,25 @@ function render() {
   applyPendingQuality();
 
   // scroll speed (0 = still, ~1 = flicking through sections)
-  const sy = scrollY, rawV = lenis ? Math.abs(lenis.velocity) / 45 : Math.abs(sy - prevScroll) / 45;
+  const sy = scrollY, signedV = lenis ? lenis.velocity / 45 : (sy - prevScroll) / 45, rawV = Math.abs(signedV);
   if (sy !== prevScroll) motion.dir = sy > prevScroll ? 1 : -1;
   prevScroll = sy;
   motion.vel += (Math.min(rawV, 1.2) - motion.vel) * 0.05;
-  const v = reduce ? 0 : motion.vel;
+  const v = reduce ? 0 : Math.min(1.5, motion.vel + sceneFx.warp);
+
+  // mass: a loose spring follows the signed speed, so the cloud is left behind by a scroll, then catches up and settles
+  if (!reduce) {
+    mass.v += ((gsap.utils.clamp(-1.2, 1.2, signedV) - mass.x) * 50 - mass.v * 6.5) * dt;
+    mass.x += mass.v * dt;
+    scrollLag += (sy - scrollLag) * 0.12;
+    dustShift.value = (scrollLag / viewH) * 2.6;                  // 2.6 world units of dust per screen scrolled
+  }
 
   mouse.x += (mouse.tx - mouse.x) * 0.06;
   mouse.y += (mouse.ty - mouse.y) * 0.06;
+  tilt.x += (tilt.tx - tilt.x) * 0.05;
+  tilt.y += (tilt.ty - tilt.y) * 0.05;
+  const leanX = mouse.x + tilt.x * 0.7, leanY = mouse.y - tilt.y * 0.7;   // what the scene leans toward: the mouse, plus the phone's own tilt
   scrollSmooth += (sy / maxScroll - scrollSmooth) * 0.08;
 
   const bu = bgMat.uniforms;
@@ -542,28 +753,34 @@ function render() {
   bu.uVel.value = v;
   bu.uDir.value = motion.dir;
   bu.uMouse.value.set((mouse.x + 1) / 2, (mouse.y + 1) / 2);
+  bu.uCharge.value = charge.v;
 
   const pu = pMat.uniforms;
   pu.uTime.value = t;
 
   pu.uVel.value = v;
   pu.uShockAge.value = t - motion.shockT;
+  pu.uPull.value = charge.v;
   blobMat.uniforms.uTime.value = t;
 
-
-  if (mouse.seen) {
-    ndc.set(mouse.x, mouse.y, 0.5).unproject(camera).sub(camera.position).normalize();
-    const dist = (camera.position.z - world.position.z) / -ndc.z;
-    tmp.copy(camera.position).add(ndc.multiplyScalar(dist));
-    pu.uMouse.value.copy(tmp.applyMatrix4(camera.matrixWorldInverse));
-  }
+  // where the particles part: under the finger while one is down (fading out once it lifts), otherwise around the mouse
+  if (finger.on || finger.k > 0.002) {
+    finger.k += ((finger.on ? 1 : 0) - finger.k) * (finger.on ? 0.3 : 0.14);
+    finger.x += (finger.tx - finger.x) * 0.4;
+    finger.y += (finger.ty - finger.y) * 0.4;
+    viewPoint(finger.x, finger.y, pu.uMouse.value);
+    pu.uHole.value = finger.k;
+  } else if (mouse.seen) {
+    viewPoint(mouse.x, mouse.y, pu.uMouse.value);
+    pu.uHole.value = 1;
+  } else pu.uHole.value = 0;
 
   spinDir += (motion.dir - spinDir) * 0.04;                       // direction changes ease, never flip
   spin += dt * (0.06 + v * 0.3) * spinDir;
-  world.position.set(sceneState.x, sceneState.y, sceneState.z);
+  world.position.set(sceneState.x, sceneState.y + mass.x * 0.42, sceneState.z);   // left behind by the scroll: up while travelling down
   const ut = pu.uT.value, tw = (morph.to >= 5 ? ut : 0) + (morph.from >= 5 ? 1 - ut : 0);   // how much a word (page word or logo) is showing
-  points.rotation.y = (spin + mouse.x * 0.3) * (1 - tw) + mouse.x * 0.35 * tw;
-  points.rotation.x = (sceneState.rotX + mouse.y * 0.15) * (1 - tw) - mouse.y * 0.2 * tw;
+  points.rotation.y = (spin + leanX * 0.3) * (1 - tw) + leanX * 0.35 * tw;
+  points.rotation.x = (sceneState.rotX + leanY * 0.15) * (1 - tw) - leanY * 0.2 * tw;
   if (blob.visible = sceneState.blobScale > 0.01) {
     blob.rotation.y = t * 0.1;
     blob.scale.setScalar(sceneState.blobScale);
@@ -578,15 +795,19 @@ function render() {
     s.material.rotation += u.vr * dt;
     s.material.opacity = symState.alpha * (u.base + Math.sin(t * 0.8 + u.ph) * 0.08 + v * 0.25);
   }
-  symGroup.position.x = -mouse.x * 0.6;
-  symGroup.position.y = -mouse.y * 0.4;
+  symGroup.position.x = -leanX * 0.6;
+  symGroup.position.y = -leanY * 0.4;
 
   // warp: widen the lens a touch at speed
   const fov = 45 + v * 4;
   if (Math.abs(fov - camera.fov) > 0.01) { camera.fov = fov; camera.updateProjectionMatrix(); }
-  camera.position.x += (mouse.x * 0.4 - camera.position.x) * 0.05;
-  camera.position.y += (mouse.y * 0.3 - camera.position.y) * 0.05;
-  camera.lookAt(0, 0, 0);
+  // the camera drifts with the mouse (or the phone's tilt), steps back and rolls a little during a snap,
+  // and pitches slightly the way the page is travelling
+  camera.position.x += (leanX * 0.4 - camera.position.x) * 0.05;
+  camera.position.y += (leanY * 0.3 - camera.position.y) * 0.05;
+  camera.position.z = 9 + camFx.dolly;
+  camera.lookAt(0, mass.x * -0.2, 0);
+  if (camFx.roll) camera.rotateZ(camFx.roll);
   renderer.setRenderTarget(bgTarget);
   renderer.render(bgScene, bgCam);
   renderer.setRenderTarget(null);
@@ -594,6 +815,7 @@ function render() {
 }
 gsap.ticker.add(render);
 addEventListener("resize", () => {
+  viewH = innerHeight;
   camera.aspect = innerWidth / innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(innerWidth, innerHeight);

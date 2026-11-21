@@ -105,6 +105,7 @@ function intro() {
       }, null, "blast")
       .to("#loaderLogo", { opacity: 0, scale: 1.1, duration: 0.3, ease: "power1.out" }, "blast")          // …and shatters with the particles
       .to(u.uSwirl, { value: 0.3, duration: 0.01 }, "blast")                                                // a calm, coherent pour (no random detours)
+      .to(u.uHeat, { value: 0.3, duration: 0.01 }, "blast")                                                 // …and barely "hot in flight": these points are already fuller and brighter than usual
       .to(points.scale, { x: 1, y: 1, z: 1, duration: 1.2, ease: "expo.out" }, "blast")
       .to(u.uSize, { value: P_SIZE * dpr, duration: POUR, ease: "power2.inOut" }, "blast")
       .to(u.uBoost, { value: 1, duration: POUR, ease: "power2.inOut" }, "blast")
@@ -115,6 +116,7 @@ function intro() {
       // the scroll engine and unlock wait until the particles have landed, so nothing hitches mid-pour
       .call(() => {
         gsap.to(u.uSwirl, { value: 1, duration: 0.6 });
+        u.uHeat.value = 1;                                   // (nothing is in flight now, so this shows only from the next morph on)
         gsap.to(u.uKeep, { value: keepAfterIntro, duration: 1.2, ease: "power2.inOut" });
         setupScroll();
         unlock();

@@ -28,10 +28,14 @@
 .ncard__go { color: $a2; transition: color 0.3s; }
 
 .vid {
-  display: flex; flex-direction: column; gap: 0.45rem; text-align: left; padding: 0.6rem 0.6rem 0.9rem; border-radius: 18px; @include glass(0.03);
-  transition: border-color 0.35s, box-shadow 0.4s; // no transform/opacity: GSAP animates those
+  position: relative; display: flex; flex-direction: column; gap: 0.45rem; text-align: left; padding: 0.6rem 0.6rem 0.9rem; border-radius: 18px; @include glass(0.03);
+  // no transform/opacity here: GSAP animates those. The hover lift and the press use the separate translate / scale properties.
+  transition: border-color 0.35s, box-shadow 0.4s, translate 0.4s $ease-out, scale 0.35s $ease-back;
+  @include press(0.98);
   b { font-family: $display; font-size: clamp(0.95rem, 2.1vh, 1.1rem); letter-spacing: -0.02em; line-height: 1.2; padding: 0 0.3rem; }
   &:hover:not(.is-soon) { border-color: rgba($a2, 0.55); box-shadow: 0 14px 40px -18px rgba($a2, 0.6); .vid__play { transform: scale(1.12); } }
+  // on a device that hovers, a playable card lifts and its play button sends out one ring
+  @media (hover: hover) { &:hover:not(.is-soon) { translate: 0 -3px !important; .vid__play::before { animation: playPing 0.8s $ease-out 1; } } }
   &.is-soon { cursor: default; }
   &.is-dim { opacity: 0.14; filter: grayscale(1); pointer-events: none; }
 }
@@ -40,7 +44,9 @@
   background: radial-gradient(120% 90% at 20% 10%, var(--band), transparent 60%), radial-gradient(90% 90% at 90% 100%, rgba($a2, 0.35), transparent 60%), #120e22;
 }
 .vid__play { width: 54px; height: 54px; border-radius: 50%; background: rgba(255, 255, 255, 0.92); box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4); transition: transform 0.4s $ease-out; position: relative;
+  &::before { content: ""; position: absolute; inset: 0; border-radius: 50%; border: 2px solid rgba(255, 255, 255, 0.85); opacity: 0; }
   &::after { content: ""; position: absolute; left: 21px; top: 16px; border-left: 18px solid $bg; border-top: 11px solid transparent; border-bottom: 11px solid transparent; } }
+@keyframes playPing { from { transform: scale(1); opacity: 0.85; } to { transform: scale(1.9); opacity: 0; } }
 .vid__len { position: absolute; right: 0.6rem; bottom: 0.5rem; font-size: 0.7rem; font-weight: 600; padding: 0.15rem 0.45rem; border-radius: 6px; background: rgba(0, 0, 0, 0.6); }
 .vid__meta { font-size: 0.75rem; color: $muted; padding: 0 0.3rem; }
 

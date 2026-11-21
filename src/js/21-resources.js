@@ -70,7 +70,7 @@ if ($("#videosGrid")) {
         if (b.dataset.yt) openVideo(b.dataset.yt, b.dataset.title);
         else gsap.fromTo(b, { x: -8 }, { x: 0, duration: 0.6, ease: "elastic.out(1, 0.3)" });
       }));
-      if (!reduce) gsap.from("#videosGrid > .vid", { y: 50, opacity: 0, rotationX: -25, transformPerspective: 900, duration: 1, stagger: 0.06, ease: "expo.out", clearProps: "opacity,transform", scrollTrigger: { trigger: "#videosGrid", start: "top 88%", once: true } });
+      revealEach("#videosGrid > .vid", { y: 50, opacity: 0 }, { stagger: 0.06, start: "top 92%", duration: 1 });   // row by row as they scroll into view
       ScrollTrigger.refresh();
     })
     .catch(() => {

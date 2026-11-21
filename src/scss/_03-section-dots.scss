@@ -12,6 +12,7 @@
       padding: 0.3rem 0.65rem; border-radius: 99px; background: rgba(20, 16, 34, 0.9); border: 1px solid $line; color: $ink;
       opacity: 0; pointer-events: none; transition: opacity 0.3s, transform 0.4s $ease-out; }
     &:hover { background: rgba(255, 255, 255, 0.6); span { opacity: 1; transform: translate(0, -50%); } }
+    &.is-flash span { opacity: 1; transform: translate(0, -50%); }   // the section just changed: its name shows for a moment (03-snap.js)
     &.is-on { height: 30px; background: $grad; box-shadow: 0 0 14px rgba($a1, 0.7); } }
 }
 .vignette { position: fixed; inset: 0; z-index: 1; pointer-events: none; background: radial-gradient(ellipse at center, transparent 55%, rgba($bg, 0.6) 100%); }
@@ -20,4 +21,12 @@
   padding: 0.45rem 0.9rem; border-radius: 99px; @include glass-blur(0.04); font-size: 0.72rem; color: $muted;
   b { font-family: $display; font-weight: 500; font-size: 0.85rem; @include grad-text; display: inline-block; }
   @include down(sm) { display: none; }
+  // desktop: the pill is a real button (04-scene.js swaps the tag) that pours the particles into the next shape.
+  // GSAP owns its transform (the intro slides it in), so the press uses the separate scale property.
+  &--btn { transition: border-color 0.3s, scale 0.35s $ease-back;
+    @media (min-width: 900px) and (min-height: 560px) { pointer-events: auto; }
+    &:hover { border-color: rgba(255, 255, 255, 0.3); .hud__go { translate: 3px 0; opacity: 1; } }
+    &:active { scale: 0.95 !important; transition-duration: 0.3s, 0.1s; }
+    &:focus-visible { outline-offset: 4px; } }
+  &__go { width: 6px; height: 6px; margin-left: -0.1rem; border: solid currentColor; border-width: 1.5px 1.5px 0 0; rotate: 45deg; opacity: 0.55; transition: translate 0.35s $ease-out, opacity 0.3s; }
 }

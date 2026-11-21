@@ -34,4 +34,4 @@
 // spotlight inside buttons
 .btn::after { content: ""; position: absolute; inset: 0; border-radius: inherit; z-index: 1; pointer-events: none; opacity: 0; transition: opacity 0.35s;
   background: radial-gradient(90px circle at var(--bx, 50%) var(--by, 50%), rgba(255, 255, 255, 0.5), transparent 70%); }
-.btn:hover::after { opacity: 0.55; }
+@media (hover: hover) { .btn:hover::after { opacity: 0.55; } }

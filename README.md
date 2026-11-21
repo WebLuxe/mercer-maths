@@ -50,12 +50,19 @@ Videos come from **`assets/data/resources.json`**. Upload to YouTube (unlisted w
 | **Quiz.** Three real Add Maths questions with worked answers. | **Booking.** Three steps, then a ready-to-send WhatsApp or email. |
 
 **Everything else:**
-- **Live 3D background:** aurora light, a rippling graph-paper grid, shooting stars and floating maths symbols.
-- **Particle shapes:** a sphere, a torus knot, z = sin x · cos y, a saddle, a spiral, and the words "A*", "KS" and "π". Each section owns one finished shape, and arriving there pours the particles straight from the last shape to the next in one smooth morph. They never pass through shapes in between, however fast you scroll.
-- **Scroll speed drives the motion:** the grid warps, light streaks rush past, and the view widens like a warp jump.
-- **Click anywhere:** a shockwave ripples through the grid and the particles.
-- **Snap scrolling:** one flick moves one full-screen section, with side dots and keyboard support. Phones keep normal scrolling.
-- **Cursor effects:** a comet cursor trail, hero letters that lift as the cursor passes, holographic foil on the portrait, 3D tilt and glare on cards, and a light inside every button.
+- **Live 3D background:** aurora light, a rippling graph-paper grid, shooting stars and floating maths symbols. Each section has its own colour mood, and dust drifts past at different depths as you scroll.
+- **Particle shapes:** a sphere, a torus knot, z = sin x · cos y, a saddle, a spiral, and the words "A*", "KS" and "π". Each section owns one finished shape, and arriving there pours the particles straight from the last shape to the next in one smooth morph. They never pass through shapes in between, however fast you scroll. The particles twinkle, and glow hot while they are in flight. On desktop the pill in the bottom-left corner is a button: press it to pour them into the next shape.
+- **Scroll speed drives the motion:** the grid warps, light streaks rush past, and the view widens like a warp jump. The particle cloud has weight: it lags behind a scroll and springs back, and the camera leans into every snap.
+- **Click anywhere:** a shockwave ripples through the grid and the particles. **Hold the mouse down** and the particles fall toward the cursor while light gathers there; let go and they are thrown back out, harder the longer you held.
+- **Snap scrolling:** one flick moves one full-screen section, with side dots (each names its section as you arrive) and keyboard support. Phones keep normal scrolling.
+- **Panels with depth:** the section you leave tilts back, shrinks and dims, and the next one stands up as it lands. It follows the scroll, so it plays in both directions.
+- **Reveals:** headings rise letter by letter, the stats roll into place like a counter, chart bars shoot out with a spark on the tip, the story timeline lights up node by node as its line is drawn, and each testimonial's grade flips up like a departure board (D → C → B → A).
+- **Cursor effects:** a ring that stretches as it travels, squeezes on a press and names what a click will do (Book, Read, Open, Next); a comet trail; hero letters that lift as the cursor passes; holographic foil on the portrait; 3D tilt, glare and a lit edge on cards; and buttons that fill from the point where the pointer enters and drain where it leaves.
+- **On phones:** the particles part around your finger, the scene leans as you tilt the phone, a tap leaves a ring where it landed, every control looks pressed the moment you touch it, and phones that can give a short buzz on a tap, a right answer or a mistake.
+- **Page changes:** the particles rush outward as you leave a page and pour back in on the next, so the two read as one jump.
+- **Small rewards:** a right quiz answer fills with a sweep and gets a tick, the final score rolls inside a ring, fee prices roll into place, and a finished booking lands its tick in a burst of symbols.
+- **Sound, if you want it:** a round button in the bottom-right corner (desktop) turns on a soft soundscape: a note for every control you point at (slide along a row and it plays a little run), a whoosh between panels, chimes in the quiz, a tone that climbs while you hold the mouse down, and a quiet chord that changes with each section. It is off until you press it, it remembers your choice, and every sound is synthesised in the browser: there are no audio files.
+- **Reduced motion:** with the system setting on there is no snap scrolling, the 3D scene no longer reacts to scrolling, holding or tilting, and headings, numbers and the timeline are simply there instead of animating in.
 
 <img src="docs/screenshots/mobile.jpg" alt="Mobile layout" width="260" />
 
@@ -85,11 +92,20 @@ assets/             What the site loads (built, don't edit by hand)
   data/resources.json   the notes + videos list (edit this)
   notes/            note PDFs
 src/                Source code
-  js/               00-core.js … 20-performance.js, joined in order at build time
-  scss/             _abstracts.scss + 30 partials, entry: style.scss
+  js/               00-core.js … 25-touch.js, joined in filename order at build time (they share one scope)
+                    00-core.js        set-up, and the event bus that lets features react to each other
+                    01b-motion-kit.js shared helpers: rolling numbers, symbol bursts, reveals, phone buzz
+                    04-scene.js       the 3D scene: shaders and the one render loop
+                    06-scroll.js      scroll choreography: panel depth, headings, reveals, carousel
+                    24-audio.js       the optional sound: a small synthesiser that listens to the event bus
+  scss/             _abstracts.scss (tokens, mixins) + 33 partials, entry: style.scss
+tools/test.cjs      Browser tests
 docs/screenshots/   Images for this README
 build.mjs           Build script
 ```
+
+Features talk to each other through a small event bus (`bus.on` / `bus.emit` in `00-core.js`): a file announces what just
+happened ("snap:go", "quiz:right", "charge:release", "tap"…) and others react without knowing who announced it.
 
 ## Develop
 
@@ -99,6 +115,7 @@ npm run build      # chapters + notes, then src → assets (esbuild + sass, fetc
 npm run notes      # demo notes JSON → PDFs
 npm run serve      # http://127.0.0.1:4823
 npm test           # browser tests on desktop + phone sizes (needs Edge or Chrome)
+node tools/test.cjs laptops motion   # …or only the suites you name: desktop, desktop-small, laptops, phone, motion, touch, sound, offline, slow
 ```
 
 Three.js, GSAP and Lenis are served from `assets/vendor/` (copied from `node_modules` by the build), so the site works even if a CDN is blocked. If the app can't start for any reason, the loader steps aside after 10 seconds instead of trapping the visitor.

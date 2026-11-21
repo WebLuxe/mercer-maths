@@ -8,11 +8,21 @@
 .teaser { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; @include down(md) { grid-template-columns: repeat(2, 1fr); } }
 .teaser__card {
   position: relative; overflow: hidden; border-radius: 24px; padding: clamp(1.1rem, 3vh, 1.8rem); @include glass(0.03);
-  display: flex; flex-direction: column; gap: 0.35rem; min-height: clamp(170px, 30vh, 260px); transition: border-color 0.4s;
+  display: flex; flex-direction: column; gap: 0.35rem; min-height: clamp(170px, 30vh, 260px); transition: border-color 0.4s, scale 0.35s $ease-back;
   &::before { content: ""; position: absolute; width: 70%; aspect-ratio: 1; top: -30%; right: -25%; border-radius: 50%; background: var(--c); filter: blur(60px); opacity: 0.3; transition: opacity 0.5s; }
+  // a soft sheen that crosses the card once when the pointer arrives (it waits off to the left, and goes back unseen)
+  &::after { content: ""; position: absolute; inset: 0; pointer-events: none; translate: -115% 0;
+    background: linear-gradient(112deg, transparent 36%, rgba(255, 255, 255, 0.13) 50%, transparent 64%); }
   b { font-family: $display; font-size: clamp(1.2rem, 3vh, 1.6rem); letter-spacing: -0.02em; margin-top: auto; }
   span:not(.teaser__sym) { color: $muted; font-size: 0.85rem; }
   em { position: absolute; top: 1.2rem; right: 1.3rem; font-style: normal; font-size: 1.3rem; transition: transform 0.5s $ease-out; }
-  &:hover { border-color: rgba(255, 255, 255, 0.25); &::before { opacity: 0.6; } em { transform: translate(4px, -4px) rotate(-45deg); } }
+  &:active, &.is-press { scale: 0.98 !important; transition-duration: 0.4s, 0.1s; }               // a press is felt at once (the tilt is GSAP's, on transform)
+  @media (hover: hover) {
+    &:hover { border-color: rgba(255, 255, 255, 0.25); &::before { opacity: 0.6; } em { transform: translate(4px, -4px) rotate(-45deg); }
+      &::after { translate: 115% 0; transition: translate 0.95s $ease-out; }
+      // the big symbol lifts toward you
+      .teaser__sym { scale: 1.16; translate: 0 -5px; text-shadow: 0 10px 44px var(--c), 0 0 22px var(--c); } }
+  }
 }
-.teaser__sym { font-family: $display; font-weight: 700; font-size: clamp(2.4rem, 7vh, 3.8rem); line-height: 1; color: var(--c); text-shadow: 0 0 34px var(--c); }
+.teaser__sym { align-self: flex-start; font-family: $display; font-weight: 700; font-size: clamp(2.4rem, 7vh, 3.8rem); line-height: 1; color: var(--c); text-shadow: 0 0 34px var(--c);
+  transform-origin: 0 100%; transition: scale 0.55s $ease-back, translate 0.55s $ease-out, text-shadow 0.5s; }

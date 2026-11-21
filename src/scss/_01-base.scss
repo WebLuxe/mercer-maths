@@ -18,12 +18,14 @@ img { display: block; max-width: 100%; }
 button { font: inherit; color: inherit; background: none; border: 0; }
 [hidden] { display: none !important; }
 html.lenis-stopped { overflow: hidden; }           // page behind the booking panel can't scroll
+html.is-charging { -webkit-user-select: none; user-select: none; }   // hold to charge: dragging the gravity well around doesn't select text
 .is-off, .is-off * { animation-play-state: paused !important; }   // performance engine: off-screen = paused
 .portrait__frame picture { display: contents; }
 @keyframes glowPulse { from { opacity: 0.35; } to { opacity: 0.7; } }
 ::selection { background: $a1; color: #fff; }
 :focus-visible { outline: 2px solid $a2; outline-offset: 3px; border-radius: 6px; }
 
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }   // for screen readers only
 .display { font-family: $display; letter-spacing: -0.04em; line-height: 0.92; font-weight: 700; }
 .grad { @include grad-text; }
 .eyebrow {
@@ -34,6 +36,41 @@ html.lenis-stopped { overflow: hidden; }           // page behind the booking pa
 .wrap { width: min(1280px, 100% - 32px); margin-inline: auto; @include up(sm) { width: min(1280px, 100% - 64px); } }
 section { position: relative; z-index: 2; }
 .reveal-line { display: block; overflow: hidden; padding-bottom: 0.06em; > span { display: block; } }
+// A heading cut into letters (01-text-split.js → splitLine): every word is a no-break box that masks its own
+// letters, so a line that wraps on a phone still hides each letter below its own row. The padding gives
+// descenders and side bearings room inside the mask; the equal negative margin means nothing moves because of it.
+.rw { display: inline-block; white-space: nowrap; overflow: hidden; vertical-align: top; padding: 0 0.12em 0.14em; margin: 0 -0.12em -0.14em;
+  .ch { display: inline-block; } }
+// a gradient line in letters: each piece shows its own slice of the gradient (the same trick as the hero title)
+.grad.is-split { background: none; animation: none; color: inherit;
+  .ch { background: $grad; -webkit-background-clip: text; background-clip: text; color: transparent;
+    background-size: calc(var(--n) * 100%) 100%; background-position: calc(var(--i) / (var(--n) - 1) * 100%) 0; } }
+// The rise (06-scroll.js → setupHeadings). Letters wait below their row (.is-wait). When the heading scrolls into
+// view the class is lifted and each letter's own transition brings it up: later the further along the line it is
+// (its place --i times the step --s, after the line's own delay --d). The browser runs these by itself, so a page
+// with a couple of hundred letters costs no script per letter and none per frame.
+.is-split .ch { transform-origin: 50% 100%; transition: transform 1.05s $ease-out; transition-delay: calc(var(--d, 0s) + var(--i, 0) * var(--s, 0.02s)); }
+.is-split.is-wait .ch { transform: perspective(500px) translateY(120%) rotateX(-80deg); transition: none; }
+// a line that can't be cut without changing the layout rises whole, as every heading used to
+.is-rise { transition: transform 1.2s $ease-out; transition-delay: var(--d, 0s); }
+.is-rise.is-wait { transform: translateY(110%) rotate(4deg); transition: none; }
+
+// rolling numbers (01b-motion-kit.js → odometer): one column per digit. The unseen digit (__k) gives the column
+// its exact width and baseline; the strip of digits (__s) rolls up behind a mask that only cuts above and below,
+// so a wide digit passing through a narrow column keeps its sides.
+.odo { white-space: nowrap; }
+.odo__c { display: inline-block; position: relative; clip-path: inset(0 -0.3em); }
+.odo__k { visibility: hidden; }
+.odo__s { position: absolute; left: 50%; top: 0; translate: -50% 0; will-change: transform;
+  i { display: block; font-style: normal; text-align: center; } }
+
+// the ring a finished tap leaves where the finger was (25-touch.js): one small element, moved and faded only
+.tapring { position: fixed; left: 0; top: 0; z-index: 350; width: 64px; height: 64px; margin: -32px 0 0 -32px; border-radius: 50%; pointer-events: none; opacity: 0;
+  border: 1.5px solid rgba(255, 255, 255, 0.9); box-shadow: 0 0 18px rgba($a2, 0.7), inset 0 0 14px rgba($a1, 0.45); }
+
+// bursts of symbols (01b-motion-kit.js → burst) fly on one layer above the page and the booking panel
+.burst { position: fixed; inset: 0; z-index: 300; pointer-events: none; overflow: hidden;
+  span { position: absolute; left: 0; top: 0; font-family: $display; font-weight: 700; font-size: 1.6rem; will-change: transform, opacity; } }
 
 // performance engine: low-power tier drops the decorative layers
 .low-power .grain, .low-power .trail { display: none; }

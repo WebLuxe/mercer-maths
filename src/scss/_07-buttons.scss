@@ -6,9 +6,27 @@
 .btn {
   position: relative; display: inline-flex; align-items: center; gap: 0.7rem; padding: 1rem 1.8rem; border-radius: 99px;
   font-weight: 500; font-size: 0.95rem; overflow: hidden; isolation: isolate; border: 1px solid $line;
+  transition: color 0.3s, scale 0.4s $ease-back;
   span { position: relative; z-index: 2; }
-  &::before { content: ""; position: absolute; inset: 0; z-index: 1; background: $grad; transform: translateY(101%); border-radius: inherit; transition: transform 0.6s $ease-out; }
-  &:hover::before { transform: translateY(0); }
-  &--fill { background: $ink; color: $bg; border-color: transparent; &:hover { color: #fff; } }
+  // The gradient fill grows from the point where the pointer came in and drains toward the point where it left
+  // (--ox / --oy, set at those two moments by 18-button-spotlight.js). A circle clipped out of one small layer.
+  &::before { content: ""; position: absolute; inset: 0; z-index: 1; background: $grad; border-radius: inherit;
+    clip-path: circle(0% at var(--ox, 50%) var(--oy, 100%)); transition: clip-path 0.55s $ease-out; }
+  &--fill { background: $ink; color: $bg; border-color: transparent; }
   &--ghost { @include glass; }
+  // A press squeezes the button a little and lets it go with a small spring: the separate scale property, because
+  // GSAP owns transform on the magnetic buttons. A finger gets the fill too, growing from under the fingertip.
+  &:active, &.is-press { scale: 0.96 !important; transition-duration: 0.25s, 0.1s; &::before { clip-path: circle(150% at var(--ox, 50%) var(--oy, 100%)); } }
+  &--fill:active, &--fill.is-press { color: #fff; }
+  // hover belongs to devices that can hover: on a touch screen it would stay stuck on after a tap
+  @media (hover: hover) {
+    &:hover::before { clip-path: circle(150% at var(--ox, 50%) var(--oy, 100%)); }
+    &--fill:hover { color: #fff; }
+    &:hover .btn__arrow { animation: arrowFly 0.55s $ease 1; }   // the arrow leaves the way it points and comes back in from behind
+  }
+}
+// (--fx / --fy: which way this arrow points, set with the class by 18-button-spotlight.js)
+@keyframes arrowFly {
+  0% { translate: 0 0; opacity: 1; } 45% { translate: calc(var(--fx) * 140%) calc(var(--fy) * 140%); opacity: 0; }
+  55% { translate: calc(var(--fx) * -140%) calc(var(--fy) * -140%); opacity: 0; } 100% { translate: 0 0; opacity: 1; }
 }

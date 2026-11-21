@@ -33,4 +33,18 @@ function splitWords(el) {
   walk(el);
   return $$(".w", el);
 }
+// A heading line → words that never break inside (so the line still only wraps between words), each word a
+// small mask (.rw), each letter its own piece (.ch). With byWord the pieces are whole words instead: the
+// fallback for a line whose letters, set one by one, would wrap differently (no kerning between pieces).
+// Each piece knows its place (--i) and the line knows how many there are (--n): that staggers the rise and lets a
+// gradient line give every piece its own slice of the gradient (see .is-split in the base styles).
+// Returns the number of pieces. (Written as one string: a page has a couple of hundred letters to make.)
+function splitLine(el, byWord) {
+  const safe = (t) => t.replace(/&/g, "&amp;").replace(/</g, "&lt;");
+  let i = 0;
+  el.innerHTML = el.textContent.trim().split(/\s+/).map((word) =>
+    `<span class="rw">${(byWord ? [word] : [...word]).map((c) => `<span class="ch" style="--i:${i++}">${safe(c)}</span>`).join("")}</span>`).join(" ");
+  el.style.setProperty("--n", i);
+  return i;
+}
 $$("[data-split]").forEach(splitChars);

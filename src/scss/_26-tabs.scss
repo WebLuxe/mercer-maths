@@ -6,8 +6,8 @@
 //  TABS (Profile | Tuition)
 // ==========================================================
 .tabs { position: relative; display: flex; padding: 4px; border-radius: 99px; @include glass-blur(0.05); }
-.tabs__tab { position: relative; z-index: 1; padding: 0.55rem 1.25rem; border-radius: 99px; font-size: 0.86rem; font-weight: 500; color: $muted; transition: color 0.35s;
-  &.is-hot { color: $bg; } @include down(sm) { padding: 0.5rem 0.95rem; } }
+.tabs__tab { position: relative; z-index: 1; padding: 0.55rem 1.25rem; border-radius: 99px; font-size: 0.86rem; font-weight: 500; color: $muted; transition: color 0.35s, scale 0.35s $ease-back;
+  &.is-hot { color: $bg; } @include press(0.93); @include down(sm) { padding: 0.5rem 0.95rem; } }
 .tabs__pill { position: absolute; top: 4px; bottom: 4px; left: 4px; width: 0; border-radius: 99px; background: $ink; box-shadow: 0 6px 24px -6px rgba($a1, 0.85); z-index: 0; }
 .nav__logo { @include down(sm) { font-size: 1.05rem; } }
 .status { @include down(sm) { display: none; } }

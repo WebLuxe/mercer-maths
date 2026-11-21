@@ -38,6 +38,20 @@ if ($("#ttGrid")) {
     slots.forEach((sl) => sl.classList.toggle("is-dim", want !== "all" && sl.dataset.form !== want));
     bus.emit("filter:change", { kind: "timetable", value: want, btn: f });
     if (!reduce) gsap.fromTo(slots, { rotationY: -100, opacity: 0 }, { rotationY: 0, opacity: (i, el) => (el.classList.contains("is-dim") ? 0.14 : 1), duration: 0.8, stagger: { each: 0.035, from: "start" }, ease: "expo.out", transformPerspective: 900, clearProps: "opacity" });
+    lightSeats(slots.filter((sl) => !sl.classList.contains("is-dim")), 0.3);
   }));
-  gsap.from(".tt__day", { y: 60, opacity: 0, rotationX: -35, transformPerspective: 900, duration: 1.1, stagger: 0.08, ease: "expo.out", scrollTrigger: { trigger: ".tt", start: "top 85%" } });
+
+  // the free seats in each slot light up one after another: when the grid arrives, and again after a filter flips the cards
+  const lightSeats = (which, delay) => {
+    if (reduce) return;
+    which.forEach((sl, k) => gsap.fromTo($$(".slot__seats .is-free", sl), { scale: 0.3, opacity: 0.25 },
+      { scale: 1, opacity: 1, duration: 0.5, ease: "back.out(3)", stagger: 0.07, delay: delay + k * 0.05, overwrite: true }));
+  };
+  bus.on("scroll:setup", () => {
+    if (reduce) return;
+    gsap.set(".tt__day", { transformPerspective: 900 });
+    gsap.set(".slot__seats .is-free", { scale: 0.3, opacity: 0.25 });   // unlit until their day arrives
+    // each day column arrives as it scrolls into view (all six together on a desktop, row by row on a phone)
+    revealEach(".tt__day", { y: 60, opacity: 0, rotationX: -35 }, { stagger: 0.08, start: "top 92%", then: (days) => days.forEach((d, k) => lightSeats($$(".slot", d), 0.45 + k * 0.08)) });
+  });
 }

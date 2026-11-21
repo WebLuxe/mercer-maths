@@ -18,8 +18,11 @@
   &__x { position: absolute; top: 18px; right: 18px; width: 40px; height: 40px; border-radius: 50%; border: 1px solid $line; display: grid; place-items: center;
     transition: background 0.3s, transform 0.5s $ease-out; &:hover { background: rgba(255, 255, 255, 0.08); transform: rotate(90deg); } }
   &__head { margin-bottom: 4vh; padding-right: 3rem; }
+  // progress: each segment fills from the left as its step is reached (and empties again on the way back)
   &__bar { display: flex; gap: 6px; margin-top: 1.2rem;
-    i { flex: 1; height: 3px; border-radius: 3px; background: $line; transition: background 0.5s; &.is-on { background: $grad; } } }
+    i { position: relative; flex: 1; height: 3px; border-radius: 3px; background: $line; overflow: hidden;
+      &::after { content: ""; position: absolute; inset: 0; background: $grad; transform: scaleX(0); transform-origin: left; transition: transform 0.55s $ease-out; }
+      &.is-on::after { transform: scaleX(1); } } }
   form { flex: 1; display: flex; flex-direction: column; }
   &__step { border: 0; display: none; &.is-on { display: block; } }
   &__q { font-family: $display; font-weight: 700; font-size: clamp(1.7rem, 4.4vh, 2.5rem); letter-spacing: -0.03em; line-height: 1.05; margin-bottom: 3vh; padding: 0; }
@@ -35,7 +38,8 @@
 .chips { display: flex; flex-wrap: wrap; gap: 0.6rem;
   &__label { display: block; font-size: 0.72rem; color: $muted; letter-spacing: 0.16em; text-transform: uppercase; margin: 2.4vh 0 0.8rem; }
   button { padding: 0.75rem 1.15rem; border-radius: 99px; border: 1px solid rgba(255, 255, 255, 0.16); background: rgba(255, 255, 255, 0.03); font-size: 0.92rem;
-    transition: border-color 0.3s, background 0.3s, box-shadow 0.4s; // no transform: GSAP pops these
+    transition: border-color 0.3s, background 0.3s, box-shadow 0.4s, scale 0.35s $ease-back; // no transform: GSAP pops these
+    @include press(0.94);
     &:hover { border-color: rgba($a2, 0.6); }
     &[aria-pressed="true"] { background: $grad; border-color: transparent; color: #fff; box-shadow: 0 10px 30px -8px rgba($a1, 0.75); } } }
 .field { display: block; margin-bottom: 1.3rem;

@@ -86,6 +86,12 @@ Parent's WhatsApp: ${phone}`;
     bookDone.hidden = false;
     gsap.from(bookDone.children, { y: 30, opacity: 0, duration: 0.8, stagger: 0.08, ease: "expo.out" });
     gsap.from(".book__tick", { scale: 0, rotate: -180, duration: 1, ease: "back.out(2)" });
+    // …and as the tick lands, symbols burst out of it (the same burst as a right answer in the quiz)
+    gsap.delayedCall(reduce ? 0 : 0.42, () => {
+      if (bookDone.hidden) return;
+      const r = $(".book__tick").getBoundingClientRect();
+      burst(r.left + r.width / 2, r.top + r.height / 2, 24, true);
+    });
   } });
   // celebrate in the background: ripple from the panel
   const r = bookPanel.getBoundingClientRect();

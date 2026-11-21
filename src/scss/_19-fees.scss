@@ -8,7 +8,9 @@
   position: relative; border-radius: 28px; padding: fluid(24, 36); @include glass(0.03); display: flex; flex-direction: column; gap: 1.1rem;
   transition: border-color 0.4s, box-shadow 0.5s; // no transform: GSAP tilts these
   &:hover { box-shadow: 0 24px 60px -30px rgba($a1, 0.75); }
-  &--main { background: rgba($a1, 0.08); &::before { @include conic-border(28px); } }
+  // the featured card floats very slightly (the separate translate property: GSAP owns transform for the tilt).
+  // Like every looping animation it pauses while its section is off screen (.is-off), and the low-power tier drops it.
+  &--main { background: rgba($a1, 0.08); animation: floaty 4.6s ease-in-out infinite alternate; &::before { @include conic-border(28px); } }
   &__tag { font-size: 0.72rem; letter-spacing: 0.2em; text-transform: uppercase; color: $muted; }
   &--main &__tag { @include grad-text; }
   h3 { font-family: $display; font-size: 1.9rem; letter-spacing: -0.03em; line-height: 1; }
@@ -16,4 +18,10 @@
   ul { list-style: none; display: grid; gap: 0.55rem; font-size: 0.9rem; color: $muted; flex: 1;
     li { padding-left: 1.5rem; position: relative; &::before { content: "✓"; position: absolute; left: 0; color: $a2; } } }
   .btn { align-self: start; }
+  // the ticks appear one by one once the card has arrived (.is-pre is set by the script, so without it they simply show)
+  &.is-pre li::before { opacity: 0; scale: 0.2; transition: opacity 0.3s, scale 0.45s $ease-back; }
+  &.is-pre.is-in li::before { opacity: 1; scale: 1; }
+  @for $i from 1 through 6 { &.is-in li:nth-child(#{$i})::before { transition-delay: #{0.5 + $i * 0.09}s; } }
 }
+.low-power .format--main { animation: none; }
+@keyframes floaty { from { translate: 0 0; } to { translate: 0 -7px; } }

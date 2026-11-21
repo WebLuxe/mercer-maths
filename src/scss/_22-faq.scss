@@ -6,9 +6,12 @@
 .faq-wrap { display: grid; gap: 2rem; @include up(md) { grid-template-columns: 1fr 1.4fr; gap: 4rem; align-items: start; } }
 .faq {
   &__item { border-bottom: 1px solid $line; &:first-child { border-top: 1px solid $line; } }
-  &__q { width: 100%; display: flex; justify-content: space-between; align-items: center; gap: 1rem; padding: 1.4rem 0; text-align: left;
+  &__q { position: relative; isolation: isolate; width: 100%; display: flex; justify-content: space-between; align-items: center; gap: 1rem; padding: 1.4rem 0; text-align: left;
     font-family: $display; font-weight: 500; font-size: fluid(18, 22); letter-spacing: -0.02em; transition: color 0.3s;
-    &:hover { color: #fff; span { @include grad-text; } }
+    // a quiet track behind the row: it slides in under the pointer and deepens under a press or a thumb
+    &::before { content: ""; position: absolute; inset: 4px -0.75rem; z-index: -1; border-radius: 14px; background: rgba(255, 255, 255, 0.05); opacity: 0; scale: 0.97 0.86; transition: opacity 0.3s, scale 0.45s $ease-out, background 0.2s; }
+    &:active::before, &.is-press::before { opacity: 1; scale: 1; background: rgba(255, 255, 255, 0.09); transition-duration: 0.09s; }
+    @media (hover: hover) { &:hover { color: #fff; span { @include grad-text; } &::before { opacity: 1; scale: 1; } } }
     i { position: relative; width: 18px; height: 18px; flex-shrink: 0;
       &::before, &::after { content: ""; position: absolute; left: 0; top: 50%; width: 100%; height: 1.5px; background: currentColor; transition: transform 0.5s $ease-out; }
       &::after { transform: rotate(90deg); } }

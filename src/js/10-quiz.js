@@ -10,24 +10,22 @@ if ($("#quizStage")) {
     { q: "How many real roots does x<sup>2</sup> + 4x + 5 = 0 have?", opts: ["Two", "One", "None", "Infinitely many"], a: 2,
       why: "<strong>b² − 4ac = 16 − 20 = −4.</strong> A negative discriminant means the curve never touches the x-axis." },
   ];
-  const stage = $("#quizStage"), dots = $$("#quizDots i"), countEl = $("#quizCount"), burstEl = $("#quizBurst"), box = $("#quizBox");
+  const stage = $("#quizStage"), dots = $$("#quizDots i"), countEl = $("#quizCount");
   let idx = 0, score = 0;
 
-  const burst = (fromEl, n = 16) => {
-    if (reduce) return;
-    const b = box.getBoundingClientRect(), r = fromEl.getBoundingClientRect();
-    const cx = r.left - b.left + r.width / 2, cy = r.top - b.top + r.height / 2;
-    const sym = "∑∫π√∞Δθ✓+=";
-    const colors = ["#8b5cf6", "#22d3ee", "#f472b6", "#ffffff"];
-    for (let i = 0; i < n; i++) {
-      const s = document.createElement("span");
-      s.textContent = sym[(Math.random() * sym.length) | 0];
-      s.style.left = cx + "px"; s.style.top = cy + "px"; s.style.color = colors[i % 4];
-      burstEl.appendChild(s);
-      const a = Math.random() * Math.PI * 2, d = 80 + Math.random() * 160;
-      gsap.fromTo(s, { x: 0, y: 0, scale: 0.4, opacity: 1, rotate: 0 },
-        { x: Math.cos(a) * d, y: Math.sin(a) * d - 40, scale: 1 + Math.random(), rotate: (Math.random() - 0.5) * 180, opacity: 0, duration: 1.2 + Math.random() * 0.6, ease: "expo.out", onComplete: () => s.remove() });
-    }
+  // symbols burst from the middle of an element (the shared burst, see 01b-motion-kit.js)
+  const burstFrom = (el, n, celebrate) => {
+    const r = el.getBoundingClientRect();
+    burst(r.left + r.width / 2, r.top + r.height / 2, n, celebrate);
+  };
+  // an option's letter badge turns into a tick, with a pop
+  const tick = (opt, delay) => {
+    const b = opt.querySelector("b");
+    if (reduce) { b.textContent = "✓"; return; }
+    gsap.timeline({ delay })
+      .to(b, { scale: 0, duration: 0.12, ease: "power2.in" })
+      .call(() => (b.textContent = "✓"))
+      .to(b, { scale: 1, duration: 0.5, ease: "back.out(3)" });
   };
 
   const setDots = () => dots.forEach((d, i) => { d.classList.toggle("is-done", i < idx); d.classList.toggle("is-now", i === idx); });
@@ -54,8 +52,11 @@ if ($("#quizStage")) {
   function answer(btn) {
     const item = QUIZ[idx], pick = +btn.dataset.i, opts = $$(".quiz__opt", stage);
     opts.forEach((o) => (o.disabled = true));
+    // right: the option fills with a quick sweep (.is-picked), its letter becomes a tick, symbols burst out of it.
+    // wrong: it shakes, and the right answer pulses once and gets the tick instead.
+    btn.classList.add("is-picked");
     opts[item.a].classList.add("is-right");
-    if (pick === item.a) { score++; burst(btn); } else btn.classList.add("is-wrong");
+    if (pick === item.a) { score++; tick(btn, 0); burstFrom(btn, 16); } else { btn.classList.add("is-wrong"); tick(opts[item.a], 0.3); }
     bus.emit(pick === item.a ? "quiz:right" : "quiz:wrong", { btn, right: opts[item.a], idx });
     const last = idx === QUIZ.length - 1;
     const why = document.createElement("div");
@@ -76,12 +77,14 @@ if ($("#quizStage")) {
       "Full marks. You'd fit straight into the Grade 11 Add Maths group.",
     ][score];
     swap(() => {
-      stage.innerHTML = `<div class="quiz__end"><div class="score"><span id="qs">0</span>/${QUIZ.length}</div><p>${msg}</p>
+      // the score rolls into place inside a ring that draws round to the share you got right
+      stage.innerHTML = `<div class="quiz__end"><div class="score"><svg viewBox="0 0 120 120" aria-hidden="true"><circle class="score__track" cx="60" cy="60" r="54"/><circle class="score__arc" cx="60" cy="60" r="54" pathLength="1"/></svg><span><span id="qs">0</span><small>/${QUIZ.length}</small></span></div><p>${msg}</p>
         <div class="row"><a href="#contact" class="btn btn--fill" id="qBook"><span>Book a free trial</span><span>↗</span></a><button class="btn btn--ghost" id="qAgain"><span>Try again</span></button></div></div>`;
-      const o = { v: 0 };
       gsap.from(".quiz__end > *", { y: 30, opacity: 0, duration: 0.9, stagger: 0.1, ease: "expo.out" });
-      gsap.to(o, { v: score, duration: 1, delay: 0.2, ease: "power2.out", onUpdate: () => ($("#qs").textContent = Math.round(o.v)) });
-      if (score === QUIZ.length) gsap.delayedCall(0.9, () => burst($(".quiz__end .score"), 36));
+      odometer($("#qs"), score, 0.3);
+      // (autoRound off: the ring's length is 1 unit, and GSAP would otherwise snap the offset to whole pixels: 1, then 0)
+      gsap.to(".score__arc", { strokeDashoffset: 1 - score / QUIZ.length, autoRound: false, duration: reduce ? 0 : 1.4, delay: reduce ? 0 : 0.3, ease: "power3.inOut" });
+      if (score === QUIZ.length) gsap.delayedCall(1.5, () => $(".quiz__end .score") && burstFrom($(".quiz__end .score"), 36, true));   // full marks: celebrate
       $("#qBook").addEventListener("click", (e) => { e.preventDefault(); openBook(); });
       $("#qAgain").addEventListener("click", () => { idx = 0; score = 0; showQuestion(); });
     });
