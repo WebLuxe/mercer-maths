@@ -29,6 +29,7 @@ if (ptIn) {
     const target = location.hash && $(location.hash);
     if (target) lenis ? lenis.scrollTo(target, { immediate: true, force: true }) : target.scrollIntoView();
     revealPage();
+    bus.emit("intro:done", { first: false });           // the page can be used (arrived through a page transition)
   });
 } else {
   // the logo is drawn in the site's display font, so wait for that font first (a fraction of a second)
@@ -76,6 +77,7 @@ function intro() {
     // a link like resources.html#notes, opened directly: go there once the page can scroll
     const target = location.hash.length > 1 && document.getElementById(location.hash.slice(1));
     if (target) lenis ? lenis.scrollTo(target, { duration: 1.2, force: true }) : target.scrollIntoView();
+    bus.emit("intro:done", { first: true });            // the page can be used (first visit: the logo intro has finished)
   };
   const loader = $("#loader");
   if (loader) {
@@ -87,6 +89,7 @@ function intro() {
       .to(".loader__foot, .loader__bar", { opacity: 0, duration: 0.35 }, 0)
       .addLabel("blast")
       .call(() => {
+        bus.emit("intro:blast");
         u.uShock.value.set(0, 0, 0);
         u.uShockAmp.value = 1.8;                           // a bigger ring than a click
         motion.shockT = clock.getElapsedTime();

@@ -45,6 +45,7 @@ if ($("#subjects .subject[data-band]")) {
             const b = e.target.closest("[data-co]");
             if (!b || b.getAttribute("aria-selected") === "true") return;
             fill(card, st, st.courses.find((c) => c.id === b.dataset.co));
+            bus.emit("filter:change", { kind: "subjects", value: b.dataset.co, btn: b });
             if (!reduce) gsap.fromTo($$("li", ol).slice(0, 10), { x: -16, opacity: 0 }, { x: 0, opacity: 1, duration: 0.45, stagger: 0.025, ease: "expo.out", clearProps: "opacity,transform" });
           });
         }

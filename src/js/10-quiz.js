@@ -56,6 +56,7 @@ if ($("#quizStage")) {
     opts.forEach((o) => (o.disabled = true));
     opts[item.a].classList.add("is-right");
     if (pick === item.a) { score++; burst(btn); } else btn.classList.add("is-wrong");
+    bus.emit(pick === item.a ? "quiz:right" : "quiz:wrong", { btn, right: opts[item.a], idx });
     const last = idx === QUIZ.length - 1;
     const why = document.createElement("div");
     why.innerHTML = `<p class="quiz__why">${item.why}</p><button class="btn btn--fill quiz__next"><span>${last ? "See my score" : "Next question"}</span><span>→</span></button>`;
@@ -67,6 +68,7 @@ if ($("#quizStage")) {
   function showEnd() {
     setDots();
     countEl.textContent = "Your score";
+    bus.emit("quiz:end", { score, total: QUIZ.length });
     const msg = [
       "That's exactly what the diagnostic paper is for. Every one of these is fixable in a few lessons.",
       "A start. The gaps are usually just one or two habits, and they're quick to fix.",

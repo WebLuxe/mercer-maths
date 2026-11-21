@@ -117,6 +117,7 @@ if ($("#chList")) {
           box.classList.add("is-open"); box.setAttribute("aria-hidden", "false");
           document.documentElement.classList.add("rdr-on");
           history.pushState({ rdr: 1 }, "");
+          bus.emit("reader:open", { title: ch.t });
           if (!reduce) gsap.fromTo(box, { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.5, ease: "expo.out", clearProps: "transform" });
           setTimeout(() => $(".rdr__i", box).focus({ preventScroll: true }), 50);
         }
@@ -132,6 +133,7 @@ if ($("#chList")) {
         pages.innerHTML = "";
         ui.book = false; lenis?.start();
         focusBack?.focus?.({ preventScroll: true });
+        bus.emit("reader:close");
         if (!fromPop) { ignorePop = true; history.back(); }
       }
     };
@@ -180,6 +182,7 @@ if ($("#chList")) {
     course = c; filter = "";
     store.set("kt_course", c.id);
     drawCourses(); drawInfo(); drawList(true);
+    bus.emit("filter:change", { kind: "chapters", value: c.id });
   };
 
   bandBar.addEventListener("click", (e) => {

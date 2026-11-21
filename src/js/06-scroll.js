@@ -126,6 +126,9 @@ function setupScroll() {
 
   gsap.from(".contact__big", { yPercent: 40, scale: 0.85, opacity: 0, duration: 1.4, ease: "expo.out", scrollTrigger: { trigger: ".contact", start: "top 75%" } });
   gsap.from(".contact__cta .btn, .contact__info > div", { y: 30, opacity: 0, duration: 0.9, stagger: 0.08, ease: "power3.out", scrollTrigger: { trigger: ".contact__cta", start: "top 92%" } });
+
+  // later files add their own scroll-driven pieces here (after the pin above exists, so they measure its extra space)
+  bus.emit("scroll:setup");
 }
 
 /* ---------- section 4: 3D carousel, cards on a spinning cylinder ---------- */
@@ -153,6 +156,7 @@ function setupCarousel() {
     if (best !== front) {
       cards[front]?.classList.remove("is-front");
       cards[best].classList.add("is-front");
+      bus.emit("carousel:front", { i: best, prev: front, el: cards[best] });
       front = best;
       now.textContent = String(best + 1).padStart(2, "0");
       gsap.fromTo(cards[best].querySelector(".card__sym"), { rotateY: -90, opacity: 0 }, { rotateY: 0, opacity: 1, duration: 0.9, ease: "expo.out", overwrite: true });

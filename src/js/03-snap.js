@@ -19,7 +19,8 @@ function snapTo(y, dur = 1.2) {
   if (!lenis) return;
   snap.busy = true;
   snap.consumed = true;
-  lenis.scrollTo(y, { duration: dur, easing: easeSnap, lock: true, force: true, onComplete: () => (snap.busy = false) });
+  bus.emit("snap:go", { y, dur, dir: Math.sign(y - scrollY) || 1 });
+  lenis.scrollTo(y, { duration: dur, easing: easeSnap, lock: true, force: true, onComplete: () => { snap.busy = false; bus.emit("snap:land", { y }); } });
   setTimeout(() => (snap.busy = false), dur * 1000 + 300); // safety net
 }
 // the 3D carousel section has one stop per card
@@ -119,10 +120,13 @@ function updateDots() {
   let i = 0;
   sectionBounds().forEach((s, k) => { if (s.top <= mid) i = k; });
   if (i === activeDot) return;
+  const prev = activeDot;
   activeDot = i;
   dotBtns.forEach((b, k) => b.classList.toggle("is-on", k === i));
   const id = sectionEls[i].id;
   navLinks.forEach((a) => a.classList.toggle("is-active", a.getAttribute("href") === "#" + id));
+  // (the first call happens while the page is still starting, before anything listens: read sectionEls[activeDot] for "now")
+  bus.emit("section:change", { i, prev, id: id || "hero", el: sectionEls[i] });
 }
 
 

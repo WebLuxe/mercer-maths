@@ -17,3 +17,16 @@ const svgEl = (tag, attrs, parent) => {
   parent.appendChild(n);
   return n;
 };
+
+/* A tiny event bus. A feature announces what just happened ("snap:go", "quiz:right", "book:open"…)
+   and other files react to it (sound, haptics, the 3D scene) without either knowing about the other.
+   A listener that throws never breaks the feature that announced: the error is logged and the rest run. */
+const bus = {
+  map: {},
+  on(name, fn) { (bus.map[name] || (bus.map[name] = [])).push(fn); return bus; },
+  emit(name, data) {
+    const list = bus.map[name];
+    if (!list) return;
+    for (const fn of list) { try { fn(data || {}); } catch (err) { console.error("bus:" + name, err); } }
+  },
+};

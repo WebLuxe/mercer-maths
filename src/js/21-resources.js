@@ -15,6 +15,7 @@ if ($("#videosGrid")) {
     if (!btn || btn.getAttribute("aria-selected") === "true") return;
     $$("button", bar).forEach((x) => x.setAttribute("aria-selected", String(x === btn)));
     const want = btn.dataset.band, els = items();
+    bus.emit("filter:change", { kind: "videos", value: want, btn });
     gsap.killTweensOf(els);
     els.forEach((el) => { el.hidden = want !== "all" && el.dataset.band !== want; gsap.set(el, { clearProps: "opacity,transform" }); });
     const shown = els.filter((el) => !el.hidden);
@@ -36,6 +37,7 @@ if ($("#videosGrid")) {
     $("#vtitle").textContent = title;
     modal.classList.add("is-open");
     modal.setAttribute("aria-hidden", "false");
+    bus.emit("video:open", { title });
     gsap.fromTo(".vmodal__scrim", { opacity: 0 }, { opacity: 1, duration: 0.4 });
     gsap.fromTo(".vmodal__box", { y: 40, scale: 0.94, opacity: 0, rotationX: 12, transformPerspective: 1200 }, { y: 0, scale: 1, opacity: 1, rotationX: 0, duration: 0.8, ease: "expo.out" });
     setTimeout(() => $(".vmodal__x").focus({ preventScroll: true }), 300);
@@ -50,6 +52,7 @@ if ($("#videosGrid")) {
     ui.book = false;
     lenis?.start();
     videoFocus?.focus?.({ preventScroll: true });
+    bus.emit("video:close");
     const finish = () => { clearTimeout(videoClosing); modal.classList.remove("is-open", "is-closing"); };
     videoClosing = setTimeout(finish, 450);
     gsap.to(".vmodal__box", { y: 30, scale: 0.96, opacity: 0, duration: 0.35, ease: "power2.in" });

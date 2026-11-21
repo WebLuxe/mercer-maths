@@ -17,6 +17,7 @@ let currentSet = "maths", chartShown = false;
 function drawChart(key, first) {
   currentSet = key;
   chartShown = true;
+  bus.emit("chart:draw", { key, first: !!first });
   const set = DATA[key], total = set.grades.reduce((a, [, n]) => a + n, 0);
   $("#chartSub").textContent = `${set.label} · ${total} students`;
   $$(".chart__row").forEach((row, i) => {

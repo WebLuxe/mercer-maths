@@ -14,6 +14,7 @@ function revealPage() {
   gsap.set("#pt i", { y: 0, yPercent: 0 });
   gsap.set(chars, { y: 0, yPercent: 0 });
   document.documentElement.classList.remove("pt-in");
+  bus.emit("page:reveal", { label });
   gsap.timeline({ onComplete: () => gsap.set("#pt i", { yPercent: 105 }) })
     .to(chars, { yPercent: -110, duration: 0.55, stagger: 0.03, ease: "power3.in" }, 0.1)
     .to("#pt i", { yPercent: -105, duration: 1.15, stagger: { each: 0.07, from: "center" }, ease: "expo.inOut" }, 0.3);
@@ -22,6 +23,7 @@ function leaveTo(url, label) {
   try { sessionStorage.setItem("pt", label); } catch (e) {}
   const chars = ptLabel(label);
   lenis?.stop();
+  bus.emit("page:leave", { url, label });
   if (reduce) { location.href = url; return; }
   gsap.timeline({ onComplete: () => (location.href = url) })
     .fromTo("#pt i", { yPercent: 105 }, { yPercent: 0, duration: 0.9, stagger: { each: 0.06, from: "edges" }, ease: "expo.inOut" })

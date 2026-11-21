@@ -290,6 +290,7 @@ function setShape(k, instant) {
   morph.from = morph.to; morph.to = morph.target;
   u.uFrom.value = morph.from; u.uTo.value = morph.to; u.uT.value = 0;
   updateHud(morph.to);
+  bus.emit("shape:change", { from: morph.from, to: morph.to });
   morph.tween = gsap.to(u.uT, { value: 1, duration: reduce ? 0 : 1.6, ease: "power2.inOut",
     onComplete: () => { morph.tween = null; setShape(morph.target); } });
 }
@@ -448,6 +449,7 @@ addEventListener("pointerdown", (e) => {
   bgMat.uniforms.uRippleT.value = bgMat.uniforms.uTime.value;
   pMat.uniforms.uShock.value.copy(pMat.uniforms.uMouse.value);
   motion.shockT = clock.getElapsedTime();
+  bus.emit("shock", { x: e.clientX, y: e.clientY, target: e.target });
 }, { passive: true });
 
 // HUD: names the shape currently on screen

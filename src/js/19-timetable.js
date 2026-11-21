@@ -36,6 +36,7 @@ if ($("#ttGrid")) {
     $$(".tt__filters button").forEach((x) => x.setAttribute("aria-selected", String(x === f)));
     const want = f.dataset.form;
     slots.forEach((sl) => sl.classList.toggle("is-dim", want !== "all" && sl.dataset.form !== want));
+    bus.emit("filter:change", { kind: "timetable", value: want, btn: f });
     if (!reduce) gsap.fromTo(slots, { rotationY: -100, opacity: 0 }, { rotationY: 0, opacity: (i, el) => (el.classList.contains("is-dim") ? 0.14 : 1), duration: 0.8, stagger: { each: 0.035, from: "start" }, ease: "expo.out", transformPerspective: 900, clearProps: "opacity" });
   }));
   gsap.from(".tt__day", { y: 60, opacity: 0, rotationX: -35, transformPerspective: 900, duration: 1.1, stagger: 0.08, ease: "expo.out", scrollTrigger: { trigger: ".tt", start: "top 85%" } });

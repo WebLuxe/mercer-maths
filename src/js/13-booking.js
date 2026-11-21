@@ -19,6 +19,7 @@ $$(".chips", bookEl).forEach((g) => {
     b.setAttribute("aria-pressed", "false");
     b.addEventListener("click", () => {
       pickChip(g, b);
+      bus.emit("chip:pick", { btn: b, field: f });
       bookErr.textContent = "";
       gsap.fromTo(b, { scale: 0.9 }, { scale: 1, duration: 0.6, ease: "back.out(3)" });
       if (bookStep === 0) setTimeout(() => showBookStep(1, 1), 260);   // one tap is enough on step 1
@@ -33,6 +34,7 @@ function showBookStep(i, dir = 1) {
   bookNext.querySelector("span").textContent = i === bookSteps.length - 1 ? "Create message" : "Next";
   bookSteps.forEach((st, k) => st.classList.toggle("is-on", k === i));
   bookErr.textContent = "";
+  bus.emit("book:step", { i, dir });
   if (!reduce) gsap.fromTo(bookSteps[i].children, { x: 50 * dir, opacity: 0, rotationY: 18 * dir, transformPerspective: 900 },
     { x: 0, opacity: 1, rotationY: 0, duration: 0.7, stagger: 0.05, ease: "expo.out" });
 }
@@ -55,6 +57,7 @@ bookForm.addEventListener("submit", (e) => {
   const problem = bookProblem();
   if (problem) {
     bookErr.textContent = problem;
+    bus.emit("book:error", { problem });
     gsap.fromTo(bookPanel, { x: -10 }, { x: 0, duration: 0.5, ease: "elastic.out(1, 0.3)" });
     return;
   }
@@ -77,6 +80,7 @@ Parent's WhatsApp: ${phone}`;
   $("#sendWa").href = "https://wa.me/23059238436?text=" + encodeURIComponent(msg);
   $("#sendMail").href = "mailto:hello@kavishmaths.example?subject=" + encodeURIComponent("Free trial lesson: " + name) + "&body=" + encodeURIComponent(msg);
   bookBars.forEach((b) => b.classList.add("is-on"));
+  bus.emit("book:done", { panel: bookPanel });
   gsap.to(bookForm, { opacity: 0, y: -20, duration: 0.3, onComplete: () => {
     bookForm.hidden = true;
     bookDone.hidden = false;
@@ -105,6 +109,7 @@ function openBook(preset) {
   bookEl.classList.add("is-open");
   bookEl.setAttribute("aria-hidden", "false");
   lenis?.stop();
+  bus.emit("book:open", { panel: bookPanel });
   gsap.to(bookScrim, { opacity: 1, duration: 0.5 });
   gsap.fromTo(bookPanel, { xPercent: 110, rotationY: -28, transformPerspective: 1400, transformOrigin: "100% 50%" },
     { xPercent: 0, rotationY: 0, duration: reduce ? 0 : 1, ease: "expo.out" });
@@ -120,6 +125,7 @@ function closeBook() {
   ui.book = false;
   lenis?.start();
   bookFocus?.focus?.({ preventScroll: true });
+  bus.emit("book:close", { panel: bookPanel });
   const finish = () => { clearTimeout(bookClosing); bookEl.classList.remove("is-open", "is-closing"); };
   bookClosing = setTimeout(finish, 750);
   gsap.to(bookScrim, { opacity: 0, duration: 0.4 });
