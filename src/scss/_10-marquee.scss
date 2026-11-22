@@ -4,9 +4,10 @@
 
 // ---------- marquee ----------
 .marquee {
-  padding: 2.2rem 0; border-block: 1px solid $line; overflow: hidden; background: rgba(255, 255, 255, 0.015);
+  padding: 2.2rem 0; border-block: 1px solid; border-image: linear-gradient(90deg, transparent, rgba($a1, 0.8), rgba($a2, 0.8), rgba($a3, 0.8), transparent) 1; overflow: hidden;
+  background: linear-gradient(90deg, rgba($a1, 0.12), rgba($a2, 0.05) 50%, rgba($a3, 0.1));
   &__track { display: flex; width: max-content; animation: marquee 34s linear infinite; }
   &__item { font-family: $display; font-weight: 700; font-size: fluid(32, 68); letter-spacing: -0.03em; padding-right: 3rem; white-space: nowrap; display: flex; align-items: center; gap: 3rem;
-    &:nth-child(even) { color: transparent; -webkit-text-stroke: 1px rgba(255, 255, 255, 0.35); }
-    &::after { content: "✦"; font-size: 0.5em; color: $a2; -webkit-text-stroke: 0; } }
+    &:nth-child(even) { color: transparent; -webkit-text-stroke: 1px rgba(190, 175, 255, 0.6); }
+    &::after { content: "✦"; font-size: 0.5em; color: $a2; -webkit-text-stroke: 0; text-shadow: 0 0 18px $a2; } }
 }

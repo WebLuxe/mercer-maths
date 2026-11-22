@@ -10,13 +10,13 @@
   &__sub { color: $muted; font-size: 0.85rem; margin-top: 0.3rem; }
   &__tabs { display: inline-flex; padding: 4px; border-radius: 99px; @include glass(0.04);
     button { padding: 0.5rem 1.1rem; border-radius: 99px; font-size: 0.82rem; color: $muted; transition: background 0.3s, color 0.3s, scale 0.35s $ease-back;
-      &[aria-selected="true"] { background: $ink; color: $bg; } @include press(0.94); } }
+      &[aria-selected="true"] { background: $grad-cta; color: #fff; box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3), 0 6px 20px -6px rgba(109, 77, 255, 0.9); } @include press(0.94); } }
   &__rows { display: grid; gap: 12px; }
   &__row { display: grid; grid-template-columns: 52px 1fr 76px; align-items: center; gap: 1rem; }
   &__grade { font-family: $display; font-weight: 700; font-size: 1.4rem; line-height: 1; }
-  &__track { position: relative; height: 24px; border-radius: 6px; background: rgba(255, 255, 255, 0.03); }
+  &__track { position: relative; height: 24px; border-radius: 6px; background: rgba(255, 255, 255, 0.05); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04); }
   // (07-chart.js writes the bar's transform; the hover lift uses the separate translate property so the two never fight)
-  &__bar { position: absolute; inset: 0; background: $grad; border-radius: 6px; transform-origin: left; transform: scaleX(0); box-shadow: 0 0 18px rgba($a1, 0.45); transition: filter 0.2s, translate 0.35s $ease-out, box-shadow 0.35s; }
+  &__bar { position: absolute; inset: 0; background: $grad; border-radius: 6px; transform-origin: left; transform: scaleX(0); box-shadow: 0 0 22px rgba($a1, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.35); transition: filter 0.2s, translate 0.35s $ease-out, box-shadow 0.35s; }
   @media (hover: hover) { &__row:hover &__bar { filter: brightness(1.3); translate: 0 -2px; box-shadow: 0 6px 22px rgba($a1, 0.6); } }
   // the spark that rides a bar's tip while it grows: a full-width box slid left, so its right edge is always the tip
   &__tip { position: absolute; inset: 0; pointer-events: none; opacity: 0; transform: translateX(-100%);

@@ -6,12 +6,13 @@
 $bg: #07060b;
 $bg-2: #0e0c16;
 $ink: #f3f1fa;
-$muted: #8d88a3;
+$muted: #a09bb8;
 $line: rgba(255, 255, 255, 0.09);
 $a1: #8b5cf6; // violet
 $a2: #22d3ee; // cyan
 $a3: #f472b6; // pink
 $grad: linear-gradient(110deg, $a1 0%, $a2 50%, $a3 100%);
+$grad-cta: linear-gradient(110deg, #7c3aed 0%, #5b6cff 48%, #22b8f0 100%); // the main button: violet into blue
 $ease: cubic-bezier(0.77, 0, 0.175, 1);
 $ease-out: cubic-bezier(0.16, 1, 0.3, 1);
 $ease-back: cubic-bezier(0.34, 1.56, 0.64, 1); // lands with a small overshoot: for things let go after a press
@@ -27,15 +28,21 @@ $bp: (sm: 600px, md: 900px, lg: 1200px);
 }
 // Cards: tinted, no backdrop blur. Blurring a full-screen WebGL canvas that redraws every
 // frame is the single most expensive thing a browser can do, so blur is kept to small UI.
-@mixin glass($a: 0.04) {
-  background: linear-gradient(rgba(255, 255, 255, $a), rgba(255, 255, 255, $a)), rgba(12, 10, 22, 0.66);
-  border: 1px solid $line;
+// The look: dark glass lit from the top-left in violet and from the bottom-right in cyan, a hairline edge that
+// carries the same two lights (the border-box layer shows through the 1px transparent border), a thin sheen along
+// the top and a violet glow underneath. All of it is painted once: nothing here animates.
+$card-edge: linear-gradient(140deg, rgba($a1, 0.75), rgba(255, 255, 255, 0.13) 28%, rgba(255, 255, 255, 0.06) 66%, rgba($a2, 0.6));
+@mixin card-skin($a, $fill) {
+  background:
+    linear-gradient(155deg, rgba(167, 139, 250, $a * 2.6), rgba(255, 255, 255, $a * 0.5) 45%, rgba(34, 211, 238, $a * 1.2)) padding-box,
+    linear-gradient($fill, $fill) padding-box,
+    $card-edge border-box;
+  border: 1px solid transparent;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 26px 60px -32px rgba($a1, 0.7);
 }
+@mixin glass($a: 0.04) { @include card-skin($a, rgba(14, 11, 28, 0.74)); }
 // (was a live backdrop blur; re-blurring the moving WebGL layer every frame cost more than it showed)
-@mixin glass-blur($a: 0.04) {
-  background: linear-gradient(rgba(255, 255, 255, $a), rgba(255, 255, 255, $a)), rgba(14, 11, 26, 0.82);
-  border: 1px solid $line;
-}
+@mixin glass-blur($a: 0.04) { @include card-skin($a, rgba(15, 12, 30, 0.88)); }
 // animated conic border, used on the portrait and the featured fee card
 @mixin conic-border($r: 28px) {
   content: ""; position: absolute; inset: 0; border-radius: $r; padding: 1px; pointer-events: none;

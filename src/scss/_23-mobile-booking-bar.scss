@@ -35,8 +35,9 @@ $panel: "(min-width: 900px) and (min-height: 560px)";
   .sec.show { display: block; height: auto; padding: 0; }
   .wrap { width: min(1280px, 100% - 150px); }   // leaves a lane for the section dots
   .hero { height: 100vh; min-height: 0; padding: var(--pad-top) 0 var(--pad-bot); }
-  .hero__title { font-size: clamp(3rem, min(7.4vw, 12.5vh), 7rem); margin: 2.4vh 0; }
-  .hero__cta { margin-top: 4vh; }
+  .hero__title { font-size: clamp(3rem, min(7.4vw, 12.5vh), 7rem); margin: 2vh 0; }
+  .hero__cta { margin-top: 3.4vh; }
+  .hero .eyebrow { padding-block: 0.32rem; }    // the badge is taller than the plain label it replaced: keep the hero's text clear of the nav
   .portrait { width: min(420px, 100%, 62vh * 0.8); }
 
   .sec-head {

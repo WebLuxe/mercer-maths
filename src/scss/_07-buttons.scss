@@ -12,8 +12,13 @@
   // (--ox / --oy, set at those two moments by 18-button-spotlight.js). A circle clipped out of one small layer.
   &::before { content: ""; position: absolute; inset: 0; z-index: 1; background: $grad; border-radius: inherit;
     clip-path: circle(0% at var(--ox, 50%) var(--oy, 100%)); transition: clip-path 0.55s $ease-out; }
-  &--fill { background: $ink; color: $bg; border-color: transparent; }
-  &--ghost { @include glass; }
+  // the main button: violet into blue, lit along its top edge, with its own glow underneath and a band of light
+  // that crosses it every few seconds (the band is one small layer that only ever moves)
+  &--fill { background: $grad-cta; color: #fff; border-color: transparent; font-weight: 600;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.38), inset 0 -8px 16px -8px rgba(20, 8, 70, 0.55), 0 12px 36px -8px rgba(109, 77, 255, 0.85), 0 0 0 1px rgba(255, 255, 255, 0.07);
+    &::after { content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none; translate: -130% 0;
+      background: linear-gradient(105deg, transparent 34%, rgba(255, 255, 255, 0.5) 50%, transparent 66%); animation: shine 4.8s $ease infinite; } }
+  &--ghost { @include glass(0.06); }
   // A press squeezes the button a little and lets it go with a small spring: the separate scale property, because
   // GSAP owns transform on the magnetic buttons. A finger gets the fill too, growing from under the fingertip.
   &:active, &.is-press { scale: 0.96 !important; transition-duration: 0.25s, 0.1s; &::before { clip-path: circle(150% at var(--ox, 50%) var(--oy, 100%)); } }
@@ -25,6 +30,7 @@
     &:hover .btn__arrow { animation: arrowFly 0.55s $ease 1; }   // the arrow leaves the way it points and comes back in from behind
   }
 }
+@keyframes shine { 0%, 62% { translate: -130% 0; } 100% { translate: 130% 0; } }
 // (--fx / --fy: which way this arrow points, set with the class by 18-button-spotlight.js)
 @keyframes arrowFly {
   0% { translate: 0 0; opacity: 1; } 45% { translate: calc(var(--fx) * 140%) calc(var(--fy) * 140%); opacity: 0; }
