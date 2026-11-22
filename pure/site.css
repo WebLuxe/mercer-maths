@@ -55,9 +55,12 @@ button { cursor: pointer; background: none; border: 0; padding: 0; }
 .cur-in .curtain i { transform: none; } .cur-in .curtain b, .cur-in .curtain span { opacity: 1; }
 
 /* ---------- panels ---------- */
-.panel { position: relative; background: #000; }
-.panel__in { position: relative; background: #000; }
-.panel--paper > .panel__in { background: var(--paper); color: var(--ink); }
+/* every panel has a tone (its background): the paper of a hero, or one of two blacks that alternate down the page */
+.panel { position: relative; --tone: #000; background: var(--tone); }
+.sec:nth-child(even) { --tone: #0c0c0c; }
+.panel--paper { --tone: var(--paper); }
+.panel__in { position: relative; background: var(--tone); }
+.panel--paper > .panel__in { color: var(--ink); }
 .sec > .panel__in { padding: 7rem 0; }
 
 /* ---------- home hero ---------- */
@@ -292,21 +295,35 @@ a.row:hover .row__n, a.row:hover .row__d { color: #555; } a.row:hover .row__go {
 .dots button { width: 0.8rem; height: 0.8rem; border-radius: 99px; background: #fff; opacity: 0.4; transition: height 0.5s var(--spring), opacity 0.3s; position: relative; }
 .dots button::after { content: ""; position: absolute; inset: -0.6rem; } .dots button[aria-current="true"] { height: 2.8rem; opacity: 1; }
 
-/* ---------- desktop: every panel is exactly one screen, and the page scrolls through them like any page ---------- */
+/* ---------- desktop: every panel is exactly one screen, and one flick glides to the next ---------- */
+/* Between two panels the edge of the one arriving is not a straight line: it bulges like the front of a wave, highest in
+   the middle of the glide and flat again when it lands. The bulge is an ellipse in the panel's own tone, centred on the
+   panel's edge and squashed flat at rest (the script adds one to each edge of every panel, .cap, and scales it). */
 @media (min-width: 761px) and (min-height: 480px) {
-  .panel { height: 100vh; overflow: hidden; }
-  .panel--paper { background: var(--paper); }
-  .panel__in { height: 100%; display: flex; flex-direction: column; justify-content: center; will-change: transform, opacity; }
+  .deck { overflow-x: clip; }                                  /* (the wave is wider than the page) */
+  .panel { height: 100vh; }
+  .cap { position: absolute; left: -20%; width: 140%; height: 52vh; border-radius: 50%; background: var(--tone); pointer-events: none; transform: scaleY(0); will-change: transform; }
+  .cap--t { top: -26vh; box-shadow: 0 -2px 0 rgba(255, 255, 255, 0.34), 0 -3.4rem 6rem -3rem rgba(255, 255, 255, 0.16); }
+  /* (drawing order: a panel's top wave comes after the panel above it and before its own content, which is simply the order
+     they are written in. Its bottom wave has to lie over the panel BELOW it: the script lifts the whole panel for that, and
+     z-index −1 keeps the wave under the panel's own content.) */
+  .panel--paper > .cap--b { background: #000; }                /* (a hero ends in its black strip: its lower wave continues that) */
+  .cap--b { z-index: -1; bottom: -26vh; box-shadow: 0 2px 0 rgba(255, 255, 255, 0.34), 0 3.4rem 6rem -3rem rgba(255, 255, 255, 0.16); }
+  .panel__in { height: 100%; overflow: hidden; display: flex; flex-direction: column; justify-content: center; will-change: opacity; }
   .sec > .panel__in { padding: 11.5rem 0 4rem; }
   .hero > .panel__in, .phero > .panel__in { justify-content: stretch; }
   .hero > .panel__in > .art, .phero > .panel__in > .art { flex: 1; height: auto; min-height: 0; }
   .phero > .panel__in > .art { padding: 15rem 5.7rem 5rem; }
   .dots { display: flex; }
   .foot > .panel__in { padding: 10.5rem 0 3rem; }
+  /* what is inside a panel travels in layers (the script moves them at different speeds, so content streams in and out
+     instead of moving as one slab): each layer is kept as its own picture, so moving it costs nothing to draw */
+  .sec .wrap > *, .say, .trust, .mq, .hero__photo, .hero__title, .hero__about, .hero__book, .frame, .out, .plate, .logos, .true, .avail, .phero h1, .phero__r, .phero__img, .phero .cube { will-change: translate, transform; }
   html:not(.stepper) { scroll-snap-type: y proximity; } html:not(.stepper) .panel { scroll-snap-align: start; }
 }
 
 /* ---------- phone: one column, free scrolling ---------- */
+@media not ((min-width: 761px) and (min-height: 480px)) { .cap { display: none; } }
 @media (max-width: 760px) {
   .nav { position: absolute; left: 1.6rem; top: 1.6rem; height: 4.2rem; } .nav a { padding: 0 1.15rem; font-size: 1.25rem; }
   .hdate { display: none; }
@@ -358,16 +375,20 @@ a.row:hover .row__n, a.row:hover .row__d { color: #555; } a.row:hover .row__go {
 /* titles: the letters stand up one after another */
 .hero__title, .phero h1 { perspective: 70rem; }
 
-/* the hero is a set of layers at different depths: each shifts, and the plates turn, with the pointer (--mx / --my run −1 … 1) */
-.hero__photo { translate: calc(var(--mx, 0) * -1.8rem) calc(var(--my, 0) * -1.1rem); }
-.hero__title, .phero h1 { translate: calc(var(--mx, 0) * 1.1rem) calc(var(--my, 0) * 0.7rem); }
-.plate { translate: calc(var(--mx, 0) * 2.8rem) calc(var(--my, 0) * 1.7rem); transform: perspective(70rem) rotateY(calc(var(--mx, 0) * 18deg)) rotateX(calc(var(--my, 0) * -14deg)); }
-.frame { translate: calc(var(--mx, 0) * 1.9rem) calc(var(--my, 0) * 1.2rem); transform: perspective(80rem) rotateY(calc(var(--mx, 0) * 14deg)) rotateX(calc(var(--my, 0) * -12deg)); }
-.out { translate: calc(var(--mx, 0) * 2.3rem) calc(var(--my, 0) * 1.4rem); transform: perspective(80rem) rotateY(calc(var(--mx, 0) * 14deg)) rotateX(calc(var(--my, 0) * -12deg)); }
-.true { translate: calc(var(--mx, 0) * 3.6rem) calc(var(--my, 0) * 2.1rem); }
-.avail { translate: calc(var(--mx, 0) * 2rem) calc(var(--my, 0) * 1.2rem); }
-.logos { translate: calc(var(--mx, 0) * 1.4rem) calc(var(--my, 0) * 0.8rem); }
-.phero__img { translate: calc(var(--mx, 0) * -2.2rem) calc(var(--my, 0) * -1.3rem); }
+/* the hero is a set of layers at different depths. Each shifts, and the plates turn, with the pointer (--mx / --my run
+   −1 … 1); and between panels each travels at its own speed (--d: −1 = a screen below, 0 = in place, 1 = a screen above) */
+.hero__photo { translate: calc(var(--mx, 0) * -1.8rem) calc(var(--my, 0) * -1.1rem + var(--d, 0) * 16vh); }
+.hero__title, .phero h1 { translate: calc(var(--mx, 0) * 1.1rem) calc(var(--my, 0) * 0.7rem + var(--d, 0) * -14vh); }
+.hero__yr, .hero__about, .hero__book { translate: 0 calc(var(--d, 0) * -20vh); }
+.plate { translate: calc(var(--mx, 0) * 2.8rem) calc(var(--my, 0) * 1.7rem + var(--d, 0) * -30vh); transform: perspective(70rem) rotateY(calc(var(--mx, 0) * 18deg)) rotateX(calc(var(--my, 0) * -14deg)); }
+.frame { translate: calc(var(--mx, 0) * 1.9rem) calc(var(--my, 0) * 1.2rem + var(--d, 0) * -24vh); transform: perspective(80rem) rotateY(calc(var(--mx, 0) * 14deg)) rotateX(calc(var(--my, 0) * -12deg)); }
+.out { translate: calc(var(--mx, 0) * 2.3rem) calc(var(--my, 0) * 1.4rem + var(--d, 0) * -34vh); transform: perspective(80rem) rotateY(calc(var(--mx, 0) * 14deg)) rotateX(calc(var(--my, 0) * -12deg)); }
+.true { translate: calc(var(--mx, 0) * 3.6rem) calc(var(--my, 0) * 2.1rem + var(--d, 0) * -40vh); }
+.avail { translate: calc(var(--mx, 0) * 2rem) calc(var(--my, 0) * 1.2rem + var(--d, 0) * -26vh); }
+.logos { translate: calc(var(--mx, 0) * 1.4rem) calc(var(--my, 0) * 0.8rem + var(--d, 0) * -12vh); }
+.phero__img { translate: calc(var(--mx, 0) * -2.2rem) calc(var(--my, 0) * -1.3rem + var(--d, 0) * 14vh); }
+.phero__r { translate: 0 calc(var(--d, 0) * -30vh); }
+.phero .cube { translate: 0 calc(var(--d, 0) * -44vh); }
 
 /* a cube of symbols: six faces placed in real 3D, turning by itself and leaning with the pointer */
 .cube { position: absolute; z-index: 3; --s: 15rem; width: var(--s); height: var(--s); right: 17rem; top: 15rem; perspective: 80rem; pointer-events: none; }

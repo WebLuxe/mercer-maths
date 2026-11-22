@@ -166,63 +166,80 @@
     requestAnimationFrame(step);
   };
 
-  /* ---- desktop: one screen per panel, and the page simply scrolls through them. Nothing is stacked or flipped: a
-     panel's content only drifts a little slower than the page (so it has some depth) and fades as it leaves.
-     Scrolling is smooth and it snaps: the page follows the wheel or the trackpad as it moves (eased, never in jumps),
-     and when the hand stops it glides on to the nearest panel, or to the next one if it was pushed far enough. ---- */
-  const panels = $$(".panel"), inners = panels.map((p) => p.firstElementChild);
+  /* ---- desktop: one screen per panel, with smooth snapping. One flick of the wheel or the trackpad, an arrow key or a dot
+     glides the page exactly one panel (eased in and out, a little over a second) and it always rests on a whole panel.
+     What happens in between follows the glide, so it also plays backwards:
+       - the edge of the arriving panel bulges like a wave (see .cap in the styles);
+       - what is inside each panel travels in layers at different speeds: headings lead, the blocks under them follow,
+         and on the way out they stream off ahead of their panel;
+       - the panel being left fades. ---- */
+  const panels = $$(".panel"), inners = panels.map((p) => $(":scope > .panel__in", p));
   const stepper = fine && !reduce && panels.length > 1;
   if (stepper) root.classList.add("stepper");
-  let cur = 0, dots = [];
+  // each panel's layers and how far each travels (a share of the screen's height per screen scrolled).
+  // The heroes' layers are moved by the styles instead, from --d (they already shift with the pointer there).
+  const layers = panels.map((p, i) => {
+    if (p.matches(".hero, .phero")) return null;
+    const wrap = $(":scope > .wrap", inners[i]), head = wrap && $(":scope > .head", wrap);
+    const rest = (wrap ? [...wrap.children] : [...inners[i].children]).filter((c) => c !== head);
+    const out = head ? [[head, -0.1]] : [];
+    if (!wrap) [...inners[i].children].forEach((c, k) => { if (c.classList.contains("wrap")) [...c.children].forEach((x, j) => out.push([x, -0.2 - j * 0.07])); else out.push([c, -0.12 - k * 0.1]); });
+    else rest.forEach((c, k) => out.push([c, -0.24 - k * 0.08]));
+    return out;
+  });
+  // the wave on each edge of each panel: an element before the panel's content (top edge) and one after it (bottom edge)
+  const caps = panels.map((p) => {
+    if (!stepper) return null;
+    const t = document.createElement("i"), b = document.createElement("i");
+    t.className = "cap cap--t"; b.className = "cap cap--b";
+    t.setAttribute("aria-hidden", "true"); b.setAttribute("aria-hidden", "true");
+    p.prepend(t); p.append(b);
+    return [t, b];
+  });
+  let cur = 0, busy = false, glide = 0, dir = 1, lastY = scrollY, dots = [];
   const inDeck = () => deckMQ.matches;
   const mark = (i) => { dots.forEach((d, k) => d.setAttribute("aria-current", k === i)); };
   const paint = () => {
-    const y = scrollY / innerHeight;
-    inners.forEach((el, i) => {
+    const y = scrollY / innerHeight, live = inDeck() && !reduce;
+    if (scrollY !== lastY) { dir = scrollY > lastY ? 1 : -1; lastY = scrollY; }
+    panels.forEach((p, i) => {
       // d: −1 = a full screen below (still to arrive), 0 = filling the screen, 1 = a full screen above (gone)
-      const d = inDeck() && !reduce ? Math.round(clamp(y - i, -1, 1) * 600) / 600 : 0;
-      if (d === el._d) return;
-      el._d = d;
-      el.style.transform = d ? `translateY(${(d * 14).toFixed(2)}vh)` : "";          // (down while its panel moves up: slower than the page)
-      el.style.opacity = d > 0 ? (1 - 0.7 * d).toFixed(3) : "";
+      const d = live ? Math.round(clamp(y - i, -1, 1) * 800) / 800 : 0;
+      if (d === p._d) return;
+      p._d = d;
+      inners[i].style.opacity = d > 0 ? (1 - 0.8 * d).toFixed(3) : "";
+      if (!layers[i]) p.style.setProperty("--d", d);
+      else for (const [el, k] of layers[i]) el.style.translate = d ? `0 ${(d * k * 100).toFixed(2)}vh` : "";
     });
-    const i = Math.round(y);
-    if (i !== cur) { cur = i; mark(i); }
+    // the wave: on the leading edge of whichever panel is arriving (its top edge going down the page, its bottom edge going up)
+    const low = Math.floor(y), amp = live ? Math.round(Math.sin(Math.PI * (y - low)) * 500) / 500 : 0;
+    panels.forEach((p, i) => {
+      const t = dir > 0 && i === low + 1 ? amp : 0, b = dir < 0 && i === low ? amp : 0;
+      if (!caps[i]) return;
+      if (t !== p._t) { p._t = t; caps[i][0].style.transform = `scaleY(${t})`; }
+      if (b !== p._b) { p._b = b; caps[i][1].style.transform = `scaleY(${b})`; p.style.zIndex = b ? "3" : ""; }   // (a panel's bottom edge has to be drawn over the panel below it)
+    });
+    if (!busy) { const i = Math.round(y); if (i !== cur) { cur = i; mark(i); } }
     if (!inDeck() && words.length) { const r = say.getBoundingClientRect(); fillTo(clamp((innerHeight * 0.88 - r.top) / (r.height + innerHeight * 0.42))); }
-  };
-  // The scroller. `to` is where the page is heading, `pos` where it is; every frame `pos` closes a share of the gap
-  // (so it eases out, however far it has to go). `base` is the panel a gesture started from: a gesture can pull the
-  // page at most one panel away from it, and when the gesture ends the page settles on a whole panel.
-  const sc = { pos: scrollY, to: scrollY, base: Math.round(scrollY / innerHeight), k: 0.1, on: false, idle: 0, last: 0 };
-  const run = (now) => {
-    const dt = Math.min(50, now - sc.last || 16.7);
-    sc.last = now;
-    const gap = sc.to - sc.pos;
-    if (Math.abs(gap) < 0.5) {
-      sc.pos = sc.to; sc.on = false;
-      scrollTo(0, sc.pos); paint();
-      if (sc.pos % innerHeight < 1) root.classList.remove("is-gliding");
-      return;
-    }
-    sc.pos += gap * (1 - Math.pow(1 - sc.k, dt / 16.7));              // (the same glide at 60, 120 or 144 frames a second)
-    scrollTo(0, sc.pos); paint();
-    const at = sc.pos / innerHeight;
-    if (Math.abs(at - Math.round(at)) < 0.004 && Math.round(at) !== sc.base && sc.to !== Math.round(at) * innerHeight) sc.base = Math.round(at);   // reached the next panel with the hand still moving: carry on from there
-    requestAnimationFrame(run);
-  };
-  const kick = () => { if (sc.on) return; sc.on = true; sc.last = 0; root.classList.add("is-gliding"); requestAnimationFrame(run); };
-  const rest = () => {                                                // the gesture is over: which panel does the page settle on?
-    const vh = innerHeight, rel = sc.to / vh - sc.base, far = Math.min(0.07, 64 / vh);
-    sc.base = clamp(sc.base + (rel > far ? 1 : rel < -far ? -1 : 0), 0, panels.length - 1);
-    sc.to = sc.base * vh; sc.k = 0.095;
-    kick();
   };
   const go = (i) => {
     i = clamp(i, 0, panels.length - 1);
-    if (!stepper) return scrollTo({ top: i * innerHeight, behavior: "smooth" });
-    clearTimeout(sc.idle);
-    sc.base = i; sc.to = i * innerHeight; sc.k = 0.085;
-    kick();
+    const from = scrollY, to = i * innerHeight;
+    if (Math.abs(to - from) < 2) return;
+    if (!stepper) return scrollTo({ top: to, behavior: "smooth" });
+    const dur = 1150 + 260 * Math.max(0, Math.abs(to - from) / innerHeight - 1);     // (a jump over several panels takes a little longer)
+    cur = i; mark(i);
+    busy = true;
+    root.classList.add("is-gliding");
+    cancelAnimationFrame(glide);
+    const t0 = performance.now(), ease = (t) => (t < 0.5 ? 8 * t ** 4 : 1 - Math.pow(-2 * t + 2, 4) / 2);
+    const step = (now) => {
+      const p = Math.min(1, (now - t0) / dur);
+      scrollTo(0, from + (to - from) * ease(p));
+      paint();
+      if (p < 1) glide = requestAnimationFrame(step); else { busy = false; root.classList.remove("is-gliding"); }
+    };
+    glide = requestAnimationFrame(step);
   };
   if (panels.length > 1 && fine) {
     const box = document.createElement("div");
@@ -235,32 +252,28 @@
   cur = Math.round(scrollY / innerHeight);
   mark(cur);
   if (stepper) {
+    let last = 0, used = false, settle = 0;
     addEventListener("wheel", (e) => {
       if (!inDeck() || e.ctrlKey) return;
       e.preventDefault();
-      const vh = innerHeight, dy = e.deltaY * (e.deltaMode === 1 ? 34 : e.deltaMode === 2 ? vh : 1);
-      sc.to = clamp(clamp(sc.to + dy * 1.15, (sc.base - 1) * vh, (sc.base + 1) * vh), 0, (panels.length - 1) * vh);
-      sc.k = 0.17;
-      kick();
-      clearTimeout(sc.idle);
-      sc.idle = setTimeout(rest, 120);
+      const now = performance.now();
+      if (now - last > 180) used = false;                             // a new flick (one continuous spin or swipe counts once)
+      last = now;
+      if (busy || used || Math.abs(e.deltaY) < 3) return;
+      used = true;
+      go(cur + Math.sign(e.deltaY));
     }, { passive: false });
     addEventListener("keydown", (e) => {
       if (!inDeck() || e.altKey || e.ctrlKey || e.metaKey || e.target.closest?.("input, textarea, select, [contenteditable]")) return;
       const d = { ArrowDown: 1, PageDown: 1, ArrowUp: -1, PageUp: -1 }[e.key] || (e.key === " " && !e.target.closest?.("a, button, summary") ? (e.shiftKey ? -1 : 1) : 0);
-      const to = e.key === "Home" ? 0 : e.key === "End" ? panels.length - 1 : d ? sc.base + d : null;
+      const to = e.key === "Home" ? 0 : e.key === "End" ? panels.length - 1 : d ? cur + d : null;
       if (to === null) return;
       e.preventDefault();
-      go(to);
+      if (!busy) go(to);
     });
     // anything else that scrolls the page (the scrollbar, Tab moving focus, find in page) also ends on a whole panel
-    addEventListener("scroll", () => {
-      if (sc.on || !inDeck() || Math.abs(scrollY - sc.pos) < 2) return;
-      sc.pos = sc.to = scrollY;
-      clearTimeout(sc.idle);
-      sc.idle = setTimeout(() => go(Math.round(scrollY / innerHeight)), 170);
-    }, { passive: true });
-    addEventListener("resize", () => { if (inDeck()) { sc.pos = sc.to = sc.base * innerHeight; scrollTo(0, sc.pos); } });
+    addEventListener("scroll", () => { clearTimeout(settle); if (!busy && inDeck()) settle = setTimeout(() => { if (!busy) go(Math.round(scrollY / innerHeight)); }, 170); }, { passive: true });
+    addEventListener("resize", () => { if (inDeck()) scrollTo(0, cur * innerHeight); });
   }
   $$('a[href="#start"]').forEach((a) => a.addEventListener("click", (e) => { if (inDeck()) { e.preventDefault(); go(1); } }));
   let queued = false;
