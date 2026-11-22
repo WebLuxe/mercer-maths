@@ -10,17 +10,11 @@
 // (a section is its own stacking context, so z-index -1 stays above the WebGL canvas). Nothing is blurred live
 // and nothing repaints per frame: the layers only move with their panel.
 
-// ---- hero: a violet light behind the headline, and a lit horizon along the bottom edge
+// ---- hero: a violet light behind the headline
 .hero {
   &::before { content: ""; position: absolute; z-index: -1; pointer-events: none; left: -12%; top: 6%; width: 74%; height: 80%;
     background: radial-gradient(closest-side, rgba($a1, 0.2), rgba(79, 107, 255, 0.07) 55%, transparent); }
-  // The horizon is the top of one very large circle: dark just inside its edge, a white-hot rim, then blue and
-  // violet air above it. Stops are a share of the radius, so the rim keeps its proportions on every screen.
-  &::after { content: ""; position: absolute; z-index: -1; pointer-events: none; left: 0; right: 0; bottom: 0; height: 46vh; --r: 170vw;
-    background: radial-gradient(circle var(--r) at 50% calc(100% + var(--r) - 10vh),
-      transparent 96.2%, rgba($bg, 0.9) 99.35%, rgba(255, 255, 255, 0.95) 99.7%, rgba(150, 165, 255, 0.8) 99.92%,
-      rgba($a1, 0.42) 100.8%, rgba(79, 107, 255, 0.16) 103.2%, transparent 108.5%); }
-  @include down(md) { &::before { left: -30%; width: 130%; top: 0; height: 60%; } &::after { --r: 240vw; height: 34vh; } }
+  @include down(md) { &::before { left: -30%; width: 130%; top: 0; height: 60%; } }
 }
 
 // ---- section headings: a pool of light under the gradient line
@@ -57,9 +51,3 @@ $glows: rgba(61, 123, 255, 0.5), rgba(139, 92, 255, 0.55), rgba(45, 212, 238, 0.
   .contact__info > div:hover { --glow-size: 270px; }
   .chart:hover { --glow-size: 480px; }
 }
-
-// ---- portal (26-portal.js): the two rings a panel change flies through. Drawn small and scaled up by the script.
-.portal { position: fixed; inset: 0; z-index: 60; pointer-events: none; overflow: hidden; display: grid; place-items: center;
-  i { grid-area: 1 / 1; width: 30vmin; aspect-ratio: 1; border-radius: 50%; opacity: 0; will-change: transform, opacity;
-    border: 3px solid #b4f8ff; box-shadow: 0 0 20px 3px rgba($a2, 0.95), inset 0 0 20px 3px rgba($a2, 0.8), 0 0 70px 10px rgba($a1, 0.55);
-    &:nth-child(2) { width: 24vmin; border-color: #d9ccff; box-shadow: 0 0 20px 3px rgba($a1, 0.95), inset 0 0 20px 3px rgba($a1, 0.8), 0 0 70px 10px rgba($a3, 0.4); } } }

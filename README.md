@@ -50,10 +50,9 @@ Videos come from **`assets/data/resources.json`**. Upload to YouTube (unlisted w
 | **Quiz.** Three real Add Maths questions with worked answers. | **Booking.** Three steps, then a ready-to-send WhatsApp or email. |
 
 **Everything else:**
-- **Portal transition:** every panel change is a flight through two neon rings: forwards going down the page, backwards going up.
 - **One poster typeface:** every heading is set in Syne 800, with the accent line alternating between gradient and outline from panel to panel.
 - **Stage lighting:** the page is near black, with one fan of light beams falling from the top, so what is lit reads as lit. Every panel change sends a band of light sweeping through the graph paper.
-- **Hero:** a wide poster headline in three finishes (solid, outline, gradient) and two neon rings that orbit the portrait, one passing in front of him, each with a point of light racing round it. A glowing horizon runs along the bottom edge.
+- **Hero:** a wide poster headline in three finishes (solid, outline, gradient) and two neon rings that orbit the portrait, one passing in front of him, each with a point of light racing round it.
 - **Results:** one giant figure with the grade curve drawing itself behind it, and a chart whose top grades are lit and whose other bars dim when you point at one.
 - **Story:** the years are giant outlined numerals that light up as the line reaches them, with a pulse of light travelling down the line. Each testimonial leads with the grade jump in giant type (start grade in outline, final grade in gradient), and the final grade gets circled in pen.
 - **Cards:** dark glass with a hairline edge; each card in a row has its own corner light, which grows under the pointer.
