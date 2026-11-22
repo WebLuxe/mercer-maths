@@ -10,18 +10,18 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@100..900&family=Archivo:wdth,wght@62..125,100..900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="site.css?v=1">
+  <link rel="stylesheet" href="site.css?v=2">
+  <script>(function(d){d.classList.add("js");if(!matchMedia("(prefers-reduced-motion: reduce)").matches)d.classList.add("cur-in");setTimeout(function(){if(!window.__pure)d.classList.remove("js","cur-in")},4000)})(document.documentElement)</script>
 </head>
 <body>
-  <header class="top"><div class="art">
-    <nav class="nav" aria-label="Pages"><i class="nav__pill" aria-hidden="true"></i><a href="index.html">Home</a><a href="classes.html" aria-current="page" class="is-on">Classes</a><a href="results.html">Results</a><a href="notes.html">Notes</a></nav>
-    <div class="top__date" id="date" aria-hidden="true">Kavish Maths<br>Mauritius</div>
-    <a class="btn top__cta" href="contact.html"><span>Book a Trial</span><i>↗</i></a>
-  </div></header>
-  <main>
-  <section class="phero">
+  <div class="curtain" aria-hidden="true"><b>Classes</b><span>Kavish Maths — Pure</span></div>
+  <nav class="nav" aria-label="Pages"><i class="nav__pill" aria-hidden="true"></i><a href="index.html">Home</a><a href="classes.html" aria-current="page" class="is-on">Classes</a><a href="results.html">Results</a><a href="notes.html">Notes</a></nav>
+  <main class="deck">
+  <section class="panel panel--paper phero"><div class="panel__in">
     <img class="phero__img" src="img/chalk.jpg" alt="" aria-hidden="true">
     <div class="art">
+      <div class="hdate" id="date" aria-hidden="true">Kavish Maths<br>Mauritius</div>
+      <a class="btn hcta" href="contact.html"><span>Book a Trial</span><i>↗</i></a>
       <h1><span class="phero__ix" data-rise>(01) — Classes</span><span class="mask"><span>The</span></span><span class="mask"><span>Classes</span></span></h1>
       <div class="phero__r">
         <p data-rise>Three stages, one way of working: small groups, a diagnostic on day one, and a marked past paper every week.</p>
@@ -29,43 +29,44 @@
         <span data-rise style="display:inline-block"><a class="btn" href="contact.html">Book a trial <i>↗</i></a></span>
       </div>
     </div>
-  </section>
   <div class="bar"><div class="art wide"><span>Grades <span class="dim">7–13</span></span><a class="bar__mid" href="#start">Scroll down <i>↓</i></a><span class="dim">NCE · SC · HSC</span></div></div>
+  </div></section>
 
-  <section class="sec" id="start"><div class="wrap">
+  <section class="panel sec" id="start"><div class="panel__in"><div class="wrap">
     <div class="head"><small class="rv">(STAGES)</small><h2 class="rv">Pick up exactly where your grade is.</h2></div>
     <div class="grid3">
       <div class="card card--light rv"><small>(01) Grades 7–9</small><h3>Foundations for the NCE</h3><ul><li>Grade 7 and Grade 8 Maths</li><li>Grade 9: the NCE syllabus</li><li>Number, algebra and geometry done properly</li></ul><div class="card__big">NCE</div></div>
       <div class="card card--mid rv"><small>(02) Grades 10–11</small><h3>School Certificate: Maths and Add Maths</h3><ul><li>O Level Mathematics 4024</li><li>Additional Mathematics 4037</li><li>A marked past paper every week</li></ul><div class="card__big">SC</div></div>
       <div class="card rv"><small>(03) Grades 12–13</small><h3>A Level Maths for the HSC</h3><ul><li>Pure Mathematics 1 and 3</li><li>Mechanics and Statistics</li><li>Cambridge 9709, paper by paper</li></ul><div class="card__big">HSC</div></div>
     </div>
-  </div></section>
+  </div></div></section>
 
-  <section class="sec"><div class="wrap">
+  <section class="panel sec"><div class="panel__in"><div class="wrap">
     <div class="head"><small class="rv">(TIMETABLE)</small><h2 class="rv">One week, twelve classes.</h2><div class="chips rv" id="ttChips" role="group" aria-label="Show classes for"><button aria-pressed="true" data-band="all">All</button><button aria-pressed="false" data-band="7-9">7–9</button><button aria-pressed="false" data-band="10-11">10–11</button><button aria-pressed="false" data-band="12-13">12–13</button></div></div>
     <div class="tt" id="tt"></div>
-  </div></section>
+  </div></div></section>
 
-  <section class="sec"><div class="wrap">
+  <section class="panel sec"><div class="panel__in"><div class="wrap">
     <div class="head"><small class="rv">(METHOD)</small><h2 class="rv">How every lesson works.</h2></div>
     <div class="grid4"><div class="step rv"><b>01</b><h3>Diagnostic</h3><p>A short paper on day one shows exactly which topics are missing.</p></div><div class="step rv"><b>02</b><h3>Teach</h3><p>One topic at a time, explained from the foundations up, in groups of six at most.</p></div><div class="step rv"><b>03</b><h3>Practise</h3><p>A real past paper every week, marked and handed back while you still remember your mistakes.</p></div><div class="step rv"><b>04</b><h3>Report</h3><p>Parents get a note every month: topics covered, marks, and what comes next.</p></div></div>
-  </div></section>
+  </div></div></section>
 
-  <section class="sec"><div class="wrap">
+  <section class="panel sec"><div class="panel__in"><div class="wrap">
     <div class="head"><small class="rv">(FEES)</small><h2 class="rv">Pick how you learn.</h2></div>
     <div class="grid3">
       <div class="card  rv"><small>In person</small><h3>Small group</h3><ul><li>Maximum 6 students</li><li>2 × 90 min per week</li><li>Weekly past paper marking</li><li>Monthly note to parents</li></ul><div class="card__big">Rs 2,800<small>/ month</small></div><a class="btn btn--line" href="contact.html">Join a group <i>↗</i></a></div>
       <div class="card card--light rv"><small>Most flexible</small><h3>One-to-one</h3><ul><li>60 minutes, your pace</li><li>Built from your diagnostic</li><li>Book weekly or before exams</li><li>Homework help on WhatsApp</li></ul><div class="card__big">Rs 1,200<small>/ session</small></div><a class="btn " href="contact.html">Book a session <i>↗</i></a></div>
       <div class="card  rv"><small>Online</small><h3>Live online</h3><ul><li>Same groups, over Zoom</li><li>Shared digital whiteboard</li><li>Every lesson recorded</li><li>Works from anywhere</li></ul><div class="card__big">Rs 2,200<small>/ month</small></div><a class="btn btn--line" href="contact.html">Join online <i>↗</i></a></div>
     </div>
-  </div></section>
+  </div></div></section>
 
-  <section class="sec"><div class="wrap">
+  <section class="panel sec"><div class="panel__in"><div class="wrap">
     <div class="head"><small class="rv">(QUESTIONS)</small><h2 class="rv">Parents usually ask.</h2></div>
-    <div class="faq"><details class="rv"><summary><small>01</small>Which syllabus do you follow?<i>+</i></summary><p>The Mauritius national curriculum for Grades 7–9 (NCE), Cambridge SC for Grades 10–11 (Maths 4024, Add Maths 4037) and Cambridge HSC for Grades 12–13 (A Level Maths 9709). Groups are split by grade, so nobody sits through topics that aren't on their paper.</p></details><details class="rv"><summary><small>02</small>Can my child join halfway through the year?<i>+</i></summary><p>Yes. The diagnostic paper on day one shows which earlier topics are missing, and those get covered in catch-up sessions alongside the group.</p></details><details class="rv"><summary><small>03</small>What happens if a lesson is missed?<i>+</i></summary><p>Every lesson is recorded, and the notes and practice sheet are shared the same evening. A short catch-up can be booked if it's an important topic.</p></details><details class="rv"><summary><small>04</small>How do I know it's working?<i>+</i></summary><p>Parents get a progress note every month with the topics covered, past paper marks, and what's next. You'll see the marks move before results day.</p></details><details class="rv"><summary><small>05</small>Is the trial lesson really free?<i>+</i></summary><p>Yes. One full class plus the diagnostic paper, no payment details and no commitment. You decide afterwards.</p></details></div>
-  </div></section>
-  </main>
-  <footer class="foot"><div class="wrap">
+    <div class="faq"><details class="rv" name="faq"><summary><small>01</small>Which syllabus do you follow?<i>+</i></summary><p>The Mauritius national curriculum for Grades 7–9 (NCE), Cambridge SC for Grades 10–11 (Maths 4024, Add Maths 4037) and Cambridge HSC for Grades 12–13 (A Level Maths 9709). Groups are split by grade, so nobody sits through topics that aren't on their paper.</p></details><details class="rv" name="faq"><summary><small>02</small>Can my child join halfway through the year?<i>+</i></summary><p>Yes. The diagnostic paper on day one shows which earlier topics are missing, and those get covered in catch-up sessions alongside the group.</p></details><details class="rv" name="faq"><summary><small>03</small>What happens if a lesson is missed?<i>+</i></summary><p>Every lesson is recorded, and the notes and practice sheet are shared the same evening. A short catch-up can be booked if it's an important topic.</p></details><details class="rv" name="faq"><summary><small>04</small>How do I know it's working?<i>+</i></summary><p>Parents get a progress note every month with the topics covered, past paper marks, and what's next. You'll see the marks move before results day.</p></details><details class="rv" name="faq"><summary><small>05</small>Is the trial lesson really free?<i>+</i></summary><p>Yes. One full class plus the diagnostic paper, no payment details and no commitment. You decide afterwards.</p></details></div>
+  </div></div></section>
+  <section class="panel sec foot"><footer class="panel__in">
+    <div class="mq" aria-hidden="true"><div class="mq__t"><span>Book a free trial —</span><span>First lesson’s on me —</span><span>Book a free trial —</span><span>First lesson’s on me —</span><span>Book a free trial —</span><span>First lesson’s on me —</span><span>Book a free trial —</span><span>First lesson’s on me —</span></div></div>
+    <div class="wrap">
     <div class="foot__top"><h2 class="rv">First lesson’s<br><span>on me.</span></h2><a class="btn btn--white rv" href="contact.html">Book a free trial <i>↗</i></a></div>
     <div class="foot__cols">
       <div><div class="foot__brand"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M2 21 12 3l4.2 7.6L10.4 21z"/><path d="M13.6 21l3.9-7 3.9 7z" opacity=".6"/></svg>KAVISH</div><p>Maths tuition for Grades 7 to 13 in Mauritius: NCE, SC and HSC, in small groups, one-to-one or live online.</p></div>
@@ -74,7 +75,9 @@
       <div><b>Hours</b><span>Mon–Fri · 15:30–20:00</span><span>Saturday · 08:00–13:00</span><span>Grades 7–13</span></div>
     </div>
     <div class="foot__end"><span>© 2026 Kavish Maths</span><span>Demo content: names, results, prices and reviews are placeholders.</span><span>Photos from Unsplash: Ludovic Migneault, Anna Hecker, Thomas T, Takashi Miyazaki, Vitaly Gariev</span></div>
-  </div></footer>
-  <script src="site.js?v=1"></script>
+    </div>
+  </footer></section>
+  </main>
+  <script src="site.js?v=2"></script>
 </body>
 </html>

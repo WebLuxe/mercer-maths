@@ -10,18 +10,18 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@100..900&family=Archivo:wdth,wght@62..125,100..900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="site.css?v=1">
+  <link rel="stylesheet" href="site.css?v=2">
+  <script>(function(d){d.classList.add("js");if(!matchMedia("(prefers-reduced-motion: reduce)").matches)d.classList.add("cur-in");setTimeout(function(){if(!window.__pure)d.classList.remove("js","cur-in")},4000)})(document.documentElement)</script>
 </head>
 <body>
-  <header class="top"><div class="art">
-    <nav class="nav" aria-label="Pages"><i class="nav__pill" aria-hidden="true"></i><a href="index.html">Home</a><a href="classes.html">Classes</a><a href="results.html">Results</a><a href="notes.html">Notes</a></nav>
-    <div class="top__date" id="date" aria-hidden="true">Kavish Maths<br>Mauritius</div>
-    <a class="btn top__cta" href="contact.html"><span>Book a Trial</span><i>↗</i></a>
-  </div></header>
-  <main>
-  <section class="phero">
+  <div class="curtain" aria-hidden="true"><b>Contact</b><span>Kavish Maths — Pure</span></div>
+  <nav class="nav" aria-label="Pages"><i class="nav__pill" aria-hidden="true"></i><a href="index.html">Home</a><a href="classes.html">Classes</a><a href="results.html">Results</a><a href="notes.html">Notes</a></nav>
+  <main class="deck">
+  <section class="panel panel--paper phero"><div class="panel__in">
     <img class="phero__img" src="img/chalk.jpg" alt="" aria-hidden="true">
     <div class="art">
+      <div class="hdate" id="date" aria-hidden="true">Kavish Maths<br>Mauritius</div>
+      <a class="btn hcta" href="contact.html"><span>Book a Trial</span><i>↗</i></a>
       <h1><span class="phero__ix" data-rise>(04) — Contact</span><span class="mask"><span>Let’s</span></span><span class="mask"><span>Talk</span></span></h1>
       <div class="phero__r">
         <p data-rise>The first lesson is free. Bring your last test paper and we'll start from there.</p>
@@ -29,14 +29,13 @@
         <span data-rise style="display:inline-block"><a class="btn" href="https://wa.me/23059238436?text=Hello%2C%20I%27d%20like%20to%20ask%20about%20Maths%20tuition." target="_blank" rel="noopener">WhatsApp +230 5923 8436 <i>↗</i></a></span>
       </div>
     </div>
-  </section>
   <div class="bar"><div class="art wide"><span>Reply <span class="dim">same day</span></span><a class="bar__mid" href="#start">Scroll down <i>↓</i></a><span class="dim">No commitment</span></div></div>
+  </div></section>
 
-  <section class="sec" id="start"><div class="wrap">
-    <div class="head"><small class="rv">(BOOK)</small><h2 class="rv">Three questions, then it's a WhatsApp message.</h2></div>
+  <section class="panel sec" id="start"><div class="panel__in"><div class="wrap">
+    <div class="head"><small class="rv">(BOOK)</small><h2 class="rv">Book the free trial.</h2></div>
     <div class="contact">
       <form class="form rv" id="book">
-        <h3>Book the free trial</h3>
         <label>Student's name<input name="name" required autocomplete="name" placeholder="First name is enough"></label>
         <div class="form__2">
           <label>Grade<select name="grade"><option>Grade 7</option><option>Grade 8</option><option>Grade 9 (NCE)</option><option>Grade 10</option><option selected>Grade 11 (SC)</option><option>Grade 12</option><option>Grade 13 (HSC)</option></select></label>
@@ -53,9 +52,10 @@
         <div class="card card--wide rv"><small>Who</small><h3>Grades 7–13 · NCE, SC and HSC · Maths, Add Maths and A Level Maths</h3></div>
       </div>
     </div>
-  </div></section>
-  </main>
-  <footer class="foot"><div class="wrap">
+  </div></div></section>
+  <section class="panel sec foot"><footer class="panel__in">
+    <div class="mq" aria-hidden="true"><div class="mq__t"><span>Book a free trial —</span><span>First lesson’s on me —</span><span>Book a free trial —</span><span>First lesson’s on me —</span><span>Book a free trial —</span><span>First lesson’s on me —</span><span>Book a free trial —</span><span>First lesson’s on me —</span></div></div>
+    <div class="wrap">
     <div class="foot__top"><h2 class="rv">First lesson’s<br><span>on me.</span></h2><a class="btn btn--white rv" href="contact.html">Book a free trial <i>↗</i></a></div>
     <div class="foot__cols">
       <div><div class="foot__brand"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M2 21 12 3l4.2 7.6L10.4 21z"/><path d="M13.6 21l3.9-7 3.9 7z" opacity=".6"/></svg>KAVISH</div><p>Maths tuition for Grades 7 to 13 in Mauritius: NCE, SC and HSC, in small groups, one-to-one or live online.</p></div>
@@ -64,7 +64,9 @@
       <div><b>Hours</b><span>Mon–Fri · 15:30–20:00</span><span>Saturday · 08:00–13:00</span><span>Grades 7–13</span></div>
     </div>
     <div class="foot__end"><span>© 2026 Kavish Maths</span><span>Demo content: names, results, prices and reviews are placeholders.</span><span>Photos from Unsplash: Ludovic Migneault, Anna Hecker, Thomas T, Takashi Miyazaki, Vitaly Gariev</span></div>
-  </div></footer>
-  <script src="site.js?v=1"></script>
+    </div>
+  </footer></section>
+  </main>
+  <script src="site.js?v=2"></script>
 </body>
 </html>
