@@ -10,11 +10,13 @@
   &:hover { box-shadow: 0 24px 60px -30px rgba($a1, 0.75); }
   // the featured card floats very slightly (the separate translate property: GSAP owns transform for the tilt).
   // Like every looping animation it pauses while its section is off screen (.is-off), and the low-power tier drops it.
-  &--main { background: linear-gradient(160deg, rgba($a1, 0.34), rgba(14, 11, 28, 0.88) 52%, rgba($a2, 0.16)); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 30px 80px -30px rgba($a1, 0.95); animation: floaty 4.6s ease-in-out infinite alternate; &::before { @include conic-border(28px); } }
+  // the recommended card is marked with light, not with a different box: a glow rises from its bottom edge
+  &--main { background: radial-gradient(120% 78% at 50% 108%, rgba(124, 92, 255, 0.62), rgba(34, 211, 238, 0.2) 46%, transparent 76%), linear-gradient(rgba(12, 11, 26, 0.93), rgba(12, 11, 26, 0.93));
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 34px 90px -30px rgba($a1, 0.95); animation: floaty 4.6s ease-in-out infinite alternate; &::before { @include conic-border(28px); } }
   &__tag { font-size: 0.72rem; letter-spacing: 0.2em; text-transform: uppercase; color: $muted; }
-  &--main &__tag { @include grad-text; }
+  &--main &__tag { align-self: flex-start; padding: 0.38rem 0.8rem; border-radius: 99px; color: #fff; background: $grad-cta; box-shadow: 0 6px 20px -6px rgba(109, 77, 255, 0.9); letter-spacing: 0.16em; }
   h3 { font-family: $display; font-size: 1.9rem; letter-spacing: -0.03em; line-height: 1; }
-  &__price { font-family: $display; font-weight: 700; font-size: 2.8rem; letter-spacing: -0.04em; line-height: 1; small { font-family: "Inter"; font-weight: 400; font-size: 0.85rem; color: $muted; letter-spacing: 0; } }
+  &__price { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.1em 0.35em; font-family: $poster; font-weight: 800; font-size: fluid(27, 38); letter-spacing: -0.04em; line-height: 1; small { font-family: "Inter"; font-weight: 400; font-size: 0.85rem; color: $muted; letter-spacing: 0; } }
   ul { list-style: none; display: grid; gap: 0.55rem; font-size: 0.9rem; color: $muted; flex: 1;
     li { padding-left: 1.5rem; position: relative; &::before { content: "✓"; position: absolute; left: 0; color: $a2; } } }
   .btn { align-self: start; }

@@ -13,7 +13,7 @@
   // The headline figure: first, full width, in the poster face, with the grade curve rising behind it. The curve
   // draws itself whenever the section comes into view (.is-off is the off-screen flag from 20-performance.js).
   &--hero { grid-column: 1 / -1; order: -1; display: flex; align-items: flex-end; gap: fluid(14, 34);
-    .stat__num { font-family: $poster; font-weight: 800; font-size: fluid(64, 150); line-height: 0.86; letter-spacing: -0.05em; color: #f4f8ff;
+    .stat__num { flex: none; white-space: nowrap; font-family: $poster; font-weight: 800; font-size: fluid(64, 150); line-height: 0.86; letter-spacing: -0.05em; color: #f4f8ff;
       text-shadow: 0 0 60px rgba($a1, 0.95), 0 0 22px rgba($a2, 0.4); }
     .stat__label { color: $ink; font-size: fluid(14, 17); max-width: 17ch; margin: 0 0 0.45em; } }
   &__curve { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none;
