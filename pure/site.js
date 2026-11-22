@@ -18,13 +18,13 @@
   root.classList.add("js");
 
   /* ---- the curtain: every page arrives from behind a black sheet that lifts, and leaves behind one that rises ---- */
-  const curtain = $(".curtain");
+  const curtain = $(".curtain"), shutters = curtain ? $$("i", curtain) : [], word = curtain && $("b", curtain);
   let shows = 0;                                                    // ms until the page starts to show (the load animation waits for it)
   if (curtain && !reduce && root.classList.contains("cur-in")) {
-    shows = 520;
-    const up = curtain.animate([{ transform: "none" }, { transform: "translateY(-101%)" }], { duration: 950, delay: 260, easing: INOUT, fill: "forwards" });
-    curtain.firstElementChild.animate([{ transform: "translateY(60%)", opacity: 0 }, { transform: "none", opacity: 1, offset: 0.35 }, { transform: "none", opacity: 1, offset: 0.55 }, { transform: "translateY(-40%)", opacity: 0 }], { duration: 900, easing: "ease", fill: "both" });
-    up.finished.then(() => { root.classList.remove("cur-in"); up.cancel(); }).catch(() => {});
+    shows = 560;
+    const ups = shutters.map((c, k) => c.animate([{ transform: "none" }, { transform: "translateY(-101%)" }], { duration: 780, delay: 300 + k * 75, easing: INOUT, fill: "forwards" }));
+    $$("b, span", curtain).forEach((t) => t.animate([{ opacity: 1, transform: "none" }, { opacity: 0, transform: "translateY(-30%) scale(0.9)" }], { duration: 380, delay: 180, easing: "ease-in", fill: "forwards" }));
+    Promise.all(ups.map((u) => u.finished)).then(() => { root.classList.remove("cur-in"); curtain.getAnimations({ subtree: true }).forEach((x) => x.cancel()); }).catch(() => {});
   } else root.classList.remove("cur-in");
   if (curtain && !reduce) {
     document.addEventListener("click", (e) => {
@@ -33,12 +33,12 @@
       const url = new URL(a.href, location.href);
       if (url.origin !== location.origin || !/\.html$|\/$/.test(url.pathname) || url.pathname === location.pathname) return;
       e.preventDefault();
-      const name = { "index.html": "Home", "classes.html": "Classes", "results.html": "Results", "notes.html": "Notes", "contact.html": "Contact" }[url.pathname.split("/").pop() || "index.html"] || "";
-      curtain.firstElementChild.textContent = name;
-      curtain.animate([{ transform: "translateY(101%)" }, { transform: "none" }], { duration: 620, easing: INOUT, fill: "forwards" }).finished.then(() => (location.href = url.href));
-      curtain.firstElementChild.animate([{ transform: "translateY(70%)", opacity: 0 }, { transform: "none", opacity: 1 }], { duration: 620, delay: 120, easing: EASE, fill: "both" });
+      word.textContent = { "index.html": "Pure Maths", "classes.html": "Classes", "results.html": "Results", "notes.html": "Notes", "contact.html": "Contact" }[url.pathname.split("/").pop() || "index.html"] || "";
+      const downs = shutters.map((c, k) => c.animate([{ transform: "translateY(101%)" }, { transform: "none" }], { duration: 520, delay: k * 60, easing: INOUT, fill: "forwards" }));
+      $$("b, span", curtain).forEach((t) => t.animate([{ opacity: 0, transform: "translateY(60%) scale(1.15)" }, { opacity: 1, transform: "none" }], { duration: 520, delay: 300, easing: EASE, fill: "forwards" }));
+      Promise.all(downs.map((d) => d.finished)).then(() => setTimeout(() => (location.href = url.href), 160));
     });
-    addEventListener("pageshow", (e) => { if (e.persisted) { curtain.getAnimations({ subtree: true }).forEach((a) => a.cancel()); root.classList.remove("cur-in"); } });
+    addEventListener("pageshow", (e) => { if (e.persisted) { curtain.getAnimations({ subtree: true }).forEach((x) => x.cancel()); root.classList.remove("cur-in"); } });
   }
 
   /* ---- warm-up, while the curtain is still down: every picture is decoded, and every panel is drawn once (each is
@@ -97,11 +97,21 @@
 
   /* ---- load: the title rises out of its masks, the photo un-blurs, everything else follows ---- */
   if (!reduce) {
-    $$(".mask > span").forEach((s, i) => s.animate([{ transform: "translateY(110%) rotate(3deg)" }, { transform: "none" }], { duration: 1100, delay: shows + 80 + i * 110, easing: EASE, fill: "backwards" }));
-    $(".hero__photo")?.animate([{ opacity: 0, transform: "translateY(50px) scale(1.06)", filter: "grayscale(1) blur(16px)" }, { opacity: 1, transform: "none", filter: "grayscale(1) contrast(1.06) blur(0)" }], { duration: 1500, delay: shows, easing: EASE, fill: "backwards" });
+    $$(".mask > span").forEach((line, i) => {
+      line.closest("h1")?.setAttribute("aria-label", line.closest("h1").textContent.replace(/\s+/g, " ").trim());
+      const text = line.textContent;
+      line.textContent = "";
+      [...text].forEach((c, k) => {
+        const ch = document.createElement("span");
+        ch.className = "ch"; ch.textContent = c; ch.setAttribute("aria-hidden", "true");
+        line.append(ch);
+        ch.animate([{ opacity: 0, transform: "translateY(55%) rotateX(-100deg) scale(0.7)" }, { opacity: 1, transform: "translateY(-6%) rotateX(12deg) scale(1.04)", offset: 0.62 }, { opacity: 1, transform: "none" }], { duration: 1000, delay: shows + 60 + i * 150 + k * 42, easing: "cubic-bezier(0.2, 0.9, 0.3, 1)", fill: "backwards" });
+      });
+    });
+    $(".hero__photo")?.animate([{ opacity: 0, transform: "translateY(90px) scale(1.22)", filter: "blur(22px)" }, { opacity: 1, transform: "none", filter: "blur(0)" }], { duration: 1700, delay: shows, easing: EASE, fill: "backwards" });
     $(".phero__img")?.animate([{ opacity: 0, transform: "scale(1.12)" }, { opacity: 0.16, transform: "none" }], { duration: 1800, delay: shows, easing: EASE, fill: "backwards" });
     $$(".nav, .hdate, .hcta").forEach((el, i) => el.animate([{ opacity: 0, transform: "translateY(-22px)" }, { opacity: 1, transform: "none" }], { duration: 900, delay: shows + i * 80, easing: EASE, fill: "backwards" }));
-    $$("[data-rise]").forEach((el, i) => el.animate([{ opacity: 0, transform: "translateY(22px) scale(0.96)" }, { opacity: 1, transform: "none" }], { duration: 950, delay: shows + 300 + i * 60, easing: EASE, fill: "backwards" }));
+    $$("[data-rise]").forEach((el, i) => el.animate([{ opacity: 0, transform: "perspective(800px) translateY(60px) rotateX(-55deg) scale(0.8)" }, { opacity: 1, transform: "perspective(800px) translateY(-4px) rotateX(6deg) scale(1.02)", offset: 0.65 }, { opacity: 1, transform: "perspective(800px) translateY(0) rotateX(0deg) scale(1)" }], { duration: 1050, delay: shows + 320 + i * 70, easing: "cubic-bezier(0.2, 0.9, 0.3, 1)", fill: "backwards" }));
     $(".out__line i")?.animate([{ transform: "scaleX(0)" }, { transform: "none" }], { duration: 1400, delay: shows + 900, easing: EASE, fill: "backwards" });
     $$(".bar .art > *").forEach((el, i) => el.animate([{ opacity: 0, transform: "translateY(14px)" }, { opacity: 1, transform: "none" }], { duration: 800, delay: shows + 700 + i * 90, easing: EASE, fill: "backwards" }));
   }
@@ -157,41 +167,65 @@
   };
 
   /* ---- the deck (desktop): one screen per panel. Panels are sticky, so each stays put while the next slides over it;
-     as it is covered it sinks back and dims. With a mouse or trackpad, one flick moves exactly one panel. ---- */
+     as it is covered it tips over backwards, and the one arriving swings up into place.
+     Scrolling is smooth and it snaps: the page follows the wheel or the trackpad as it moves (eased, never in jumps),
+     and when the hand stops it glides on to the nearest panel, or to the next one if it was pushed far enough. ---- */
   const panels = $$(".panel"), inners = panels.map((p) => p.firstElementChild);
   const stepper = fine && !reduce && panels.length > 1;
   if (stepper) root.classList.add("stepper");
-  let cur = 0, busy = false, glide = 0, dots = [];
+  let cur = 0, dots = [];
   const inDeck = () => deckMQ.matches;
   const mark = (i) => { dots.forEach((d, k) => d.setAttribute("aria-current", k === i)); };
   const paint = () => {
     const y = scrollY / innerHeight;
     inners.forEach((el, i) => {
-      const q = inDeck() && !reduce ? Math.round(clamp(y - i) * 500) / 500 : 0;   // 0 = in full view, 1 = fully covered by the next panel
-      if (q === el._q) return;
-      el._q = q;
-      el.style.transform = q ? `translateY(${(-5 * q).toFixed(2)}rem) scale(${(1 - 0.11 * q).toFixed(4)})` : "";
-      el.style.opacity = q ? (1 - 0.75 * q).toFixed(3) : "";
+      // d: −1 = a full screen below (still to arrive), 0 = in place, 1 = fully covered by the next panel
+      const d = inDeck() && !reduce ? Math.round(clamp(y - i, -1, 1) * 600) / 600 : 0;
+      if (d === el._d) return;
+      el._d = d;
+      let tf = "", op = "", org = "", vis = "";
+      if (d >= 1) vis = "hidden";                                    // (out of sight under the panel above: not drawn at all)
+      else if (d > 0) { tf = `translateY(${(-7 * d).toFixed(2)}rem) translateZ(${(-36 * d).toFixed(2)}rem) rotateX(${(15 * d).toFixed(2)}deg)`; op = (1 - 0.82 * d).toFixed(3); org = "50% 100%"; }
+      else if (d < 0 && d > -1) { tf = `translateZ(${(26 * d).toFixed(2)}rem) rotateX(${(26 * d).toFixed(2)}deg)`; org = "50% 0%"; }
+      el.style.transform = tf; el.style.opacity = op; el.style.transformOrigin = org; el.style.visibility = vis;
     });
-    if (!busy) { const i = Math.round(y); if (i !== cur) { cur = i; mark(i); } }
+    const i = Math.round(y);
+    if (i !== cur) { cur = i; mark(i); }
     if (!inDeck() && words.length) { const r = say.getBoundingClientRect(); fillTo(clamp((innerHeight * 0.88 - r.top) / (r.height + innerHeight * 0.42))); }
   };
-  const go = (i, dur = 1050) => {
+  // The scroller. `to` is where the page is heading, `pos` where it is; every frame `pos` closes a share of the gap
+  // (so it eases out, however far it has to go). `base` is the panel a gesture started from: a gesture can pull the
+  // page at most one panel away from it, and when the gesture ends the page settles on a whole panel.
+  const sc = { pos: scrollY, to: scrollY, base: Math.round(scrollY / innerHeight), k: 0.1, on: false, idle: 0, last: 0 };
+  const run = (now) => {
+    const dt = Math.min(50, now - sc.last || 16.7);
+    sc.last = now;
+    const gap = sc.to - sc.pos;
+    if (Math.abs(gap) < 0.5) {
+      sc.pos = sc.to; sc.on = false;
+      scrollTo(0, sc.pos); paint();
+      if (sc.pos % innerHeight < 1) root.classList.remove("is-gliding");
+      return;
+    }
+    sc.pos += gap * (1 - Math.pow(1 - sc.k, dt / 16.7));              // (the same glide at 60, 120 or 144 frames a second)
+    scrollTo(0, sc.pos); paint();
+    const at = sc.pos / innerHeight;
+    if (Math.abs(at - Math.round(at)) < 0.004 && Math.round(at) !== sc.base && sc.to !== Math.round(at) * innerHeight) sc.base = Math.round(at);   // reached the next panel with the hand still moving: carry on from there
+    requestAnimationFrame(run);
+  };
+  const kick = () => { if (sc.on) return; sc.on = true; sc.last = 0; root.classList.add("is-gliding"); requestAnimationFrame(run); };
+  const rest = () => {                                                // the gesture is over: which panel does the page settle on?
+    const vh = innerHeight, rel = sc.to / vh - sc.base, far = Math.min(0.07, 64 / vh);
+    sc.base = clamp(sc.base + (rel > far ? 1 : rel < -far ? -1 : 0), 0, panels.length - 1);
+    sc.to = sc.base * vh; sc.k = 0.095;
+    kick();
+  };
+  const go = (i) => {
     i = clamp(i, 0, panels.length - 1);
-    const from = scrollY, to = i * innerHeight;
-    cur = i; mark(i);
-    if (Math.abs(to - from) < 2) return;
-    if (!stepper) return scrollTo({ top: to, behavior: "smooth" });
-    busy = true;
-    cancelAnimationFrame(glide);
-    const t0 = performance.now(), ease = (t) => (t < 0.5 ? 16 * t ** 5 : 1 - Math.pow(-2 * t + 2, 5) / 2);
-    const step = (now) => {
-      const p = Math.min(1, (now - t0) / dur);
-      scrollTo(0, from + (to - from) * ease(p));
-      paint();
-      if (p < 1) glide = requestAnimationFrame(step); else busy = false;
-    };
-    glide = requestAnimationFrame(step);
+    if (!stepper) return scrollTo({ top: i * innerHeight, behavior: "smooth" });
+    clearTimeout(sc.idle);
+    sc.base = i; sc.to = i * innerHeight; sc.k = 0.085;
+    kick();
   };
   if (panels.length > 1 && fine) {
     const box = document.createElement("div");
@@ -204,28 +238,32 @@
   cur = Math.round(scrollY / innerHeight);
   mark(cur);
   if (stepper) {
-    let last = 0, used = false, settle = 0;
     addEventListener("wheel", (e) => {
       if (!inDeck() || e.ctrlKey) return;
       e.preventDefault();
-      const now = performance.now();
-      if (now - last > 200) used = false;                             // a new flick (one continuous spin or swipe counts once)
-      last = now;
-      if (busy || used || Math.abs(e.deltaY) < 3) return;
-      used = true;
-      go(cur + Math.sign(e.deltaY));
+      const vh = innerHeight, dy = e.deltaY * (e.deltaMode === 1 ? 34 : e.deltaMode === 2 ? vh : 1);
+      sc.to = clamp(clamp(sc.to + dy * 1.15, (sc.base - 1) * vh, (sc.base + 1) * vh), 0, (panels.length - 1) * vh);
+      sc.k = 0.17;
+      kick();
+      clearTimeout(sc.idle);
+      sc.idle = setTimeout(rest, 120);
     }, { passive: false });
     addEventListener("keydown", (e) => {
       if (!inDeck() || e.altKey || e.ctrlKey || e.metaKey || e.target.closest?.("input, textarea, select, [contenteditable]")) return;
       const d = { ArrowDown: 1, PageDown: 1, ArrowUp: -1, PageUp: -1 }[e.key] || (e.key === " " && !e.target.closest?.("a, button, summary") ? (e.shiftKey ? -1 : 1) : 0);
-      const to = e.key === "Home" ? 0 : e.key === "End" ? panels.length - 1 : d ? cur + d : null;
+      const to = e.key === "Home" ? 0 : e.key === "End" ? panels.length - 1 : d ? sc.base + d : null;
       if (to === null) return;
       e.preventDefault();
-      if (!busy) go(to);
+      go(to);
     });
-    // anything else that scrolls the page (the scrollbar, Tab moving focus, find in page) ends on a whole panel
-    addEventListener("scroll", () => { clearTimeout(settle); if (!busy && inDeck()) settle = setTimeout(() => { if (!busy) go(Math.round(scrollY / innerHeight), 500); }, 170); }, { passive: true });
-    addEventListener("resize", () => { if (inDeck()) scrollTo(0, cur * innerHeight); });
+    // anything else that scrolls the page (the scrollbar, Tab moving focus, find in page) also ends on a whole panel
+    addEventListener("scroll", () => {
+      if (sc.on || !inDeck() || Math.abs(scrollY - sc.pos) < 2) return;
+      sc.pos = sc.to = scrollY;
+      clearTimeout(sc.idle);
+      sc.idle = setTimeout(() => go(Math.round(scrollY / innerHeight)), 170);
+    }, { passive: true });
+    addEventListener("resize", () => { if (inDeck()) { sc.pos = sc.to = sc.base * innerHeight; scrollTo(0, sc.pos); } });
   }
   $$('a[href="#start"]').forEach((a) => a.addEventListener("click", (e) => { if (inDeck()) { e.preventDefault(); go(1); } }));
   let queued = false;
@@ -265,17 +303,21 @@
       ring.classList.toggle("is-big", !!e.target.closest?.(HOT));
     }, { passive: true });
     document.addEventListener("pointerleave", () => { m.on = false; ring.classList.remove("is-on"); });
-    // the hero's layers: how far each moves, as a share of the pointer's distance from the middle of the screen
-    const layers = [[".hero__photo", -0.012], [".plate", 0.02], [".logos", 0.012], [".frame", 0.016], [".out", 0.018], [".true", 0.03], [".hero__title", 0.008], [".phero h1", 0.008], [".phero__img", -0.014]]
-      .map(([s, k]) => [$(s), k]).filter(([el]) => el);
+    // the first panel's layers and cube read --mx / --my (−1 … 1 from the middle of the screen: see "The 3D layer" in the styles)
+    const stage = panels[0] || document.body, cubes = $$(".trust .cube");
     const loop = () => {
       m.rx += (m.x - m.rx) * 0.2; m.ry += (m.y - m.ry) * 0.2;
-      m.px += (m.x - m.px) * 0.11; m.py += (m.y - m.py) * 0.11;
+      const vx = m.x - m.px;                                          // how far the picture is behind the pointer = how fast it is moving
+      m.px += vx * 0.11; m.py += (m.y - m.py) * 0.11;
       ring.style.transform = `translate(${m.rx.toFixed(1)}px,${m.ry.toFixed(1)}px)`;
-      peek.style.transform = `translate(${m.px.toFixed(1)}px,${m.py.toFixed(1)}px)`;
-      if (layers.length && cur === 0 && inDeck()) {
-        m.hx += (m.x - innerWidth / 2 - m.hx) * 0.06; m.hy += (m.y - innerHeight / 2 - m.hy) * 0.06;
-        for (const [el, k] of layers) el.style.translate = `${(m.hx * k).toFixed(2)}px ${(m.hy * k).toFixed(2)}px`;
+      peek.style.transform = `translate(${m.px.toFixed(1)}px,${m.py.toFixed(1)}px) perspective(600px) rotateY(${clamp(vx * 0.18, -38, 38).toFixed(1)}deg) rotate(${clamp(vx * 0.06, -14, 14).toFixed(1)}deg)`;
+      const tx = clamp((m.x - innerWidth / 2) / (innerWidth / 2), -1, 1), ty = clamp((m.y - innerHeight / 2) / (innerHeight / 2), -1, 1);
+      m.hx += (tx - m.hx) * 0.07; m.hy += (ty - m.hy) * 0.07;
+      const sx = m.hx.toFixed(3), sy = m.hy.toFixed(3);
+      if (sx !== m.sx || sy !== m.sy) {
+        m.sx = sx; m.sy = sy;
+        if (cur === 0) { stage.style.setProperty("--mx", sx); stage.style.setProperty("--my", sy); }
+        cubes.forEach((c) => { c.style.setProperty("--mx", sx); c.style.setProperty("--my", sy); });
       }
       requestAnimationFrame(loop);
     };
@@ -293,7 +335,7 @@
       if (getComputedStyle(c).position === "static") c.style.position = "relative";
       c.addEventListener("pointermove", (e) => {
         const r = c.getBoundingClientRect(), x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
-        c.style.setProperty("--ry", ((x - 0.5) * 9).toFixed(2) + "deg"); c.style.setProperty("--rx", ((0.5 - y) * 9).toFixed(2) + "deg");
+        c.style.setProperty("--ry", ((x - 0.5) * 22).toFixed(2) + "deg"); c.style.setProperty("--rx", ((0.5 - y) * 20).toFixed(2) + "deg");
         c.style.setProperty("--gx", (x * 100).toFixed(1) + "%"); c.style.setProperty("--gy", (y * 100).toFixed(1) + "%");
         c.classList.add("is-hot");
       });

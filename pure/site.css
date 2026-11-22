@@ -47,10 +47,12 @@ button { cursor: pointer; background: none; border: 0; padding: 0; }
 .hcta { position: absolute; left: 123.7rem; top: 4.1rem; width: 14.4rem; padding: 0; }
 
 /* ---------- the curtain between pages (only once the script has said so: without it the page is simply there) ---------- */
-.curtain { position: fixed; inset: 0; z-index: 900; background: #000; color: var(--text); display: grid; place-items: center; overflow: hidden; pointer-events: none; transform: translateY(101%); }
-.curtain b { font: 640 13rem/1 var(--disp); font-stretch: 104%; letter-spacing: -0.06em; text-transform: uppercase; }
-.curtain span { position: absolute; left: 5.7rem; bottom: 4rem; font-size: 1.3rem; color: var(--mute); }
-.cur-in .curtain { transform: none; }
+.curtain { position: fixed; inset: 0; z-index: 900; display: grid; place-items: center; overflow: hidden; pointer-events: none; color: var(--text); }
+.curtain i { position: absolute; top: 0; bottom: 0; width: 20.2%; background: #000; transform: translateY(101%); }
+.curtain i:nth-child(1) { left: 0; } .curtain i:nth-child(2) { left: 20%; } .curtain i:nth-child(3) { left: 40%; } .curtain i:nth-child(4) { left: 60%; } .curtain i:nth-child(5) { left: 80%; }
+.curtain b { position: relative; font: 640 13rem/1 var(--disp); font-stretch: 104%; letter-spacing: -0.06em; text-transform: uppercase; opacity: 0; }
+.curtain span { position: absolute; left: 5.7rem; bottom: 4rem; font-size: 1.3rem; color: var(--mute); opacity: 0; }
+.cur-in .curtain i { transform: none; } .cur-in .curtain b, .cur-in .curtain span { opacity: 1; }
 
 /* ---------- panels ---------- */
 .panel { position: relative; background: #000; }
@@ -60,11 +62,13 @@ button { cursor: pointer; background: none; border: 0; padding: 0; }
 
 /* ---------- home hero ---------- */
 .hero > .panel__in > .art { height: 93.8rem; overflow: hidden; }
-/* the photo is multiplied onto the paper, so its white studio backdrop becomes the paper itself, and its edges are faded out */
-.hero__photo { position: absolute; left: 42rem; top: 0; width: 60rem; height: 100%; object-fit: cover; object-position: 50% 0; filter: grayscale(1) contrast(1.06); mix-blend-mode: multiply; will-change: transform;
-  -webkit-mask: linear-gradient(90deg, transparent, #000 16%, #000 84%, transparent), linear-gradient(transparent, #000 9%); -webkit-mask-composite: source-in; mask: linear-gradient(90deg, transparent, #000 16%, #000 84%, transparent), linear-gradient(transparent, #000 9%); mask-composite: intersect; }
+/* The photo melts into the paper: its white studio backdrop is the paper's own grey and its edges fade out. That is baked
+   into the picture itself (img/hero.webp: the photo multiplied onto #dadada, with a faded edge in its transparency).
+   It was first done live, with a blend mode and two masks, and the whole hero froze when it was turned in 3D. */
+.hero__photo { position: absolute; left: 42rem; top: 0; width: 60rem; height: 100%; object-fit: cover; object-position: 50% 0; will-change: transform; }
 .hero__title { position: absolute; left: 5.7rem; top: 14.6rem; font: 640 9rem/0.86 var(--disp); font-stretch: 104%; letter-spacing: -0.06em; text-transform: uppercase; }
-.mask { display: block; overflow: hidden; padding-bottom: 0.06em; } .mask > span { display: block; }
+.mask { display: block; } .mask > span { display: block; }
+.ch { display: inline-block; transform-origin: 50% 100%; backface-visibility: hidden; }
 .hero__yr { position: absolute; left: 33.9rem; top: 17.2rem; font-size: 1.5rem; }
 .hero__about { position: absolute; left: 5.7rem; top: 32.4rem; width: 30rem; font-size: 1.4rem; line-height: 1.42; }
 .hero__about b { display: block; font-weight: 500; font-size: 1.25rem; margin-bottom: 1.2rem; letter-spacing: 0.02em; }
@@ -86,7 +90,7 @@ button { cursor: pointer; background: none; border: 0; padding: 0; }
 .fcard__r { text-align: right; } .fcard__r b { display: block; } .fcard__r .fcard__l { color: #d6d6d6; max-width: 11rem; margin-left: auto; }
 
 .true { position: absolute; left: 121.6rem; top: 19rem; display: flex; align-items: center; gap: 0.9rem; height: 4rem; padding: 0 1.6rem 0 0.6rem; border-radius: 99px; font-size: 1.3rem;
-  background: rgba(255, 255, 255, 0.55); border: 1px solid rgba(255, 255, 255, 0.7); -webkit-backdrop-filter: blur(1rem); backdrop-filter: blur(1rem); }
+  background: rgba(240, 240, 240, 0.78); border: 1px solid rgba(255, 255, 255, 0.8); }
 .true i { width: 2.8rem; height: 2.8rem; border-radius: 50%; background: var(--ink); color: #fff; display: grid; place-items: center; font-style: normal; font-size: 1.3rem; }
 .avail { position: absolute; right: 5.7rem; top: 30.6rem; text-align: right; font-size: 1.4rem; line-height: 1.35; }
 .out { position: absolute; left: 114.7rem; bottom: 3rem; width: 23.6rem; }
@@ -96,12 +100,12 @@ button { cursor: pointer; background: none; border: 0; padding: 0; }
 .out__card img { width: 100%; height: 100%; object-fit: cover; transform: scale(1.55); transform-origin: 62% 45%; filter: grayscale(1) contrast(1.15); transition: transform 0.9s var(--ease); }
 .out__card:hover img { transform: scale(1.72); }
 .out__go { position: absolute; left: 50%; top: 50%; width: 4.4rem; height: 4.4rem; margin: -2.2rem 0 0 -2.2rem; border-radius: 50%; display: grid; place-items: center; color: #fff; font-size: 1.6rem;
-  background: rgba(255, 255, 255, 0.22); border: 1px solid rgba(255, 255, 255, 0.4); -webkit-backdrop-filter: blur(0.8rem); backdrop-filter: blur(0.8rem); transition: transform 0.5s var(--ease); }
+  background: rgba(120, 120, 120, 0.72); border: 1px solid rgba(255, 255, 255, 0.45); transition: transform 0.5s var(--ease); }
 .out__card:hover .out__go { transform: rotate(45deg); }
 .out__line { display: block; height: 2px; margin-top: 1.4rem; background: rgba(255, 255, 255, 0.6); } .out__line i { display: block; height: 100%; width: 35%; background: var(--ink); transform-origin: 0 50%; }
 
 .plate { position: absolute; left: 53.8rem; bottom: 14.6rem; width: 36.4rem; height: 7.3rem; padding: 0 2.2rem; display: flex; align-items: center; gap: 1.3rem; color: #fff; border-radius: 0.6rem;
-  background: rgba(18, 18, 18, 0.62); border: 1px solid rgba(255, 255, 255, 0.14); -webkit-backdrop-filter: blur(1.2rem); backdrop-filter: blur(1.2rem); }
+  background: linear-gradient(100deg, rgba(34, 34, 34, 0.9), rgba(70, 70, 70, 0.82) 55%, rgba(30, 30, 30, 0.9)); border: 1px solid rgba(255, 255, 255, 0.16); }   /* (plates are tinted, not blurred: live blur cannot be turned in 3D cheaply) */
 .plate svg { width: 2.5rem; height: 2.5rem; flex: none; }
 .plate b { font: 600 2.5rem/1 var(--disp); font-stretch: 125%; letter-spacing: 0.06em; }
 .plate i { margin-left: auto; width: 3rem; height: 0.9rem; border-block: 2px solid #fff; }
@@ -160,8 +164,8 @@ button { cursor: pointer; background: none; border: 0; padding: 0; }
 /* ---------- section heads ---------- */
 .head { display: grid; grid-template-columns: 22rem 1fr auto; align-items: end; gap: 3rem; margin-bottom: 4rem; }
 .head small { font-size: 1.3rem; color: var(--mute); padding-bottom: 1rem; }
-.head h2 { font-size: 5.5rem; line-height: 1.02; font-weight: 500; letter-spacing: -0.035em; max-width: 78rem; }
-.wd { display: inline-block; overflow: hidden; vertical-align: top; padding-bottom: 0.1em; margin-bottom: -0.1em; } .wd > span { display: inline-block; }
+.head h2 { font-size: 5.5rem; line-height: 1.02; font-weight: 500; letter-spacing: -0.035em; max-width: 78rem; text-wrap: balance; }
+.wd { display: inline-block; vertical-align: top; perspective: 40rem; } .wd > span { display: inline-block; transform-origin: 50% 100%; backface-visibility: hidden; }
 
 /* index rows: a numbered list of big links that invert under the pointer */
 .rows { border-top: 1px solid var(--line2); }
@@ -195,7 +199,7 @@ a.row:hover .row__n, a.row:hover .row__d { color: #555; } a.row:hover .row__go {
 .card .btn { align-self: flex-start; margin-top: 2rem; }
 /* cards lean toward the pointer (the script feeds --rx / --ry) and carry a soft light where it is */
 .tilt { transform: perspective(90rem) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) translateY(var(--lift, 0)); transition: transform 0.7s var(--ease); }
-.tilt.is-hot { transition-duration: 0.15s; --lift: -0.6rem; }
+.tilt.is-hot { transition-duration: 0.15s; --lift: -1.2rem; }
 .tilt::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; opacity: 0; transition: opacity 0.4s; background: radial-gradient(28rem circle at var(--gx, 50%) var(--gy, 50%), rgba(255, 255, 255, 0.14), transparent 60%); }
 .tilt.is-hot::after { opacity: 1; } .card--light.tilt::after, .tcard--faces.tilt::after { background: radial-gradient(28rem circle at var(--gx, 50%) var(--gy, 50%), rgba(255, 255, 255, 0.55), transparent 60%); }
 
@@ -206,11 +210,11 @@ a.row:hover .row__n, a.row:hover .row__d { color: #555; } a.row:hover .row__go {
 /* timetable */
 .tt { display: grid; grid-template-columns: repeat(6, 1fr); gap: 1.4rem; }
 .tt__day { border-top: 1px solid var(--line2); padding-top: 1.6rem; } .tt__day h3 { font: 500 1.4rem/1 var(--disp); font-stretch: 125%; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 1.8rem; }
-.slot { display: block; width: 100%; text-align: left; padding: 1.6rem; margin-bottom: 1rem; border-radius: 0.8rem; background: #151515; border: 1px solid var(--line); transition: background 0.35s, color 0.35s, opacity 0.45s, scale 0.6s var(--spring), translate 0.5s var(--ease); }
+.slot { display: block; width: 100%; text-align: left; padding: 1.6rem; margin-bottom: 1rem; border-radius: 0.8rem; background: #151515; border: 1px solid var(--line); transition: background 0.35s, color 0.35s, opacity 0.45s, transform 0.7s var(--spring), translate 0.5s var(--ease); }
 .slot b { display: block; font-size: 2.6rem; font-weight: 600; letter-spacing: -0.04em; line-height: 1; margin-bottom: 1rem; } .slot span { display: block; font-size: 1.25rem; color: #b5b5b5; transition: color 0.35s; }
 .slot em { display: inline-block; margin-top: 1.1rem; font-style: normal; font-size: 1.1rem; padding: 0.3rem 0.8rem; border-radius: 99px; border: 1px solid var(--line2); }
 .slot:hover { background: #fff; color: var(--ink); translate: 0 -0.3rem; } .slot:hover span { color: #444; } .slot:hover em { border-color: #999; }
-.slot.is-dim { opacity: 0.18; scale: 0.94; }
+.slot { transform-origin: 50% 0; } .slot.is-dim { opacity: 0.16; transform: perspective(50rem) rotateX(58deg) scale(0.9); }
 
 /* steps */
 .step { border-top: 1px solid var(--line2); padding-top: 2rem; } .step b { font: 500 1.3rem/1 var(--disp); font-stretch: 125%; letter-spacing: 0.06em; color: var(--mute); }
@@ -272,8 +276,8 @@ a.row:hover .row__n, a.row:hover .row__d { color: #555; } a.row:hover .row__go {
 .js .tilt.rv.is-in { transform: perspective(90rem) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) translateY(var(--lift, 0)); }
 .js .tilt.rv.is-done { transition: transform 0.7s var(--ease); transition-delay: 0s; } .js .tilt.rv.is-done.is-hot { transition-duration: 0.15s; }
 /* headings: each word rises out of its own mask */
-.js h2.rv { opacity: 1; transform: none; } .js h2.rv .wd > span { transform: translateY(112%) rotate(4deg); transform-origin: 0 100%; transition: transform 1s var(--ease); transition-delay: calc(var(--i, 0) * 80ms + var(--w, 0) * 45ms); }
-.js h2.rv.is-in .wd > span { transform: none; }
+.js h2.rv { opacity: 1; transform: none; } .js h2.rv .wd > span { opacity: 0; transform: translateY(70%) rotateX(-100deg) scale(0.8); transition: transform 1s var(--spring), opacity 0.5s; transition-delay: calc(var(--i, 0) * 80ms + var(--w, 0) * 60ms); }
+.js h2.rv.is-in .wd > span { opacity: 1; transform: none; }
 /* rows slide in from the left, one after another */
 .js .rows > .row.rv { transform: translateX(-4rem); transition: opacity 0.8s var(--ease), transform 1s var(--ease), color 0.35s, padding 0.5s var(--ease); transition-delay: calc(var(--i, 0) * 90ms), calc(var(--i, 0) * 90ms), 0s, 0s; }
 .js .rows > .row.rv.is-in { transform: none; }
@@ -282,8 +286,8 @@ a.row:hover .row__n, a.row:hover .row__d { color: #555; } a.row:hover .row__go {
 /* ---------- pointer: a ring that follows it, and a picture that follows it over the index ---------- */
 .ring { position: fixed; z-index: 800; left: 0; top: 0; width: 3.4rem; height: 3.4rem; margin: -1.7rem 0 0 -1.7rem; border-radius: 50%; border: 1.5px solid #fff; mix-blend-mode: difference; pointer-events: none; opacity: 0; transition: width 0.35s var(--ease), height 0.35s var(--ease), margin 0.35s var(--ease), background 0.3s, opacity 0.3s; will-change: transform; }
 .ring.is-on { opacity: 1; } .ring.is-big { width: 7rem; height: 7rem; margin: -3.5rem 0 0 -3.5rem; background: #fff; }
-.peek { position: fixed; z-index: 70; left: 0; top: 0; width: 27rem; height: 34rem; margin: -17rem 0 0 2.4rem; border-radius: 0.8rem; overflow: hidden; pointer-events: none; opacity: 0; scale: 0.6; rotate: -6deg; transition: opacity 0.35s, scale 0.55s var(--spring), rotate 0.55s var(--spring); will-change: transform; }
-.peek.is-on { opacity: 1; scale: 1; rotate: 3deg; } .peek img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(1) contrast(1.1); }
+.peek { position: fixed; z-index: 70; left: 0; top: 0; width: 27rem; height: 34rem; margin: -17rem 0 0 2.4rem; pointer-events: none; opacity: 0; scale: 0.4; transition: opacity 0.35s, scale 0.6s var(--spring); will-change: transform; }
+.peek.is-on { opacity: 1; scale: 1; } .peek img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(1) contrast(1.1); border-radius: 0.8rem; }
 .dots { position: fixed; z-index: 60; right: 2.6rem; top: 50%; translate: 0 -50%; display: none; flex-direction: column; gap: 1.1rem; mix-blend-mode: difference; }
 .dots button { width: 0.8rem; height: 0.8rem; border-radius: 99px; background: #fff; opacity: 0.4; transition: height 0.5s var(--spring), opacity 0.3s; position: relative; }
 .dots button::after { content: ""; position: absolute; inset: -0.6rem; } .dots button[aria-current="true"] { height: 2.8rem; opacity: 1; }
@@ -312,7 +316,7 @@ a.row:hover .row__n, a.row:hover .row__d { color: #555; } a.row:hover .row__go {
   .hero__title { font-size: 6.6rem; order: 1; } .hero__yr { position: absolute; left: 20.4rem; top: 10rem; font-size: 1.3rem; }
   .hero__about { order: 3; width: 28rem; margin-top: 1.6rem; } .hero__book { order: 4; align-self: flex-start; margin: 2rem 0 2.4rem; }
   .hero__pic { order: 5; position: relative; margin: 0 -1.6rem; height: 50rem; overflow: hidden; }
-  .hero__photo { width: 100%; height: 100%; object-position: 50% 8%; -webkit-mask: linear-gradient(transparent, #000 10%); mask: linear-gradient(transparent, #000 10%); }
+  .hero__photo { width: 100%; height: 100%; object-position: 50% 8%; }
   .plate { left: 3.5rem; right: 3.5rem; top: 33.5rem; bottom: auto; width: auto; height: 6.2rem; } .plate b { font-size: 2.1rem; }
   .logos { left: 0; right: 0; top: 43.5rem; bottom: auto; width: auto; font-size: 1.55rem; }
   .true { order: 6; align-self: flex-start; margin-top: 1rem; } .avail { order: 7; text-align: left; margin: 1.6rem 0 2.4rem; }
@@ -345,4 +349,75 @@ a.row:hover .row__n, a.row:hover .row__d { color: #555; } a.row:hover .row__go {
   *, *::before, *::after { animation: none !important; transition: none !important; }
   .js .rv, .js .faces span, .js h2.rv .wd > span { opacity: 1; transform: none; } .say__big .w { color: var(--text); } .bars span i { transform: none; }
   .curtain, .ring, .peek { display: none; }
+}
+
+/* ==================================================================
+   The 3D layer
+================================================================== */
+/* deck: a panel tips over backwards as the next one covers it, and the next one swings up into place like a lid.
+   (The script writes those transforms; here the panels are given depth and made see-through round their sheets.) */
+@media (min-width: 761px) and (min-height: 480px) {
+  .panel { perspective: 150rem; background: none; }
+  .panel__in { backface-visibility: hidden; }
+}
+
+/* titles: the letters stand up one after another */
+.hero__title, .phero h1 { perspective: 70rem; }
+
+/* the hero is a set of layers at different depths: each shifts, and the plates turn, with the pointer (--mx / --my run −1 … 1) */
+.hero__photo { translate: calc(var(--mx, 0) * -1.8rem) calc(var(--my, 0) * -1.1rem); }
+.hero__title, .phero h1 { translate: calc(var(--mx, 0) * 1.1rem) calc(var(--my, 0) * 0.7rem); }
+.plate { translate: calc(var(--mx, 0) * 2.8rem) calc(var(--my, 0) * 1.7rem); transform: perspective(70rem) rotateY(calc(var(--mx, 0) * 18deg)) rotateX(calc(var(--my, 0) * -14deg)); }
+.frame { translate: calc(var(--mx, 0) * 1.9rem) calc(var(--my, 0) * 1.2rem); transform: perspective(80rem) rotateY(calc(var(--mx, 0) * 14deg)) rotateX(calc(var(--my, 0) * -12deg)); }
+.out { translate: calc(var(--mx, 0) * 2.3rem) calc(var(--my, 0) * 1.4rem); transform: perspective(80rem) rotateY(calc(var(--mx, 0) * 14deg)) rotateX(calc(var(--my, 0) * -12deg)); }
+.true { translate: calc(var(--mx, 0) * 3.6rem) calc(var(--my, 0) * 2.1rem); }
+.avail { translate: calc(var(--mx, 0) * 2rem) calc(var(--my, 0) * 1.2rem); }
+.logos { translate: calc(var(--mx, 0) * 1.4rem) calc(var(--my, 0) * 0.8rem); }
+.phero__img { translate: calc(var(--mx, 0) * -2.2rem) calc(var(--my, 0) * -1.3rem); }
+
+/* a cube of symbols: six faces placed in real 3D, turning by itself and leaning with the pointer */
+.cube { position: absolute; z-index: 3; --s: 15rem; width: var(--s); height: var(--s); right: 17rem; top: 15rem; perspective: 80rem; pointer-events: none; }
+.cube__tilt, .cube__in { position: absolute; inset: 0; transform-style: preserve-3d; }
+.cube__tilt { transform: rotateX(calc(-22deg + var(--my, 0) * -40deg)) rotateY(calc(var(--mx, 0) * 60deg)); }
+.cube__in { animation: cube 16s linear infinite; }
+.cube i { position: absolute; inset: 0; display: grid; place-items: center; font: 600 calc(var(--s) * 0.44) / 1 var(--disp); font-style: normal; border: 1.5px solid currentColor; background: rgba(218, 218, 218, 0.4); }
+.cube i:nth-child(1) { transform: translateZ(calc(var(--s) / 2)); } .cube i:nth-child(2) { transform: rotateY(90deg) translateZ(calc(var(--s) / 2)); } .cube i:nth-child(3) { transform: rotateY(180deg) translateZ(calc(var(--s) / 2)); }
+.cube i:nth-child(4) { transform: rotateY(-90deg) translateZ(calc(var(--s) / 2)); } .cube i:nth-child(5) { transform: rotateX(90deg) translateZ(calc(var(--s) / 2)); } .cube i:nth-child(6) { transform: rotateX(-90deg) translateZ(calc(var(--s) / 2)); }
+@keyframes cube { to { transform: rotateY(360deg); } }
+.trust .cube { --s: 8rem; left: 34rem; right: auto; top: 4.2rem; color: #fff; } .trust .cube i { background: rgba(40, 40, 40, 0.55); border-color: rgba(255, 255, 255, 0.7); }
+
+/* cards have depth: they lean further, and what is written on them stands off the surface */
+.tilt { transform-style: preserve-3d; }
+.tilt > * { transition: transform 0.6s var(--ease); }
+.tilt.is-hot > .card__big, .tilt.is-hot > h3, .tilt.is-hot > .tcard__n, .tilt.is-hot > .shift, .tilt.is-hot > .faces, .tilt.is-hot > .laurel { transform: translateZ(5rem); }
+.tilt.is-hot > small, .tilt.is-hot > ul, .tilt.is-hot > p, .tilt.is-hot > blockquote, .tilt.is-hot > cite, .tilt.is-hot > .tcard__l, .tilt.is-hot > .btn { transform: translateZ(2.2rem); }
+
+/* arrivals: cards, columns and steps stand up from flat on the floor; the trust cards swing in from the side */
+.js .grid3 > .rv, .js .grid4 > .rv, .js .stats > .rv, .js .tl > .rv, .js .tt > .rv, .js .info > .rv, .js .form.rv, .js .chart.rv {
+  transform: perspective(110rem) translateY(11rem) rotateX(-62deg) scale(0.86); transform-origin: 50% 100%; transition: opacity 0.7s var(--ease), transform 1.15s var(--spring); transition-delay: calc(var(--i, 0) * 95ms); }
+.js .grid3 > .rv.is-in, .js .grid4 > .rv.is-in, .js .stats > .rv.is-in, .js .tl > .rv.is-in, .js .tt > .rv.is-in, .js .info > .rv.is-in, .js .form.rv.is-in, .js .chart.rv.is-in { transform: none; }
+.js .tilt.rv.is-in { transform: perspective(90rem) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) translateY(var(--lift, 0)); }
+.js .tilt.rv.is-done { transition: transform 0.7s var(--ease); transition-delay: 0s; } .js .tilt.rv.is-done.is-hot { transition-duration: 0.15s; }
+.js .trust .tcard { opacity: 0; transform: perspective(100rem) translateX(16rem) rotateY(-68deg) scale(0.85); transform-origin: 0 50%; transition: opacity 0.6s var(--ease), transform 1.2s var(--spring); }
+.js .trust .tcard:nth-child(2) { transition-delay: 0.12s; } .js .trust .tcard:nth-child(3) { transition-delay: 0.24s; }
+.js .trust.is-in .tcard { opacity: 1; transform: perspective(90rem) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) translateY(var(--lift, 0)); }
+.js .trust.is-done .tcard { transition: transform 0.7s var(--ease); transition-delay: 0s; } .js .trust.is-done .tcard.is-hot { transition-duration: 0.15s; }
+.js .trust.rv { transform: perspective(140rem) rotateX(-28deg) translateY(8rem) scale(0.9); transform-origin: 50% 100%; transition: opacity 0.8s var(--ease), transform 1.2s var(--spring); } .js .trust.rv.is-in { transform: none; }
+/* index rows swing in from the left edge like doors, then lift toward you under the pointer */
+.js .rows > .row.rv { transform: perspective(120rem) translateX(-6rem) rotateY(38deg); transform-origin: 0 50%; }
+.js .rows > .row.rv.is-in { transform: none; }
+.js .rows > .row.rv.is-done { transition: transform 0.5s var(--spring), color 0.35s, padding 0.5s var(--ease); transition-delay: 0s; }
+.js .rows > a.row.rv.is-done:hover { transform: perspective(120rem) translateZ(3rem) rotateX(-5deg); }
+/* while the page is travelling between panels, the line of giant type leans into the movement */
+.mq__t span { transition: transform 0.5s var(--ease); } .is-gliding .mq__t span { transform: skewX(-18deg); }
+/* the statement arrives tilted and settles flat */
+.js .say { transform: perspective(120rem) rotateX(26deg) scale(0.92); opacity: 0; transition: transform 1.3s var(--spring), opacity 0.7s; } .js .say.is-in { transform: none; opacity: 1; }
+
+@media (max-width: 760px) {
+  .cube { --s: 7rem; right: 3rem; top: 10.5rem; } .trust .cube { --s: 5.4rem; left: auto; right: 2.6rem; top: 2.6rem; }
+  .tilt > * { transform: none !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .js .rv, .js .trust .tcard, .js h2.rv .wd > span, .js .say, .js .rows > .row.rv { opacity: 1 !important; transform: none !important; }
+  .slot.is-dim { transform: none; }
 }
