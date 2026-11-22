@@ -198,7 +198,12 @@ async function laptops(br) {
         const out = [];
         if (document.documentElement.scrollWidth > innerWidth) out.push("sideways scroll");
         document.querySelectorAll("main > section:not(.show)").forEach((s) => {
-          const over = s.scrollHeight - s.clientHeight;
+          // How far the content would spill out of the bottom of its panel. Worked out from layout sizes, not from
+          // scrollHeight: cards that have not been revealed yet wait a little lower (a transform), which scrollHeight
+          // counts although nothing fails to fit. The content is centred, so it spills once half of what it has
+          // over the padded area is more than the bottom padding.
+          const wrap = s.querySelector(":scope > .wrap"), cs = getComputedStyle(s), pt = parseFloat(cs.paddingTop), pb = parseFloat(cs.paddingBottom);
+          const over = wrap ? Math.round((wrap.offsetHeight - (s.clientHeight - pt - pb)) / 2 - pb) : s.scrollHeight - s.clientHeight;
           if (over > 2) out.push(`#${s.id || "hero"} overflows by ${over}px`);
         });
         // the hero's text must sit between the nav and the bottom of the screen

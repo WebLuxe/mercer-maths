@@ -160,13 +160,15 @@ function setupScroll() {
 }
 
 /* ---------- depth between panels ----------
-   The section you leave eases back, shrinks and dims. The one you enter does the mirror of that: it rises a
-   little smaller, dimmer and tilted, and stands up as it lands. Both follow the scroll position, so they play
-   in either direction, every time. They act on the same element, so each section keeps two amounts (how far it
-   still has to arrive, how far it has left) and ONE function writes the combined result. At rest that result is
-   exactly "no transform at all".
-   Phones scroll freely through sections taller than the screen, so there both effects are gentler, have no tilt,
-   and only happen at the very edges of the screen: nothing is dim or small where it is being read. */
+   Desktop panels change with a zoom-through: the section you leave grows past the camera and fades, and the one
+   you enter grows out of the far end of the shaft the background flies down. Both are held in the middle of the
+   screen while it happens (a translate cancels the scroll), and both follow the scroll position, so it plays in
+   either direction, every time. They act on the same element, so each section keeps two amounts (how far it still
+   has to arrive, how far it has left) and ONE function writes the result. At rest that result is exactly "no
+   transform at all".
+   Phones scroll freely through sections taller than the screen, so there the effect is a gentle rise at the very
+   edges of the screen: nothing is dim or small where it is being read. The carousel's panel is pinned by the
+   scroll engine, so its parts ease in and out without the zoom. */
 const depth = { items: [], measuring: true };
 function depthClear(it) {
   if (!it.on) return;
@@ -176,7 +178,9 @@ function depthClear(it) {
 function depthWrite(it) {
   if (depth.measuring) return;
   const a = it.inST.progress < 1 ? 1 - it.inST.progress : 0, b = it.outST ? it.outST.progress : 0;   // 0..1: still to arrive, already left
-  if (a < 0.0005 && b < 0.0005) return depthClear(it);
+  // at rest, and also while a panel has not started to arrive or has fully left: held in the middle of the screen it
+  // would lie, unseen, on top of the panel being used and take its clicks
+  if ((a < 0.0005 && b < 0.0005) || (panelMQ.matches && !it.flat && (a > 0.9995 || b > 0.9995))) return depthClear(it);
   it.on = true;
   let tf, op;
   if (!panelMQ.matches) {
@@ -185,11 +189,18 @@ function depthWrite(it) {
   } else if (it.flat) {
     tf = `translateY(${(56 * a - 56 * b).toFixed(1)}px) scale(${(1 - 0.08 * a - 0.08 * b).toFixed(4)})`;
     op = (1 - 0.9 * a) * (1 - 0.9 * b);
+  } else if (a > b) {
+    // Zoom-through, arriving: the translate cancels the scroll, so the panel is held in the middle of the screen
+    // and grows out of the far end of the shaft, appearing once the panel before it has gone past.
+    const e = 1 - a, k = e * e * (3 - 2 * e);
+    tf = `translateY(${(-100 * a).toFixed(2)}vh) scale(${(0.3 + 0.7 * k).toFixed(4)})`;
+    op = Math.min(1, Math.max(0, (e - 0.3) / 0.5));
   } else {
-    tf = `perspective(1400px) translateY(${(8 * a - 8 * b).toFixed(2)}%) rotateX(${(16 * b - 16 * a).toFixed(2)}deg) scale(${(1 - 0.1 * a - 0.1 * b).toFixed(4)})`;
-    op = (1 - 0.9 * a) * (1 - 0.9 * b);
+    // ...leaving: held in place the same way, it grows past the camera and is gone by the half-way point
+    tf = `translateY(${(100 * b).toFixed(2)}vh) scale(${(1 + 2.6 * b * b).toFixed(4)})`;
+    op = Math.max(0, 1 - b / 0.5);
   }
-  const origin = it.flat ? "" : a > b ? "50% 0%" : "50% 100%";       // arriving hinges on its top edge, leaving on its bottom edge
+  const origin = it.flat || !panelMQ.matches ? "" : "50% 50%";
   for (const el of it.els) { el.style.transform = tf; el.style.transformOrigin = origin; el.style.opacity = op.toFixed(3); }
 }
 function depthArm() {
@@ -198,15 +209,15 @@ function depthArm() {
 }
 function setupDepth() {
   if (reduce) return;
-  $$("main > section.sec, main > section.contact").forEach((sec) => {
+  $$("main > section.hero, main > section.sec, main > section.contact").forEach((sec) => {
     // the carousel's box is pinned by the scroll engine and can't be moved as well: its heading and its stage move instead, without the tilt
     const flat = sec.classList.contains("show"), els = flat ? $$(".show__head, .show__stage", sec) : $$(":scope > .wrap", sec);
     if (!els.length) return;
     const it = { els, flat, on: false, inST: null, outST: null };
-    // desktop panels: over the middle 70% of the snap. Phones: only in the bottom / top fifth of the screen (the middle is for reading).
-    it.inST = ScrollTrigger.create({ trigger: sec, start: () => (panelMQ.matches ? "top 85%" : "top bottom"), end: () => (panelMQ.matches ? "top 15%" : "top 78%"), onUpdate: () => depthWrite(it) });
+    // desktop panels: over the whole snap (the zoom holds both panels on screen). Phones: only in the bottom / top fifth of the screen (the middle is for reading).
+    it.inST = ScrollTrigger.create({ trigger: sec, start: "top bottom", end: () => (panelMQ.matches && !flat ? "top top" : panelMQ.matches ? "top 15%" : "top 78%"), onUpdate: () => depthWrite(it) });
     // (the contact section is the last one: it never leaves)
-    if (!sec.classList.contains("contact")) it.outST = ScrollTrigger.create({ trigger: sec, start: () => (panelMQ.matches ? "bottom 85%" : "bottom 22%"), end: () => (panelMQ.matches ? "bottom 15%" : "bottom top"), onUpdate: () => depthWrite(it) });
+    if (!sec.classList.contains("contact")) it.outST = ScrollTrigger.create({ trigger: sec, start: () => (panelMQ.matches && !flat ? "bottom bottom" : panelMQ.matches ? "bottom 85%" : "bottom 22%"), end: () => (panelMQ.matches && flat ? "bottom 15%" : "bottom top"), onUpdate: () => depthWrite(it) });
     depth.items.push(it);
   });
   // Triggers are measured with every panel standing at rest: a tilted, shrunken panel would shift whatever is measured inside it.

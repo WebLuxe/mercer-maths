@@ -51,7 +51,7 @@ Videos come from **`assets/data/resources.json`**. Upload to YouTube (unlisted w
 
 **Everything else:**
 - **One poster typeface:** every heading is set in Syne 800, with the accent line alternating between gradient and outline from panel to panel.
-- **Stage lighting:** the page is near black, with one fan of light beams falling from the top, so what is lit reads as lit. Every panel change sends a band of light sweeping through the graph paper.
+- **One flight down a tunnel:** the background is a shaft of graph paper with a light at the far end, and scrolling is travel along it, on phones too. Every panel change sends a ring of light down the shaft.
 - **Hero:** a wide poster headline in three finishes (solid, outline, gradient) and two neon rings that orbit the portrait, one passing in front of him, each with a point of light racing round it.
 - **Results:** one giant figure with the grade curve drawing itself behind it, and a chart whose top grades are lit and whose other bars dim when you point at one.
 - **Story:** the years are giant outlined numerals that light up as the line reaches them, with a pulse of light travelling down the line. Each testimonial leads with the grade jump in giant type (start grade in outline, final grade in gradient), and the final grade gets circled in pen.
@@ -61,7 +61,7 @@ Videos come from **`assets/data/resources.json`**. Upload to YouTube (unlisted w
 - **Scroll speed drives the motion:** the grid warps, light streaks rush past, and the view widens like a warp jump. The particle cloud has weight: it lags behind a scroll and springs back, and the camera leans into every snap.
 - **Click anywhere:** a shockwave ripples through the grid and the particles. **Hold the mouse down** and the particles fall toward the cursor while light gathers there; let go and they are thrown back out, harder the longer you held.
 - **Snap scrolling:** one flick moves one full-screen section, with side dots (each names its section as you arrive) and keyboard support. Phones keep normal scrolling.
-- **Panels with depth:** the section you leave tilts back, shrinks and dims, and the next one stands up as it lands. It follows the scroll, so it plays in both directions.
+- **Zoom-through panels:** on desktop the section you leave grows past the camera and the next one grows out of the far end of the tunnel. It follows the scroll, so it plays in both directions.
 - **Reveals:** headings rise letter by letter, the stats roll into place like a counter, chart bars shoot out with a spark on the tip, the story timeline lights up node by node as its line is drawn, and each testimonial's grade flips up like a departure board (D → C → B → A).
 - **Cursor effects:** a ring that stretches as it travels, squeezes on a press and names what a click will do (Book, Read, Open, Next); a comet trail; hero letters that lift as the cursor passes; holographic foil on the portrait; 3D tilt, glare and a lit edge on cards; and buttons that fill from the point where the pointer enters and drain where it leaves.
 - **On phones:** the particles part around your finger, the scene leans as you tilt the phone, a tap leaves a ring where it landed, every control looks pressed the moment you touch it, and phones that can give a short buzz on a tap, a right answer or a mistake.

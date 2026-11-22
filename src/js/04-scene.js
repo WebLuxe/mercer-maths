@@ -68,13 +68,13 @@ const bgMat = new THREE.ShaderMaterial({
     uTime: { value: 0 }, uScroll: { value: 0 }, uIntro: { value: 0 }, uVel: { value: 0 }, uDir: { value: 1 },
     uRes: { value: new THREE.Vector2(innerWidth, innerHeight) }, uMouse: { value: new THREE.Vector2(0.5, 0.5) },
     uRipple: { value: new THREE.Vector2(0.5, 0.5) }, uRippleT: { value: -10 }, uCharge: { value: 0 }, uHue: hueU,
-    uScanT: { value: -10 }, uScanDir: { value: 1 },
+    uScanT: { value: -10 }, uScanDir: { value: 1 }, uTravel: { value: 0 },
   },
   vertexShader: /* glsl */ `void main(){ gl_Position = vec4(position.xy, 0., 1.); }`,
   fragmentShader: /* glsl */ `
     ${NOISE}
     ${HUE}
-    uniform float uTime, uScroll, uIntro, uVel, uDir, uRippleT, uCharge, uScanT, uScanDir; uniform vec2 uRes, uMouse, uRipple;
+    uniform float uTime, uScroll, uIntro, uVel, uDir, uRippleT, uCharge, uScanT, uScanDir, uTravel; uniform vec2 uRes, uMouse, uRipple;
     float fbm(vec3 p){ float a = .5, s = 0.; for (int i = 0; i < 2; i++){ s += a * snoise(p); p *= 2.03; a *= .5; } return s; }
     float hash(float n){ return fract(sin(n) * 43758.5453); }
 
@@ -115,35 +115,38 @@ const bgMat = new THREE.ShaderMaterial({
       vec3 c1 = hueTurn(mix(vec3(.545, .361, .965), vec3(.133, .827, .933), .5 + .5 * sin(uScroll * 6.283 + t * 2.)));
       vec3 c2 = hueTurn(mix(vec3(.957, .447, .714), vec3(.545, .361, .965), .5 + .5 * cos(uScroll * 4.4 - t * 1.5)));
       float boost = 1. + v * 1.4;
-      col += (c1 * b1 * .34 + c2 * b2 * .26) * boost;
+      col += (c1 * b1 * .2 + c2 * b2 * .15) * boost;
 
-      // beams: a fan of light falling from above the top edge. It is the page's one directional light, so the rest
-      // of the frame can stay near black and what is lit reads as lit. The source drifts sideways as the page scrolls.
-      vec2 bo = p - vec2(sin(uScroll * 9.42) * .22 * asp, .64);
-      float ba = atan(bo.x, -bo.y);
-      float rays = .5 + .5 * sin(ba * 15. + sin(ba * 6. + t * 2.6) * 1.6 + t * 1.2);
-      col += hueTurn(vec3(.30, .36, 1.)) * smoothstep(1.05, .12, abs(ba)) * (.3 + .7 * rays * rays) * exp(-length(bo) * 1.5) * .6;
 
       // nebula
       float neb = snoise(vec3(p * .7 + 3., t * .6));
       col += vec3(.2, .11, .42) * smoothstep(.15, .95, neb) * .16;
 
-      // warped graph paper: warps harder while scrolling, bends around ripples
-      vec2 q = p * 9. + vec2(snoise(vec3(p * 1.4, t)), snoise(vec3(p * 1.4 + 5., t))) * (.55 + v * 1.1);
-      q += normalize(p - rp + .0001) * ring * 1.6;
-      q.y += uScroll * 30.;
-      vec2 gq = abs(fract(q - .5) - .5) / fwidth(q);
-      float grid = 1. - min(min(gq.x, gq.y), 1.);
+      // The shaft. We look straight down a round shaft whose wall is ruled like graph paper: rings along it, ribs
+      // round it. Scrolling is travel along it (uTravel counts screens scrolled), so the whole page is one flight
+      // toward the hole in the middle, and scrolling back up flies out again. The far end leans a little toward the
+      // pointer, the wall wobbles while moving fast, and a click still sends its ripple through the lines.
       vec2 m = (uMouse - .5) * vec2(asp, 1.);
       float md = length(p - m);
-      float mask = smoothstep(1.15, .15, length(p));
-      // scan: on every panel change one band of light sweeps the paper in the direction of travel and lights its lines
+      vec2 tc = p - m * .07 + vec2(snoise(vec3(p * 1.1, t)), snoise(vec3(p * 1.1 + 5., t))) * (.012 + v * .03);
+      tc += normalize(p - rp + .0001) * ring * .04;
+      float tr = length(tc) + .0001;
+      float tz = .42 / tr;                                           // how far down the shaft this pixel looks
+      vec2 q = vec2(tz + uTravel * 3. + uTime * .06, atan(tc.y, tc.x) * 3.8197);   // (a ring per unit of depth, 24 ribs)
+      // line widths come from the known slope of each coordinate, not from fwidth: the angle jumps where it wraps
+      vec2 gq = abs(fract(q - .5) - .5) / (vec2(.42 / (tr * tr), 3.8197 / tr) * 1.6 / uRes.y);
+      float grid = 1. - min(min(gq.x, gq.y), 1.);
+      float wall = smoothstep(.035, .3, tr) * (.3 + .7 * smoothstep(.15, .85, tr));   // far away the lines sink into the dark
+      // scan: on every panel change a ring of light runs the length of the shaft, toward you going down the page
       float sa = uTime - uScanT;
-      float scan = step(0., sa) * exp(-pow((p.y * uScanDir + .8 - sa * 1.3) / .1, 2.)) * smoothstep(1.5, 1., sa);
-      col += vec3(.75, .72, .95) * grid * (.045 * mask + .13 * smoothstep(.55, 0., md) + v * .05 + (ring + echo) * .5 + scan * .8);
+      float zb = uScanDir > 0. ? 5.2 - sa * 4.4 : .8 + sa * 4.4;
+      float scan = step(0., sa) * exp(-pow((tz - zb) / .32, 2.)) * smoothstep(1.4, .9, sa);
+      col += vec3(.75, .72, .95) * grid * (.13 * wall + .13 * smoothstep(.55, 0., md) + v * .1 * wall + (ring + echo) * .5 + scan * .85);
       col += vec3(.35, .25, .75) * smoothstep(.55, 0., md) * .1;
       vec3 cm = mix(c1, c2, .5);
-      col += cm * ((ring + echo) * .45 + scan * .1);
+      // the light at the far end: a soft pool and a bright core, in the section's colours
+      col += cm * (exp(-tr * 5.5) * .34 + exp(-tr * 26.) * .5) + vec3(.8, .85, 1.) * exp(-tr * 70.) * .35;
+      col += cm * ((ring + echo) * .45 + scan * .12);
 
       // hold to charge: light gathers at the cursor while a ring closes in on it
       col += cm * uCharge * (smoothstep(.36, 0., md) * .3 + smoothstep(.02, 0., abs(md - mix(.42, .06, uCharge))) * .55);
@@ -762,6 +765,7 @@ function render() {
   const bu = bgMat.uniforms;
   bu.uTime.value = reduce ? 0 : t;
   bu.uScroll.value = scrollSmooth;
+  bu.uTravel.value = scrollSmooth * maxScroll / innerHeight;
   bu.uVel.value = v;
   bu.uDir.value = motion.dir;
   bu.uMouse.value.set((mouse.x + 1) / 2, (mouse.y + 1) / 2);
