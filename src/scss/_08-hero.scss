@@ -7,10 +7,9 @@
   min-height: 100svh; display: flex; align-items: center; padding: 7rem 0 4rem;
   // (minmax(0, ...): the headline is allowed to run past its column and slide under the rings, without widening the column)
   .wrap { display: grid; gap: 3rem; align-items: center; @include up(md) { grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); } }
-  // Poster type: wide, heavy and as large as the longest line allows (about nine and a half ems). Three finishes,
-  // one per line: solid, outline only, gradient.
-  &__title { font-family: $poster; font-weight: 800; letter-spacing: -0.035em; line-height: 0.98; font-size: clamp(34px, 9.6vw, 92px); margin: 1.4rem 0;
-    .line { display: block; overflow: hidden; width: max-content; padding-bottom: 0.08em; white-space: nowrap; }
+  // Three finishes, one per line: solid, outline only, gradient.
+  &__title { font-size: fluid(52, 112); margin: 1.4rem 0;
+    .line { display: block; overflow: hidden; width: max-content; padding-bottom: 0.06em; white-space: nowrap; }
     .line--outline .ch { color: rgba(255, 255, 255, 0.05); -webkit-text-stroke: 1.5px rgb(150, 176, 255); }
     .ch { display: inline-block; will-change: transform; }
     // gradient across split letters: each char shows its own slice

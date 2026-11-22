@@ -17,14 +17,14 @@
   &::after { content: ""; position: absolute; left: calc(-2.5rem + 1px); top: calc(var(--yr) * 0.5 - 7px); width: 12px; height: 12px; border-radius: 50%; border: 2px solid $a2; opacity: 0; pointer-events: none; }
   &.is-lit::before { background: $a2; box-shadow: 0 0 0 6px rgba($a2, 0.14), 0 0 16px rgba($a2, 0.85); }
   &.is-lit::after { animation: tlPing 0.9s $ease-out 1; }
-  &__year { font-family: $poster; font-weight: 800; font-size: var(--yr); line-height: 1; letter-spacing: -0.03em;
+  &__year { font-family: $display; font-weight: 700; font-size: var(--yr); line-height: 1; letter-spacing: -0.03em;
     color: transparent; -webkit-text-stroke: 1.5px $a1; transition: color 0.7s, text-shadow 0.7s; }
   &:nth-child(odd) &__year { -webkit-text-stroke-color: $a2; }
   &.is-lit &__year { color: rgba($a1, 0.2); text-shadow: 0 0 34px rgba($a1, 0.85); }
   &.is-lit:nth-child(odd) &__year { color: rgba($a2, 0.16); text-shadow: 0 0 34px rgba($a2, 0.7); }
   h3 { font-family: $display; font-size: fluid(22, 32); letter-spacing: -0.02em; margin: 0.3rem 0 0.4rem; }
   p { color: $muted; max-width: 60ch; }
-  @include up(md) { display: grid; grid-template-columns: clamp(150px, 16vw, 232px) 1fr; gap: 2rem; align-items: start; h3 { margin-top: calc(var(--yr) * 0.1); } }
+  @include up(md) { display: grid; grid-template-columns: clamp(110px, 11vw, 168px) 1fr; gap: 2rem; align-items: start; h3 { margin-top: calc(var(--yr) * 0.1); } }
 }
 // while the line is still on its way, the nodes it has not reached yet wait unlit
 .timeline.is-live .tl:not(.is-lit)::before { border-color: rgba(255, 255, 255, 0.28); box-shadow: none; }

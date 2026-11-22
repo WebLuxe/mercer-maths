@@ -9,7 +9,7 @@
   // The grade jump is the picture on each card: where they started in outline, where they finished in the gradient.
   &__shift { display: flex; flex-wrap: wrap; align-items: center; gap: 0.2rem 0.9rem; font-size: 0.72rem; letter-spacing: 0.2em; text-transform: uppercase; color: $muted;
     span { flex-basis: 100%; }
-    b, em { font-family: $poster; font-weight: 800; font-size: fluid(44, 74); line-height: 1.05; letter-spacing: -0.03em; }
+    b, em { font-family: $display; font-weight: 700; font-size: fluid(44, 74); line-height: 1.05; letter-spacing: -0.03em; }
     b { color: rgba(255, 255, 255, 0.04); -webkit-text-stroke: 1.5px rgba(190, 196, 230, 0.55); }
     i { font-style: normal; @include grad-text; font-size: 1.7rem; letter-spacing: 0; }
     b:last-of-type { @include grad-text; -webkit-text-stroke: 0; position: relative; filter: drop-shadow(0 0 22px rgba($a1, 0.55)); }

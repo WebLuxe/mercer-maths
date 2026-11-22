@@ -4,7 +4,7 @@
 
 // ---------- contact ----------
 .contact { text-align: center; padding: fluid(110, 190) 0 3rem;
-  &__big { font-size: clamp(28px, 7.8vw, 150px); margin: 1.5rem 0 1.2rem;
+  &__big { font-size: fluid(52, 170); margin: 1.5rem 0 1.2rem;
     // its two lines get masks from the script (setupHeadings) so the letters can rise out of them; the masks must not add height
     .reveal-line { margin-bottom: -0.06em; } }
   &__lede { color: $muted; max-width: 46ch; margin: 0 auto 2.6rem; }
@@ -16,7 +16,7 @@
 }
 
 // the wordmark, page-wide, as a faint outline rising out of the bottom edge
-.contact__mark { position: absolute; z-index: -1; left: 50%; bottom: 0; translate: -50% 0; font-family: $poster; font-weight: 800; font-size: 9.3vw; line-height: 1; height: 0.74em; overflow: hidden;   /* (its own box crops it: nothing spills out of the panel) */
+.contact__mark { position: absolute; z-index: -1; left: 50%; bottom: 0; translate: -50% 0; font-family: $display; font-weight: 700; font-size: 16vw; line-height: 1; height: 0.74em; overflow: hidden;   /* (its own box crops it: nothing spills out of the panel) */
   letter-spacing: -0.04em; white-space: nowrap; pointer-events: none; -webkit-user-select: none; user-select: none; color: transparent; -webkit-text-stroke: 1px rgba(165, 180, 255, 0.22);
   -webkit-mask: linear-gradient(#000 10%, transparent 92%); mask: linear-gradient(#000 10%, transparent 92%); }
 

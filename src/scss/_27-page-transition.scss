@@ -14,7 +14,7 @@
     &:nth-child(3) { background: linear-gradient(#0b4452, $a2 45%, #082028); } &:nth-child(4) { background: linear-gradient(#2c1650, #a855f7 45%, #1a1030); }
     &:nth-child(5) { background: linear-gradient(#4a1438, $a3 45%, #2a0c20); } }
   &__label { position: absolute; left: 50%; top: 50%; translate: -50% -50%; display: flex; overflow: hidden; padding: 0.08em 0.04em;
-    font-family: $poster; font-weight: 800; letter-spacing: -0.03em; font-size: clamp(2.2rem, 8.6vw, 8rem); color: #fff; white-space: nowrap;
+    font-size: clamp(3rem, 12vw, 11rem); color: #fff; white-space: nowrap;
     .c { display: inline-block; transform: translateY(110%); } }
 }
 .pt-in .pt i { transform: none; }

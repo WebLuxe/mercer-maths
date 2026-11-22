@@ -50,9 +50,8 @@ Videos come from **`assets/data/resources.json`**. Upload to YouTube (unlisted w
 | **Quiz.** Three real Add Maths questions with worked answers. | **Booking.** Three steps, then a ready-to-send WhatsApp or email. |
 
 **Everything else:**
-- **One poster typeface:** every heading is set in Syne 800, with the accent line alternating between gradient and outline from panel to panel.
 - **One flight down a tunnel:** the background is a shaft of graph paper with a light at the far end, and scrolling is travel along it, on phones too. Every panel change sends a ring of light down the shaft.
-- **Hero:** a wide poster headline in three finishes (solid, outline, gradient) and two neon rings that orbit the portrait, one passing in front of him, each with a point of light racing round it.
+- **Hero:** a headline in three finishes (solid, outline, gradient) and two neon rings that orbit the portrait, one passing in front of him, each with a point of light racing round it.
 - **Results:** one giant figure with the grade curve drawing itself behind it, and a chart whose top grades are lit and whose other bars dim when you point at one.
 - **Story:** the years are giant outlined numerals that light up as the line reaches them, with a pulse of light travelling down the line. Each testimonial leads with the grade jump in giant type (start grade in outline, final grade in gradient), and the final grade gets circled in pen.
 - **Cards:** dark glass with a hairline edge; each card in a row has its own corner light, which grows under the pointer.

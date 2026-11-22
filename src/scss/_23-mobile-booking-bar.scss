@@ -23,7 +23,7 @@
 $panel: "(min-width: 900px) and (min-height: 560px)";
 @media #{$panel} {
   :root {
-    --h: clamp(1.7rem, min(3.7vw, 6.6vh), 4.1rem);   // section heading size
+    --h: clamp(2.3rem, min(5.6vw, 9vh), 6rem);   // section heading size
     --gap: clamp(0.8rem, 2.5vh, 2.2rem);         // vertical rhythm
     --pad-top: calc(68px + 1.6vh);                 // clears the nav
     --pad-bot: calc(54px + 0.8vh);                 // clears the HUD pill
@@ -42,7 +42,7 @@ $panel: "(min-width: 900px) and (min-height: 560px)";
   .contact__info > div, .tt__day, .vid, .sec-head, .about__text, .contact__big, .lib { will-change: transform, opacity; }
   .wrap { width: min(1280px, 100% - 150px); }   // leaves a lane for the section dots
   .hero { height: 100vh; min-height: 0; padding: var(--pad-top) 0 var(--pad-bot); }
-  .hero__title { font-size: clamp(2.6rem, min(6.2vw, 11.5vh), 6.4rem); margin: 2vh 0; }
+  .hero__title { font-size: clamp(3rem, min(7.4vw, 12.5vh), 7rem); margin: 2vh 0; }
   .hero__cta { margin-top: 3.4vh; }
   .hero .eyebrow { padding-block: clamp(0.22rem, 0.6vh, 0.32rem); }    // the badge is taller than the plain label it replaced: keep the hero's text clear of the nav
   .portrait { width: min(420px, 100%, 62vh * 0.8); }
@@ -109,7 +109,7 @@ $panel: "(min-width: 900px) and (min-height: 560px)";
     &__end .score { --ring: clamp(118px, 23vh, 200px); } }
   .timeline { gap: clamp(1.2rem, 4vh, 2.6rem); }
   .tl { h3 { font-size: clamp(1.15rem, 2.9vh, 1.75rem); } p { font-size: clamp(0.85rem, 1.85vh, 1rem); }
-    grid-template-columns: clamp(150px, 16vw, 232px) 1fr; --yr: clamp(2rem, min(4.1vw, 6.8vh), 3.7rem); }
+    grid-template-columns: clamp(110px, 11vw, 168px) 1fr; --yr: clamp(2rem, min(4.1vw, 6.8vh), 3.7rem); }
 
   // quotes + fees
   .quote { padding: clamp(1.1rem, 3vh, 2rem); gap: 1.6vh;
@@ -117,7 +117,7 @@ $panel: "(min-width: 900px) and (min-height: 560px)";
     &:first-child blockquote { font-size: clamp(1.1rem, 2.9vh, 1.65rem); }
     &__shift b, &__shift em { font-size: clamp(2.3rem, 8.2vh, 4.6rem); } }
   .format { padding: clamp(1rem, 2.6vh, 2.1rem); gap: 1.15vh; &--main &__tag { padding: 0.24rem 0.7rem; }
-    h3 { font-size: clamp(1.3rem, 3.4vh, 1.8rem); } &__price { font-size: clamp(1.25rem, min(2.2vw, 4.3vh), 2.3rem); }
+    h3 { font-size: clamp(1.3rem, 3.4vh, 1.8rem); } &__price { font-size: clamp(1.8rem, 5.2vh, 2.7rem); }
     ul { gap: 0.8vh; font-size: clamp(0.8rem, 1.8vh, 0.9rem); }
     .btn { padding: clamp(0.65rem, 1.6vh, 1rem) 1.5rem; } }
 
@@ -128,7 +128,7 @@ $panel: "(min-width: 900px) and (min-height: 560px)";
 
   // contact
   .contact { text-align: center;
-    &__big { font-size: clamp(2.4rem, min(6.4vw, 11vh), 7rem); margin: 2vh 0; }
+    &__big { font-size: clamp(3rem, min(9vw, 14vh), 10rem); margin: 2vh 0; }
     &__lede { margin-bottom: 3.5vh; }
     &__info { margin-top: 5vh; div { padding: 1.6vh 1.4rem; } }
     &__foot { margin-top: 5vh; padding-top: 2vh; } }
@@ -143,7 +143,7 @@ $panel: "(min-width: 900px) and (min-height: 560px)";
   .worked .eq { font-size: clamp(1.1rem, 3.2vh, 1.6rem); }
   .worked__plot svg { max-height: 42vh; }
   // heroes: smaller headline and spacing so the eyebrow never slides under the nav
-  .hero__title { font-size: clamp(2.3rem, min(6vw, 9.8vh), 5.4rem); margin: 1.4vh 0; }
+  .hero__title { font-size: clamp(2.6rem, min(6.4vw, 10.6vh), 6rem); margin: 1.4vh 0; }
   .hero__role { font-size: clamp(0.9rem, 2.5vh, 1.05rem); line-height: 1.5; }
   .hero__cta { margin-top: 2.6vh; }
   .thero__chips { margin-top: 2.2vh; }

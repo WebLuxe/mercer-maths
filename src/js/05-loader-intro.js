@@ -32,11 +32,23 @@ function warmSections() {
     s.style.transform = `translateY(${-s.getBoundingClientRect().top}px)`;
     s.style.opacity = "0.01"; s.style.zIndex = "500"; s.style.pointerEvents = "none";
   });
-  return new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(() => setTimeout(() => {
+  // The scroll engine must never measure the page while the sections are lifted: it would place every one of them at
+  // the top (the particles then took the last section's shape on the first screen). So the moment it is about to
+  // measure, everything is put back, whether or not the hold is over.
+  // The same goes for the visitor: the first scroll, tap or key press ends the warm-up at once.
+  const INPUTS = ["wheel", "touchstart", "pointerdown", "keydown"];
+  let lifted = true;
+  const putBack = () => {
+    if (!lifted) return;
+    lifted = false;
+    ScrollTrigger.removeEventListener("refreshInit", putBack);
+    INPUTS.forEach((ev) => removeEventListener(ev, putBack, true));
     secs.forEach((s) => { s.style.transform = s.style.opacity = s.style.zIndex = s.style.pointerEvents = ""; });
     document.documentElement.classList.remove("is-warming");
-    requestAnimationFrame(done);
-  }, 700))));
+  };
+  ScrollTrigger.addEventListener("refreshInit", putBack);
+  INPUTS.forEach((ev) => addEventListener(ev, putBack, { capture: true, passive: true }));
+  return new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(() => setTimeout(() => { putBack(); requestAnimationFrame(done); }, 700))));
 }
 const warmed = ready.then(warmSections);
 const ptIn = document.documentElement.classList.contains("pt-in");
@@ -142,7 +154,8 @@ function intro() {
         u.uHeat.value = 1;                                   // (nothing is in flight now, so this shows only from the next morph on)
         gsap.to(u.uKeep, { value: keepAfterIntro, duration: 1.2, ease: "power2.inOut" });
         setupScroll();
-        warmSections();
+        ScrollTrigger.refresh();                             // measure now, so no measuring is left pending…
+        warmSections();                                      // …and the second warm-up can run straight away, before the page is used
         unlock();
       }, null, "blast+=" + (POUR + 0.05));
   } else {
