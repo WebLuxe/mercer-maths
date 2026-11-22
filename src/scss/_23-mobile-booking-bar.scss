@@ -33,6 +33,13 @@ $panel: "(min-width: 900px) and (min-height: 560px)";
     display: flex; flex-direction: column; justify-content: center;
   }
   .sec.show { display: block; height: auto; padding: 0; }
+  // Each panel's content is kept as its own picture from the start, so the browser draws it ahead of time while the
+  // panel before it is being read. Drawn only at the moment it zooms in, it froze the zoom for a tenth of a second.
+  main > section.hero > .wrap, main > section.sec:not(.show) > .wrap, main > section.contact > .wrap { will-change: transform, opacity; }
+  // The blocks that animate in on their own are kept as pictures too. Otherwise each is re-drawn at every size its
+  // panel passes through while zooming in (blurred shadows included), which is the other thing that froze frames.
+  .stat, .chart, .quote, .format, .teaser__card, .tl, .subject, .faq__item, .quiz, .worked__board, .worked__plot,
+  .contact__info > div, .tt__day, .vid, .sec-head, .about__text, .contact__big, .lib { will-change: transform, opacity; }
   .wrap { width: min(1280px, 100% - 150px); }   // leaves a lane for the section dots
   .hero { height: 100vh; min-height: 0; padding: var(--pad-top) 0 var(--pad-bot); }
   .hero__title { font-size: clamp(2.6rem, min(6.2vw, 11.5vh), 6.4rem); margin: 2vh 0; }

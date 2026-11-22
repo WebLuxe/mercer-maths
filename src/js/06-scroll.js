@@ -173,7 +173,7 @@ const depth = { items: [], measuring: true };
 function depthClear(it) {
   if (!it.on) return;
   it.on = false;
-  for (const el of it.els) { el.style.transform = ""; el.style.transformOrigin = ""; el.style.opacity = ""; }
+  for (const el of it.els) { el.style.transform = ""; el.style.transformOrigin = ""; el.style.opacity = ""; el.style.willChange = ""; }
 }
 function depthWrite(it) {
   if (depth.measuring) return;
@@ -181,6 +181,9 @@ function depthWrite(it) {
   // at rest, and also while a panel has not started to arrive or has fully left: held in the middle of the screen it
   // would lie, unseen, on top of the panel being used and take its clicks
   if ((a < 0.0005 && b < 0.0005) || (panelMQ.matches && !it.flat && (a > 0.9995 || b > 0.9995))) return depthClear(it);
+  // The first write of a move asks the browser to keep the panel as one picture for as long as it moves. Without that
+  // it re-draws every card, shadow and glow at each new size (dozens of times per zoom), which is what froze frames.
+  if (!it.on) for (const el of it.els) el.style.willChange = "transform, opacity";
   it.on = true;
   let tf, op;
   if (!panelMQ.matches) {
@@ -197,7 +200,7 @@ function depthWrite(it) {
     op = Math.min(1, Math.max(0, (e - 0.3) / 0.5));
   } else {
     // ...leaving: held in place the same way, it grows past the camera and is gone by the half-way point
-    tf = `translateY(${(100 * b).toFixed(2)}vh) scale(${(1 + 2.6 * b * b).toFixed(4)})`;
+    tf = `translateY(${(100 * b).toFixed(2)}vh) scale(${(1 + 1.9 * b * b).toFixed(4)})`;
     op = Math.max(0, 1 - b / 0.5);
   }
   const origin = it.flat || !panelMQ.matches ? "" : "50% 50%";
@@ -411,9 +414,10 @@ function setupWorked() {
     const x = -1.3 + (i / 120) * 5.2, y = 2 * x * x - 5 * x - 3;
     d += (i ? "L" : "M") + X(x).toFixed(2) + " " + Y(y).toFixed(2);
   }
+  const glow = svgEl("path", { d, class: "curve curve--glow" }, svg);   // the curve's glow: a wide faint copy drawn under it
   const path = svgEl("path", { d, class: "curve" }, svg);
   const pl = path.getTotalLength();
-  gsap.set(path, { strokeDasharray: pl, strokeDashoffset: pl });
+  gsap.set([glow, path], { strokeDasharray: pl, strokeDashoffset: pl });
 
   const r1 = svgEl("circle", { cx: X(-0.5), cy: Y(0), r: 6, class: "root" }, svg);
   const r2 = svgEl("circle", { cx: X(3), cy: Y(0), r: 6, class: "root" }, svg);
@@ -429,7 +433,7 @@ function setupWorked() {
     const f = draw.p * 160, i = Math.min(159, f | 0), a = route[i], b = route[i + 1], k = f - i;
     tracer.setAttribute("cx", (a.x + (b.x - a.x) * k).toFixed(2));
     tracer.setAttribute("cy", (a.y + (b.y - a.y) * k).toFixed(2));
-    path.style.strokeDashoffset = pl * (1 - draw.p);
+    path.style.strokeDashoffset = glow.style.strokeDashoffset = pl * (1 - draw.p);
   };
 
   gsap.from(".worked__board, .worked__plot", { y: 80, opacity: 0, duration: 1.2, stagger: 0.15, ease: "expo.out", scrollTrigger: { trigger: "#worked", start: "top 88%" } });

@@ -14,10 +14,13 @@
   svg { width: 100%; height: auto; overflow: visible; display: block; }
   .ax { stroke: rgba($ink, 0.35); stroke-width: 1; }
   .grid line { stroke: rgba(255, 255, 255, 0.05); }
-  .curve { fill: none; stroke: url(#curveGrad); stroke-width: 3; stroke-linecap: round; filter: drop-shadow(0 0 6px rgba($a1, 0.7)); }
-  .root { fill: $a2; filter: drop-shadow(0 0 8px $a2); }
-  .vx { fill: $a3; filter: drop-shadow(0 0 8px $a3); }
-  .tracer { fill: #fff; filter: drop-shadow(0 0 6px #fff) drop-shadow(0 0 14px $a2); }   // the point that rides the curve while it draws
+  // (glows here are drawn, not blurred: a wide faint copy of the curve under it, and a soft ring round each point.
+  //  A blur filter on a line that changes every frame has to be blurred again every frame.)
+  .curve { fill: none; stroke: url(#curveGrad); stroke-width: 3; stroke-linecap: round; }
+  .curve--glow { stroke-width: 11; opacity: 0.22; }
+  .root { fill: $a2; stroke: rgba($a2, 0.28); stroke-width: 7; }
+  .vx { fill: $a3; stroke: rgba($a3, 0.28); stroke-width: 7; }
+  .tracer { fill: #fff; stroke: rgba($a2, 0.5); stroke-width: 9; }   // the point that rides the curve while it draws
   text { font-family: "Inter", sans-serif; font-size: 12px; fill: $muted; }
   .rl { fill: $ink; font-weight: 500; }
 }

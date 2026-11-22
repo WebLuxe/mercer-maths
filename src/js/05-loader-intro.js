@@ -16,11 +16,34 @@ const setCount = () => {
   $("#loaderBar").style.transform = `scaleX(${count.v / 100})`;
   $("#loaderStatus").textContent = statuses[v >= 100 ? 3 : Math.min(2, Math.floor(v / 34))];
 };
+// Warm-up. The first time a browser draws a new kind of thing (a blurred shadow, outlined type, a masked gradient) its
+// graphics card has to build the program for it, and that froze the page for a tenth of a second the first time each
+// section came into view. So every section is drawn once now, while the loading screen or the page-change columns are
+// up: each is lifted into the window at one hundredth of full opacity (unseen, but really drawn) for a third of a
+// second and then put back exactly as it was. It happens before any scroll set-up measures or hides anything.
+// It runs a second time straight after the scroll set-up, because that set-up builds things that did not exist the
+// first time (the plotted curve, the letters of each heading). While either pass runs, .is-warming shows the lines
+// and bars that normally draw themselves later (the end of _13-chart.scss).
+function warmSections() {
+  const secs = $$("main > section:not(.show)").slice(1);   // (not the carousel: the scroll engine pins that section and owns its transform)
+  if (!secs.length) return Promise.resolve();
+  document.documentElement.classList.add("is-warming");   // (styles: the end of _13-chart.scss)
+  secs.forEach((s) => {
+    s.style.transform = `translateY(${-s.getBoundingClientRect().top}px)`;
+    s.style.opacity = "0.01"; s.style.zIndex = "500"; s.style.pointerEvents = "none";
+  });
+  return new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(() => setTimeout(() => {
+    secs.forEach((s) => { s.style.transform = s.style.opacity = s.style.zIndex = s.style.pointerEvents = ""; });
+    document.documentElement.classList.remove("is-warming");
+    requestAnimationFrame(done);
+  }, 700))));
+}
+const warmed = ready.then(warmSections);
 const ptIn = document.documentElement.classList.contains("pt-in");
 let keepAfterIntro = 1.06;
 if (ptIn) {
   $("#loader")?.remove();
-  ready.then(() => {
+  warmed.then(() => {
     document.body.classList.remove("is-loading");
     buildTextShape(TEXT_SHAPE[0], TEXT_SHAPE[1]);
     intro();
@@ -59,7 +82,7 @@ if (ptIn) {
       .from(".loader__tag span, .loader__tag em", { yPercent: 120, opacity: 0, duration: 1, stagger: 0.12, ease: "expo.out" }, 0.9)
       .to({}, { duration: 0.5 });                                                        // hold the logo a beat
   }));
-  Promise.all([ready, assembled]).then(() => {
+  Promise.all([ready, assembled, warmed]).then(() => {
     $(".loader__veil")?.remove();
     intro();
   });
@@ -119,6 +142,7 @@ function intro() {
         u.uHeat.value = 1;                                   // (nothing is in flight now, so this shows only from the next morph on)
         gsap.to(u.uKeep, { value: keepAfterIntro, duration: 1.2, ease: "power2.inOut" });
         setupScroll();
+        warmSections();
         unlock();
       }, null, "blast+=" + (POUR + 0.05));
   } else {

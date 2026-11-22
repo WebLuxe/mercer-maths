@@ -36,3 +36,11 @@
 .tip { position: fixed; z-index: 160; pointer-events: none; padding: 0.55rem 0.8rem; border-radius: 10px; font-size: 0.78rem; line-height: 1.3; white-space: nowrap;
   background: rgba(20, 18, 30, 0.92); border: 1px solid $line; opacity: 0; transform: translate(-50%, calc(-100% - 12px)); transition: opacity 0.15s;
   b { font-weight: 600; } &.is-on { opacity: 1; } }
+
+// During the warm-up passes (05-loader-intro.js) the lines and bars that draw themselves later are shown complete, so
+// they are drawn once before they are needed. The sections are at one hundredth of full opacity then: none of it is seen.
+// (Measured: also forcing every hidden block to full opacity here made the first panel change on Tuition freeze.)
+.is-warming .curve { stroke-dashoffset: 0 !important; }
+.is-warming .timeline__line i { transform: none !important; }
+.is-warming .chart__bar { transform: scaleX(0.7) !important; }
+.is-warming .chart__tip { opacity: 1 !important; transform: none !important; }

@@ -77,7 +77,9 @@ Videos come from **`assets/data/resources.json`**. Upload to YouTube (unlisted w
 The effects are heavy, so the site works hard to stay smooth:
 
 - **Low-resolution background.** The animated background is drawn at 35% resolution and stretched to full screen. It's soft by nature, so the difference doesn't show.
-- **Adaptive quality.** It watches the 3D frame time every second. Below ~54fps it steps the resolution down, then trims particles and drops the grain and trail. It raises quality again when there's headroom, and remembers the right level for the device on the next visit.
+- **Warm-up behind the loading screen.** The first time a browser draws a new kind of thing, the graphics card has to build a program for it, which froze a frame for about a tenth of a second the first time each section appeared. Every section is now drawn once, unseen, while the loading screen is up.
+- **Sections are kept as pictures.** Each panel, and each block that animates inside it, is drawn once and then only moved, scaled and faded. Nothing is re-drawn while a panel zooms.
+- **Adaptive quality.** It times the gap between 3D frames against the pace the screen sets (60fps for the 3D, also on 120Hz and 144Hz screens). If the typical frame runs a third late it steps the resolution down, then trims particles and drops the grain and trail. It raises quality again after four steady seconds, and remembers the level for the next visit. A single frozen frame never lowers it.
 - **Light baseline.** 7,500 particles (3,500 on phones), a 2-octave background at 35% resolution, and a capped pixel ratio.
 - **FPS meter.** Add `?fps` to the URL to see live numbers.
 - **60fps 3D on fast screens.** The refresh rate is detected after start-up. On 120/144Hz screens the 3D renders at about 60fps while scrolling and the UI stay at full refresh.

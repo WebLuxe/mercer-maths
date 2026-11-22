@@ -36,7 +36,7 @@ const canvas = $("#webgl");
 // MSAA off: points and a full-screen shader gain nothing from it, and it's a big GPU cost
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: false, alpha: false, powerPreference: "high-performance" });
 const DPR_MAX = Math.min(devicePixelRatio, isMobile ? 1 : 1.25);
-const QKEY = "mm-quality";
+const QKEY = "mm-quality-2";   // (-2: levels saved by the first adjuster are ignored, it could only ever lower them)
 let savedQ = null;
 try { savedQ = JSON.parse(localStorage.getItem(QKEY) || "null"); } catch (e) {}
 let dpr = savedQ ? Math.min(DPR_MAX, savedQ.dpr) : DPR_MAX;
@@ -638,26 +638,37 @@ const applyDpr = () => {
   syncBgRes();
   pMat.uniforms.uSize.value = P_SIZE * dpr;
 };
-const perf = { frames: 0, acc: 0, last: performance.now(), warm: performance.now() + 2000 };
+// The quality adjuster. It times the gap between 3D frames and compares it with the gap the scene is asked to keep
+// (perf.pace: the screen's own frame time, doubled on fast screens where the 3D draws every other frame).
+//  - It judges the middle of a window of 60 frames, not the average: one frozen frame (a tab waking up, the graphics
+//    card building a program) says nothing about what the machine can sustain, and must not lower the quality.
+//  - Lower: the typical frame takes a third longer than asked. Raise: for four windows in a row nine frames in ten were
+//    on time. After a raise is followed by a lowering, it stops raising: that level is this machine's.
+const perf = { gaps: [], last: performance.now(), warm: performance.now() + 2000, pace: 16.7, calm: 0, raised: false, settled: false };
 const saveQ = () => { try { localStorage.setItem(QKEY, JSON.stringify({ dpr, low: perfState.low })); } catch (e) {} };
 function watchPerf() {
   const now = performance.now(), dt = now - perf.last;
   perf.last = now;
-  if (now < perf.warm || dt > 250 || ui.book) return;   // ignore loader, tab switches, booking panel          // ignore the loader and tab switches
-  perf.acc += dt; perf.frames++;
-  if (perf.frames < 60) return;
-  const avg = perf.acc / perf.frames;
-  perf.frames = 0; perf.acc = 0;
-  perf.avg = avg;
-  if (avg > 18.5 && dpr > 0.75) perf.pending = "down";            // under ~54fps
-  else if (avg > 18.5 && !perfState.low) perf.pending = "low";
-  else if (avg < 11 && dpr < DPR_MAX && !perfState.low) perf.pending = "up";
+  if (now < perf.warm || dt > 250 || ui.book) return;   // ignore the loader, tab switches and the booking panel
+  perf.gaps.push(dt);
+  if (perf.gaps.length < 60) return;
+  const sorted = perf.gaps.sort((a, b) => a - b), mid = sorted[30], most = sorted[53];
+  perf.avg = mid;
+  perf.gaps = [];
+  if (mid > perf.pace * 1.33) {
+    perf.calm = 0;
+    if (perf.raised) perf.settled = true;
+    if (dpr > 0.75) perf.pending = "down";
+    else if (!perfState.low) perf.pending = "low";
+  } else if (most < perf.pace * 1.12) {
+    if (++perf.calm >= 4 && !perf.settled && dpr < DPR_MAX && !perfState.low) { perf.pending = "up"; perf.calm = 0; }
+  } else perf.calm = 0;
 }
 // quality changes wait until nothing is moving, so they never show as a jump
 function applyPendingQuality() {
   if (!perf.pending || motion.vel > 0.02 || snap.busy || morph.tween) return;
   if (perf.pending === "down") { dpr = Math.max(0.75, dpr - 0.25); applyDpr(); }
-  else if (perf.pending === "up") { dpr = Math.min(DPR_MAX, dpr + 0.25); applyDpr(); }
+  else if (perf.pending === "up") { dpr = Math.min(DPR_MAX, dpr + 0.25); perf.raised = true; applyDpr(); }
   else if (perf.pending === "low") goLow();
   perf.pending = null;
   saveQ();
@@ -728,6 +739,9 @@ let frameNo = 0, renderEvery = 1;
     gsap.ticker.remove(probe);
     const med = gaps.slice(30).sort((a, b) => a - b)[60];
     renderEvery = med < 10 ? 2 : 1;          // under 10ms a frame = 100Hz+ screen
+    // the gap between 3D frames the adjuster should expect. No screen is slower than 60Hz, so a longer gap measured
+    // here is a slow machine, not a slow screen: capping it lets the adjuster see that and lower the quality.
+    perf.pace = Math.min(med, 16.7) * renderEvery;
   };
   gsap.ticker.add(probe);
 }

@@ -21,5 +21,5 @@
 // the loop of pen round the new grade (06-scroll.js puts it there once the grade has landed)
 .pen { position: absolute; left: -62%; top: -42%; width: 224%; height: 184%; overflow: visible; pointer-events: none;
   path { fill: none; stroke: url(#curveGrad); stroke-width: 2.2; vector-effect: non-scaling-stroke; stroke-linecap: round; stroke-dasharray: 1; stroke-dashoffset: 1;
-    filter: drop-shadow(0 0 5px rgba($a2, 0.85)); animation: penDraw 0.95s cubic-bezier(0.3, 0, 0.1, 1) 0.15s forwards; } }
+    animation: penDraw 0.95s cubic-bezier(0.3, 0, 0.1, 1) 0.15s forwards; } }
 @keyframes penDraw { to { stroke-dashoffset: 0; } }
