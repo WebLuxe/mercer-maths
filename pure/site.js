@@ -166,8 +166,8 @@
     requestAnimationFrame(step);
   };
 
-  /* ---- the deck (desktop): one screen per panel. Panels are sticky, so each stays put while the next slides over it;
-     as it is covered it tips over backwards, and the one arriving swings up into place.
+  /* ---- desktop: one screen per panel, and the page simply scrolls through them. Nothing is stacked or flipped: a
+     panel's content only drifts a little slower than the page (so it has some depth) and fades as it leaves.
      Scrolling is smooth and it snaps: the page follows the wheel or the trackpad as it moves (eased, never in jumps),
      and when the hand stops it glides on to the nearest panel, or to the next one if it was pushed far enough. ---- */
   const panels = $$(".panel"), inners = panels.map((p) => p.firstElementChild);
@@ -179,15 +179,12 @@
   const paint = () => {
     const y = scrollY / innerHeight;
     inners.forEach((el, i) => {
-      // d: −1 = a full screen below (still to arrive), 0 = in place, 1 = fully covered by the next panel
+      // d: −1 = a full screen below (still to arrive), 0 = filling the screen, 1 = a full screen above (gone)
       const d = inDeck() && !reduce ? Math.round(clamp(y - i, -1, 1) * 600) / 600 : 0;
       if (d === el._d) return;
       el._d = d;
-      let tf = "", op = "", org = "", vis = "";
-      if (d >= 1) vis = "hidden";                                    // (out of sight under the panel above: not drawn at all)
-      else if (d > 0) { tf = `translateY(${(-7 * d).toFixed(2)}rem) translateZ(${(-36 * d).toFixed(2)}rem) rotateX(${(15 * d).toFixed(2)}deg)`; op = (1 - 0.82 * d).toFixed(3); org = "50% 100%"; }
-      else if (d < 0 && d > -1) { tf = `translateZ(${(26 * d).toFixed(2)}rem) rotateX(${(26 * d).toFixed(2)}deg)`; org = "50% 0%"; }
-      el.style.transform = tf; el.style.opacity = op; el.style.transformOrigin = org; el.style.visibility = vis;
+      el.style.transform = d ? `translateY(${(d * 14).toFixed(2)}vh)` : "";          // (down while its panel moves up: slower than the page)
+      el.style.opacity = d > 0 ? (1 - 0.7 * d).toFixed(3) : "";
     });
     const i = Math.round(y);
     if (i !== cur) { cur = i; mark(i); }

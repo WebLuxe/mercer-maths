@@ -292,10 +292,11 @@ a.row:hover .row__n, a.row:hover .row__d { color: #555; } a.row:hover .row__go {
 .dots button { width: 0.8rem; height: 0.8rem; border-radius: 99px; background: #fff; opacity: 0.4; transition: height 0.5s var(--spring), opacity 0.3s; position: relative; }
 .dots button::after { content: ""; position: absolute; inset: -0.6rem; } .dots button[aria-current="true"] { height: 2.8rem; opacity: 1; }
 
-/* ---------- desktop: the deck. Every panel is exactly one screen and stays put while the next one slides over it ---------- */
+/* ---------- desktop: every panel is exactly one screen, and the page scrolls through them like any page ---------- */
 @media (min-width: 761px) and (min-height: 480px) {
-  .panel { position: sticky; top: 0; height: 100vh; overflow: hidden; }
-  .panel__in { height: 100%; display: flex; flex-direction: column; justify-content: center; transform-origin: 50% 60%; will-change: transform, opacity; }
+  .panel { height: 100vh; overflow: hidden; }
+  .panel--paper { background: var(--paper); }
+  .panel__in { height: 100%; display: flex; flex-direction: column; justify-content: center; will-change: transform, opacity; }
   .sec > .panel__in { padding: 11.5rem 0 4rem; }
   .hero > .panel__in, .phero > .panel__in { justify-content: stretch; }
   .hero > .panel__in > .art, .phero > .panel__in > .art { flex: 1; height: auto; min-height: 0; }
@@ -354,13 +355,6 @@ a.row:hover .row__n, a.row:hover .row__d { color: #555; } a.row:hover .row__go {
 /* ==================================================================
    The 3D layer
 ================================================================== */
-/* deck: a panel tips over backwards as the next one covers it, and the next one swings up into place like a lid.
-   (The script writes those transforms; here the panels are given depth and made see-through round their sheets.) */
-@media (min-width: 761px) and (min-height: 480px) {
-  .panel { perspective: 150rem; background: none; }
-  .panel__in { backface-visibility: hidden; }
-}
-
 /* titles: the letters stand up one after another */
 .hero__title, .phero h1 { perspective: 70rem; }
 
