@@ -35,7 +35,10 @@ $panel: "(min-width: 900px) and (min-height: 560px)";
   .sec.show { display: block; height: auto; padding: 0; }
   // Each panel's content is kept as its own picture from the start, so the browser draws it ahead of time while the
   // panel before it is being read. Drawn only at the moment it zooms in, it froze the zoom for a tenth of a second.
-  main > section.hero > .wrap, main > section.sec:not(.show) > .wrap, main > section.contact > .wrap { will-change: transform, opacity; }
+  main > section.hero > .wrap, main > section.sec:not(.show) > .wrap, main > section.contact > .wrap,
+  .show__head, .show__stage { will-change: transform, opacity; }   // (the carousel's panel is pinned: its heading and its stage are what move)
+  // (the round hole a panel arrives through is a mask written by depthWrite in 06-scroll.js: one big tile centred on the panel, so content that runs past the panel's own box, edge to edge, is seen through it too)
+  main > section.sec:not(.show) > .wrap, main > section.contact > .wrap { -webkit-mask-size: 400vmax 400vmax; mask-size: 400vmax 400vmax; -webkit-mask-position: center; mask-position: center; -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat; -webkit-mask-clip: no-clip; mask-clip: no-clip; }
   // The blocks that animate in on their own are kept as pictures too. Otherwise each is re-drawn at every size its
   // panel passes through while zooming in (blurred shadows included), which is the other thing that froze frames.
   .stat, .chart, .quote, .format, .teaser__card, .tl, .subject, .faq__item, .quiz, .worked__board, .worked__plot,
@@ -62,7 +65,7 @@ $panel: "(min-width: 900px) and (min-height: 560px)";
     display: grid; grid-template-columns: 1fr 1.15fr; column-gap: clamp(1.5rem, 3vw, 3.5rem); align-items: center;
     grid-template-areas: "head chart" "stats chart" "foot chart";
     .sec-head { grid-area: head; grid-template-columns: 1fr; h2, p { grid-column: 1; } }
-    .stats { grid-area: stats; border-radius: 22px; }
+    .stats { grid-area: stats; border-radius: 22px; --r: 21px; }
     .footnote { grid-area: foot; margin-top: 1vh; }
     .chart { grid-area: chart; margin-top: 0; }
   }

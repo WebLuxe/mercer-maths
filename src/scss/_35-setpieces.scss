@@ -1,0 +1,39 @@
+@use "sass:math";
+@use "sass:map";
+@use "abstracts" as *;
+
+// ==========================================================
+//  SET PIECES (27-setpieces.js)
+// ==========================================================
+
+// ---------- results: the ring that splits into three ----------
+// Each ring is a plain border with a glow (box-shadow): the cheapest things a browser draws, already in use all over
+// the page. (They were first drawn like the hero's orbit rings, a conic gradient cut by two masks: the graphics card
+// froze a frame building that the first time they appeared.)
+#results > .wrap { position: relative; }
+.rsplit { position: absolute; inset: 0; pointer-events: none; z-index: 3;
+  i { position: absolute; left: 30%; top: 60%; width: 90px; height: 90px; border-radius: 50%; opacity: 0; will-change: transform, opacity;
+    border: 2.5px solid #d9f4ff; box-shadow: 0 0 14px 2px rgba($a2, 0.85), 0 0 42px 8px rgba($a1, 0.6), inset 0 0 14px 1px rgba($a2, 0.6), inset 0 0 34px 4px rgba($a1, 0.35); }
+  i:first-child { border-color: #e6dcff; box-shadow: 0 0 14px 2px rgba(167, 139, 250, 0.9), 0 0 42px 8px rgba($a1, 0.6), inset 0 0 14px 1px rgba(167, 139, 250, 0.6), inset 0 0 34px 4px rgba($a2, 0.3); }
+}
+// (the warm-up behind the loading screen draws them once, so the graphics card is not building them when they first appear)
+.is-warming .rsplit i { opacity: 1 !important; }
+
+// ---------- about: giant phrases crossing behind the statement ----------
+// One row across the whole screen, centred on the statement. Each phrase waits off the right edge, crosses in 13s
+// and waits off the left edge for the rest of the 33s lap; the three start 11s apart, so the next one's first letters
+// arrive as the last one's are leaving. (A negative delay starts each one that far into its lap: nothing waits on
+// screen before its first crossing.)
+#about > .wrap { position: relative; z-index: 0; }
+.cross { position: absolute; z-index: -1; left: calc(50% - 50vw); width: 100vw; top: 50%; height: 1.3em; translate: 0 -50%; overflow: hidden; pointer-events: none;
+  font-family: $display; font-weight: 700; font-size: 36vw; line-height: 1.3; letter-spacing: -0.04em; text-transform: lowercase;
+  -webkit-mask: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent); mask: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+  @media (min-width: 900px) and (min-height: 560px) { font-size: min(21vw, 40vh); }
+  @include down(md) { opacity: 0.45; }                           // (on a phone it runs right behind the words being read)
+  span { position: absolute; left: 0; top: 0; white-space: nowrap; will-change: transform; color: rgba(255, 255, 255, 0.022); -webkit-text-stroke: 1.5px rgba(150, 176, 255, 0.46);
+    animation: crossing 33s linear infinite; animation-delay: calc(var(--i) * 11s - 34.5s); }
+  span:nth-child(2) { -webkit-text-stroke-color: rgba(95, 240, 255, 0.4); }
+  span:nth-child(3) { -webkit-text-stroke-color: rgba(196, 160, 255, 0.46); }
+}
+@keyframes crossing { 0% { transform: translateX(100vw); } 39.4% { transform: translateX(-100%); } 100% { transform: translateX(-100%); } }
+.low-power .cross span { animation-duration: 44s; }

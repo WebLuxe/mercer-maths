@@ -30,6 +30,7 @@ const SHAPES = [
   ["fig. 5", "r = a·e^(bθ)"],
   ["fig. 6", { tuition: "A* = Σ effort", resources: "π ≈ 3.14159" }[PAGE] || "KS = f(you)"],
   ["fig. 0", "Kavish Maths"],                                    // the intro logotype
+  ["fig. 7", "f(x, y) = Kavish"],                                // the tutor himself, in dots (profile page)
 ];
 
 const canvas = $("#webgl");
@@ -201,9 +202,11 @@ const LOGO_INTRO = !!$("#loader") && !document.documentElement.classList.contain
 const LOGO = 6;                                                  // the logotype shape slot
 const START_SHAPE = PAGE === "profile" ? 0 : 5;                 // tuition + resources open on their word
 const FIRST_SHAPE = LOGO_INTRO ? LOGO : START_SHAPE;
+const FACE = 7;                                                  // the tutor's portrait in dots
 const TEXT_SHAPE = { tuition: ["A*", 5.2], resources: ["π", 3.6] }[PAGE] || ["KS", 4.2];
 const A = new Float32Array(COUNT * 3), B = new Float32Array(COUNT * 3), C = new Float32Array(COUNT * 3),
       D = new Float32Array(COUNT * 3), E = new Float32Array(COUNT * 3), F = new Float32Array(COUNT * 3), G = new Float32Array(COUNT * 3);
+const FACE_POS = new Float32Array(COUNT * 3), FACE_LUM = new Float32Array(COUNT).fill(1);
 const rnd = new Float32Array(COUNT), col = new Float32Array(COUNT * 3);
 const palette = [new THREE.Color("#8b5cf6"), new THREE.Color("#22d3ee"), new THREE.Color("#f472b6"), new THREE.Color("#ffffff")];
 const golden = Math.PI * (3 - Math.sqrt(5));
@@ -238,6 +241,9 @@ F.set(A);
 G.set(A);
 pGeo.setAttribute("aG", new THREE.BufferAttribute(G, 3));
 pGeo.setAttribute("aF", new THREE.BufferAttribute(F, 3));
+FACE_POS.set(B);                                                 // until the photo has been sampled (or if it can't be): the knot
+pGeo.setAttribute("aH", new THREE.BufferAttribute(FACE_POS, 3));
+pGeo.setAttribute("aLum", new THREE.BufferAttribute(FACE_LUM, 1));
 pGeo.setAttribute("aRnd", new THREE.BufferAttribute(rnd, 1));
 pGeo.setAttribute("aCol", new THREE.BufferAttribute(col, 3));
 
@@ -247,17 +253,18 @@ const pMat = new THREE.ShaderMaterial({
     uTime: { value: 0 }, uMorph: { value: 0 }, uIntro: { value: 0 }, uVel: { value: 0 },
     uFrom: { value: FIRST_SHAPE }, uTo: { value: FIRST_SHAPE }, uT: { value: 1 }, uKeep: { value: 1.06 },
     uMouse: { value: new THREE.Vector3(99, 99, 0) }, uShock: { value: new THREE.Vector3(99, 99, 0) }, uShockAge: { value: 10 }, uShockAmp: { value: 1 }, uSwirl: { value: 1 }, uBoost: { value: 1 },
-    uSize: { value: P_SIZE * dpr }, uHeat: { value: 1 }, uPull: { value: 0 }, uHole: { value: 1 }, uHue: hueU,
+    uSize: { value: P_SIZE * dpr }, uHeat: { value: 1 }, uPull: { value: 0 }, uHole: { value: 1 }, uHue: hueU, uFade: { value: 1 },
+    uFaceDim: { value: isMobile ? 0.55 : 1 },                     // on a phone the portrait stands behind the text being read: quieter there
   },
   vertexShader: /* glsl */ `
     ${NOISE}
     ${HUE}
-    uniform float uTime, uMorph, uIntro, uSize, uVel, uShockAge, uShockAmp, uSwirl, uBoost, uFrom, uTo, uT, uKeep, uHeat, uPull, uHole; uniform vec3 uMouse, uShock;
-    attribute vec3 aB, aC, aD, aE, aF, aG, aCol; attribute float aRnd;
+    uniform float uTime, uMorph, uIntro, uSize, uVel, uShockAge, uShockAmp, uSwirl, uBoost, uFrom, uTo, uT, uKeep, uHeat, uPull, uHole, uFade, uFaceDim; uniform vec3 uMouse, uShock;
+    attribute vec3 aB, aC, aD, aE, aF, aG, aH, aCol; attribute float aRnd, aLum;
     varying vec3 vCol; varying float vAlpha;
     vec3 shapeAt(float k){
       if (k < .5) return position; if (k < 1.5) return aB; if (k < 2.5) return aC;
-      if (k < 3.5) return aD; if (k < 4.5) return aE; if (k < 5.5) return aF; return aG;
+      if (k < 3.5) return aD; if (k < 4.5) return aE; if (k < 5.5) return aF; if (k < 6.5) return aG; return aH;
     }
     void main(){
       // each particle leaves a little later than the last, so the shape pours rather than jumps
@@ -267,8 +274,9 @@ const pMat = new THREE.ShaderMaterial({
       p += vec3(sin(aRnd * 41.), cos(aRnd * 29.), sin(aRnd * 17. + 1.)) * fly * .55 * uSwirl;   // swirl mid-flight
       p *= mix(6.0 + aRnd * 6.0, 1.0, uIntro);
       float n = snoise(p * .45 + uTime * .15);
-      float word = mix(step(4.5, uFrom), step(4.5, uTo), tt);     // 1 while a word (page word or logo) is showing
-      p += normalize(p + .0001) * n * (.22 + uVel * .3) * (1. - word * .7);   // breathes (less on words, so letters stay crisp)
+      float word = mix(step(4.5, uFrom), step(4.5, uTo), tt);     // 1 while a word (page word or logo) or the portrait is showing
+      float face = mix(step(6.5, uFrom), step(6.5, uTo), tt);     // 1 while the portrait is showing
+      p += normalize(p + .0001) * n * (.22 + uVel * .3) * (1. - word * .7 - face * .22);   // breathes (less on words, so letters stay crisp)
       vec4 mv = modelViewMatrix * vec4(p, 1.);
       // the cursor (or a finger) parts the particles. While the mouse is held down they fall toward it instead,
       // spiralling as they go: each one travels a share of its own distance, so none is ever pulled past the centre
@@ -288,9 +296,14 @@ const pMat = new THREE.ShaderMaterial({
       float near = clamp((mv.z - modelViewMatrix[3].z) * .3, -1., 1.);
       float twinkle = sin(uTime * (1.1 + aRnd * 2.3) + aRnd * 83.) * (.15 - word * .08);
       float crowd = 1. - uPull * .45 * smoothstep(2.2, 0., dl);     // gathered at the cursor they'd add up to a white blob
-      gl_PointSize = uSize * (.35 + aRnd * .9) * (1. + wave * 1.5) * (1. + heat * .3) / -mv.z * step(.001, keep);
-      vCol = mix(hueTurn(aCol), vec3(1.), heat * .4);
-      vAlpha = (.78 + n * .28 + wave) * uIntro * keep * uBoost * (1. + twinkle) * (1. + near * .2) * (1. + heat * .45) * crowd;   // steady brightness: noise only shimmers it
+      // the portrait is a photograph in dots: each dot carries the brightness of the spot it was sampled from
+      float lum = mix(1., (.45 + aLum * .95) * uFaceDim, face);
+      // (a dot about to pass the camera would be drawn as a huge disc: its size is capped, and it fades as it comes)
+      gl_PointSize = min(uSize * mix(.35 + aRnd * .9, .3 + aLum * 1.05, face) * (1. + wave * 1.5) * (1. + heat * .3) / -mv.z, uSize * .5) * step(.001, keep);
+      // (the portrait is lit in the site's two colours, violet at the bottom left to cyan at the top right, whiter where it is bright)
+      vec3 fc = mix(mix(vec3(.6, .42, 1.), vec3(.2, .82, 1.), smoothstep(-3., 3., aH.y + aH.x * .7)), vec3(1.), aLum * aLum * .3);
+      vCol = mix(mix(hueTurn(aCol), hueTurn(fc), face * .8), vec3(1.), heat * .4);
+      vAlpha = (.78 + n * .28 + wave) * uIntro * keep * uBoost * (1. + twinkle) * (1. + near * .2) * (1. + heat * .45) * crowd * lum * uFade * smoothstep(.3, 3.2, -mv.z);   // steady brightness: noise only shimmers it
     }`,
   fragmentShader: /* glsl */ `
     varying vec3 vCol; varying float vAlpha;
@@ -479,6 +492,70 @@ function buildTextShape(str, width) {
     F[i * 3 + 2] = (Math.random() - 0.5) * 0.7;
   }
   pGeo.attributes.aF.needsUpdate = true;
+}
+// The tutor in dots: a halftone of the hero photo (which is already loaded). The part of the photo in FACE_CROP is
+// read as brightness above the backdrop, and laid out as a staggered grid of dots, one particle per dot, each drawn
+// larger and brighter the brighter its spot is (aLum): so the face, the glasses and the shirt come out, and the dark
+// backdrop stays empty. The grid is made as fine as the number of particles allows. Brighter dots also stand a little
+// nearer, so the face has relief when the scene leans. Particles left over drift round the figure as dust.
+// FACE_CROP: the part of the photo used, as fractions of its width and height (left, top, width, height).
+const FACE_CROP = [0.2, 0.12, 0.6, 0.37];
+async function buildPortraitShape() {
+  const img = $(".hero img");
+  if (!img) return;
+  try { await img.decode(); } catch (e) { return; }
+  const [fx, fy, fw, fh] = FACE_CROP, iw = img.naturalWidth, ih = img.naturalHeight;
+  const CW = 220, CH = Math.round((CW * fh * ih) / (fw * iw)), c = document.createElement("canvas");
+  c.width = CW; c.height = CH;
+  const x = c.getContext("2d", { willReadFrequently: true });
+  let d;
+  try { x.drawImage(img, fx * iw, fy * ih, fw * iw, fh * ih, 0, 0, CW, CH); d = x.getImageData(0, 0, CW, CH).data; } catch (e) { return; }
+  const n = CW * CH, L = new Float32Array(n);
+  for (let i = 0; i < n; i++) L[i] = (d[i * 4] * 0.299 + d[i * 4 + 1] * 0.587 + d[i * 4 + 2] * 0.114) / 255;
+  // the backdrop's own brightness (the two top corners), and the brightest the subject gets
+  let back = 0, bn = 0, top = 0.001;
+  for (let y = 0; y < 12; y++) for (let X = 0; X < 12; X++) { back += L[y * CW + X] + L[y * CW + CW - 1 - X]; bn += 2; }
+  back = back / bn + 0.03;
+  for (let i = 0; i < n; i++) top = Math.max(top, L[i] - back);
+  // brightness at a point of the crop, 0..1 (the mean of a small patch: a dot stands for its whole cell)
+  const at = (px, py) => {
+    const X = Math.min(CW - 2, Math.max(0, px | 0)), Y = Math.min(CH - 2, Math.max(0, py | 0)), i = Y * CW + X;
+    return Math.max(0, (L[i] + L[i + 1] + L[i + CW] + L[i + CW + 1]) / 4 - back) / top;
+  };
+  const SEEN = 0.085;                                               // dimmer than this is backdrop: no dot
+  const cells = (step) => {
+    const out = [];
+    for (let r = 0, py = step / 2; py < CH; r++, py += step * 0.866) for (let px = (r % 2 ? step : step / 2); px < CW; px += step) {
+      const v = at(px, py);
+      if (v > SEEN) out.push(px, py, v);
+    }
+    return out;
+  };
+  // the finest grid whose dots the particles can fill (nine in ten of them: the rest are the dust)
+  let lo = 1, hi = 12, grid = null;
+  for (let k = 0; k < 12; k++) { const mid = (lo + hi) / 2, g = cells(mid); if (g.length / 3 > COUNT * 0.9) lo = mid; else { hi = mid; grid = g; } }
+  if (!grid || !grid.length) return;
+  const dots = grid.length / 3, tall = isMobile ? 4.2 : 6.3, sc = tall / CH;
+  // (particles are numbered at random against the grid, so the low-power tier, which hides some, thins it evenly)
+  const order = Array.from({ length: dots }, (_, k) => k);
+  for (let k = dots - 1; k > 0; k--) { const j = (Math.random() * (k + 1)) | 0; [order[k], order[j]] = [order[j], order[k]]; }
+  for (let k = 0; k < COUNT; k++) {
+    if (k < dots) {
+      const g = order[k] * 3, v = grid[g + 2];
+      FACE_POS[k * 3] = (grid[g] - CW / 2) * sc;
+      FACE_POS[k * 3 + 1] = -(grid[g + 1] - CH / 2) * sc;
+      FACE_POS[k * 3 + 2] = (v - 0.3) * 0.75;
+      FACE_LUM[k] = Math.sqrt(v);
+    } else {
+      const ang = Math.random() * 6.283, rad = (0.5 + Math.random() * 0.75) * tall * 0.62;
+      FACE_POS[k * 3] = Math.cos(ang) * rad;
+      FACE_POS[k * 3 + 1] = Math.sin(ang) * rad;
+      FACE_POS[k * 3 + 2] = (Math.random() - 0.5) * 3;
+      FACE_LUM[k] = 0.16 + Math.random() * 0.14;
+    }
+  }
+  pGeo.attributes.aH.needsUpdate = true;
+  pGeo.attributes.aLum.needsUpdate = true;
 }
 const sceneState = PAGE !== "profile"
   ? { morph: 5, rotX: 0, x: isMobile ? 0 : 2.7, y: isMobile ? 1.2 : 0, z: 0, blobScale: 0 }
@@ -678,6 +755,13 @@ function applyPendingQuality() {
 const mass = { x: 0, v: 0 };                                     // a soft spring chasing the signed scroll speed
 const camFx = { dolly: 0, roll: 0 };                             // snap move: a step back and a slight roll, in world units / radians
 const sceneFx = { warp: 0 };                                     // extra "speed" on top of the scroll's: the jump between pages
+// The dive. Between two desktop panels the particles do what the panels do (see depthWrite in 06-scroll.js): the
+// shape you leave swells until the camera is inside it and its dots stream past, and the next one comes out of the
+// far end of the shaft and grows into place. `st` is the scroll trigger of the panel being left (its progress is the
+// position in the dive, so it plays backwards when you scroll back); on phones, where panels don't snap, a change of
+// shape plays the same dive once, by the clock (`t`).
+const dive = { st: null, t: 1 };
+bus.on("shape:change", () => { if (!reduce && !dive.st && !panelMQ.matches) gsap.fromTo(dive, { t: 0 }, { t: 1, duration: 1.5, ease: "sine.inOut", overwrite: true }); });
 bus.on("snap:go", ({ dur, dir }) => {
   if (!reduce) { bgMat.uniforms.uScanT.value = bgMat.uniforms.uTime.value; bgMat.uniforms.uScanDir.value = dir; }
   if (reduce) return;
@@ -807,7 +891,17 @@ function render() {
 
   spinDir += (motion.dir - spinDir) * 0.04;                       // direction changes ease, never flip
   spin += dt * (0.06 + v * 0.3) * spinDir;
-  world.position.set(sceneState.x, sceneState.y + mass.x * 0.42, sceneState.z);   // left behind by the scroll: up while travelling down
+  // the dive: how far through it (0..1), from the panel being left or from the clock
+  let dp = dive.st ? dive.st.progress : dive.t, grow = 1, fade = 1, home = 1;
+  if (dive.st && (dp < 0.001 || dp > 0.999)) { dive.st = null; dp = 1; }
+  if (dp < 1) {
+    const deep = dive.st ? 1 : 0.4;                               // (by the clock, on a phone: a shorter plunge)
+    if (dp < 0.5) { const u = dp * 2; grow = 1 + 7.5 * deep * u * u * u; fade = 1 - Math.min(1, Math.max(0, (u - 0.5) / 0.5)) * (dive.st ? 1 : 0.8); }
+    else { const u = (dp - 0.5) * 2, k = u * u * (3 - 2 * u); grow = 0.06 + 0.94 * k; home = dive.st ? k : 1; fade = Math.min(1, u / 0.3) * (dive.st ? 1 : 0.8) + (dive.st ? 0 : 0.2); }
+  }
+  pu.uFade.value = fade;
+  world.scale.setScalar(grow);
+  world.position.set(sceneState.x * home, (sceneState.y + mass.x * 0.42) * home, sceneState.z);   // left behind by the scroll: up while travelling down
   const ut = pu.uT.value, tw = (morph.to >= 5 ? ut : 0) + (morph.from >= 5 ? 1 - ut : 0);   // how much a word (page word or logo) is showing
   points.rotation.y = (spin + leanX * 0.3) * (1 - tw) + leanX * 0.35 * tw;
   points.rotation.x = (sceneState.rotX + leanY * 0.15) * (1 - tw) - leanY * 0.2 * tw;

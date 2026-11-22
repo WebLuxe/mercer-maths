@@ -26,7 +26,7 @@ function setupScroll() {
   const L = isMobile ? 0 : -2.5, R = isMobile ? 0 : 2.6;
   const STATES = {
     profile: {
-      hero: [0, R, 0, 0, 0, 0], about: [1, R, 0, 0.4, 0, 0], results: [2, 0, -0.4, 0.55, -1, 0],
+      hero: [0, R, 0, 0, 0, 0], about: [FACE, isMobile ? 0 : 3.1, isMobile ? 1.5 : 0.2, 0, 0, 0], results: [2, 0, -0.4, 0.55, -1, 0],
       journey: [3, L, 0, 0.6, 0, 0], students: [4, 0, -0.3, 1.05, 0, 0], teaser: [2, R, 0, 0.5, -1, 0],
       contact: [5, 0, 0.4, 0, -2.5, 0],
     },
@@ -108,7 +108,12 @@ function setupScroll() {
   // stats: the numbers roll into place like a counter while their cards arrive
   const counts = $$("[data-count]"), countText = (el) => (+el.dataset.count).toFixed(+(el.dataset.dec || 0));
   if (reduce) counts.forEach((el) => (el.textContent = countText(el)));
-  else if (counts.length) ScrollTrigger.create({ trigger: ".stats", start: "top 85%", once: true, onEnter: () => counts.forEach((el, i) => odometer(el, countText(el), 0.15 + i * 0.1)) });
+  else if (counts.length) {
+    // the three smaller figures wait for the ring that splits into them (27-setpieces.js); the headline figure rolls as its card arrives
+    const small = counts.filter((el) => !el.closest(".stat--hero"));
+    const split = setupRingSplit(() => small.forEach((el, i) => odometer(el, countText(el), i * 0.08)));
+    ScrollTrigger.create({ trigger: ".stats", start: "top 85%", once: true, onEnter: () => counts.forEach((el, i) => (split && small.includes(el)) || odometer(el, countText(el), 0.15 + i * 0.1)) });
+  }
   gsap.from(".stat", { y: 60, opacity: 0, duration: 1.1, stagger: 0.1, ease: "expo.out", scrollTrigger: { trigger: ".stats", start: "top 85%" } });
 
   // chart
@@ -173,7 +178,7 @@ const depth = { items: [], measuring: true };
 function depthClear(it) {
   if (!it.on) return;
   it.on = false;
-  for (const el of it.els) { el.style.transform = ""; el.style.transformOrigin = ""; el.style.opacity = ""; el.style.willChange = ""; el.style.clipPath = ""; }
+  for (const el of it.els) { el.style.transform = ""; el.style.transformOrigin = ""; el.style.opacity = ""; el.style.willChange = ""; el.style.maskImage = el.style.webkitMaskImage = ""; }
 }
 function depthWrite(it) {
   if (depth.measuring) return;
@@ -181,9 +186,10 @@ function depthWrite(it) {
   // at rest, and also while a panel has not started to arrive or has fully left: held in the middle of the screen it
   // would lie, unseen, on top of the panel being used and take its clicks
   if ((a < 0.0005 && b < 0.0005) || (panelMQ.matches && !it.flat && (a > 0.9995 || b > 0.9995))) return depthClear(it);
-  // The first write of a move asks the browser to keep the panel as one picture for as long as it moves. Without that
-  // it re-draws every card, shadow and glow at each new size (dozens of times per zoom), which is what froze frames.
-  if (!it.on) for (const el of it.els) el.style.willChange = "transform, opacity";
+  // On a phone, the first write of a move asks the browser to keep the panel as one picture for as long as it moves.
+  // (Desktop panels are kept that way all the time, by the panel styles: asking only when a move began made the
+  // browser re-draw the whole panel at that moment and again when it ended, which froze a frame each time.)
+  if (!it.on && !panelMQ.matches) for (const el of it.els) el.style.willChange = "transform, opacity";
   it.on = true;
   let tf, op, hole = "";
   if (!panelMQ.matches) {
@@ -199,15 +205,19 @@ function depthWrite(it) {
     tf = `translateY(${(-100 * a).toFixed(2)}vh) scale(${(0.62 + 0.38 * k).toFixed(4)})`;
     op = Math.min(1, Math.max(0, (e - 0.12) / 0.3));
     // ...and it is seen through a round hole that opens from the middle of the screen, where the shaft's light is:
-    // the panel is not faded in over the old one, you fly into the hole and it is what is inside
-    hole = e > 0.995 ? "" : `circle(${(Math.max(0, e - 0.1) * Math.max(0, e - 0.1) * 150).toFixed(2)}vmax at 50% 50%)`;
+    // the panel is not faded in over the old one, you fly into the hole and it is what is inside. The hole is a
+    // mask with a soft edge, and it stays on until the panel is at rest. (It was a clip-path at first: the moment
+    // the circle outgrew the screen the browser dropped the clip and drew the panel's layers another way, and
+    // the graphics card froze for a tenth of a second building that, in the middle of the zoom.)
+    const hr = Math.max(0, e - 0.1) * Math.max(0, e - 0.1) * 150;
+    hole = `radial-gradient(circle, #000 ${(hr * 0.9).toFixed(2)}vmax, transparent ${hr.toFixed(2)}vmax)`;
   } else {
     // ...leaving: held in place the same way, it grows past the camera and is gone by the half-way point
     tf = `translateY(${(100 * b).toFixed(2)}vh) scale(${(1 + 1.9 * b * b).toFixed(4)})`;
     op = Math.max(0, 1 - b / 0.5);
   }
   const origin = it.flat || !panelMQ.matches ? "" : "50% 50%";
-  for (const el of it.els) { el.style.transform = tf; el.style.transformOrigin = origin; el.style.opacity = op.toFixed(3); el.style.clipPath = hole; }
+  for (const el of it.els) { el.style.transform = tf; el.style.transformOrigin = origin; el.style.opacity = op.toFixed(3); el.style.maskImage = el.style.webkitMaskImage = hole; }
 }
 function depthArm() {
   depth.measuring = false;
@@ -223,7 +233,8 @@ function setupDepth() {
     // desktop panels: over the whole snap (the zoom holds both panels on screen). Phones: only in the bottom / top fifth of the screen (the middle is for reading).
     it.inST = ScrollTrigger.create({ trigger: sec, start: "top bottom", end: () => (panelMQ.matches && !flat ? "top top" : panelMQ.matches ? "top 15%" : "top 78%"), onUpdate: () => depthWrite(it) });
     // (the contact section is the last one: it never leaves)
-    if (!sec.classList.contains("contact")) it.outST = ScrollTrigger.create({ trigger: sec, start: () => (panelMQ.matches && !flat ? "bottom bottom" : panelMQ.matches ? "bottom 85%" : "bottom 22%"), end: () => (panelMQ.matches && flat ? "bottom 15%" : "bottom top"), onUpdate: () => depthWrite(it) });
+    if (!sec.classList.contains("contact")) it.outST = ScrollTrigger.create({ trigger: sec, start: () => (panelMQ.matches && !flat ? "bottom bottom" : panelMQ.matches ? "bottom 85%" : "bottom 22%"), end: () => (panelMQ.matches && flat ? "bottom 15%" : "bottom top"),
+      onUpdate: (st) => { depthWrite(it); if (panelMQ.matches && st.progress > 0.001 && st.progress < 0.999) dive.st = st; } });
     depth.items.push(it);
   });
   // Triggers are measured with every panel standing at rest: a tilted, shrunken panel would shift whatever is measured inside it.

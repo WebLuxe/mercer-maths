@@ -61,7 +61,9 @@ section { position: relative; z-index: 2; }
 // its exact width and baseline; the strip of digits (__s) rolls up behind a mask that only cuts above and below,
 // so a wide digit passing through a narrow column keeps its sides.
 .odo { white-space: nowrap; }
-.odo__c { display: inline-block; position: relative; clip-path: inset(0 -0.3em); }
+// (cut with overflow, not clip-path: a clip-path round a moving layer makes the graphics card draw it through a mask,
+// and building that mask the first time the numbers rolled froze a frame)
+.odo__c { display: inline-block; position: relative; overflow: visible clip; }
 .odo__k { visibility: hidden; }
 .odo__s { position: absolute; left: 50%; top: 0; translate: -50% 0; will-change: transform;
   i { display: block; font-style: normal; text-align: center; } }

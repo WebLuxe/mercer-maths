@@ -55,5 +55,4 @@ if (finePointer && !reduce) {
     el.addEventListener("pointerleave", () => { rx(0); ry(0); el.classList.remove("is-tilting"); });
   });
 }
-// …and arrive one after another: tipping up into place on a desktop, simply rising on a phone (row by row there)
-bus.on("scroll:setup", () => revealEach(".teaser__card", finePointer ? { y: 80, opacity: 0, rotationX: -30 } : { y: 60, opacity: 0, scale: 0.95 }, { start: "top 92%", duration: 1.2 }));
+// (how they arrive, as a staircase that deals out into the row, is in 27-setpieces.js)

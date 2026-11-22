@@ -11,8 +11,11 @@
   // the featured card floats very slightly (the separate translate property: GSAP owns transform for the tilt).
   // Like every looping animation it pauses while its section is off screen (.is-off), and the low-power tier drops it.
   // the recommended card is marked with light, not with a different box: a glow rises from its bottom edge
-  &--main { background: radial-gradient(120% 78% at 50% 108%, rgba(124, 92, 255, 0.62), rgba(34, 211, 238, 0.2) 46%, transparent 76%), linear-gradient(rgba(12, 11, 26, 0.93), rgba(12, 11, 26, 0.93));
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 34px 90px -30px rgba($a1, 0.95); animation: floaty 4.6s ease-in-out infinite alternate; &::before { @include conic-border(28px); } }
+  // (its coloured edge is a gradient behind the border. It used to be a conic gradient cut to a 1px ring by two masks:
+  // the graphics card froze a frame building that the first time the fees panel came in)
+  &--main { background: radial-gradient(120% 78% at 50% 108%, rgba(124, 92, 255, 0.62), rgba(34, 211, 238, 0.2) 46%, transparent 76%) padding-box, linear-gradient(rgba(12, 11, 26, 0.93), rgba(12, 11, 26, 0.93)) padding-box,
+      linear-gradient(140deg, #8b5cf6, rgba(34, 211, 238, 0.85) 42%, rgba(255, 255, 255, 0.12) 62%, rgba(244, 114, 182, 0.9)) border-box;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 34px 90px -30px rgba($a1, 0.95); animation: floaty 4.6s ease-in-out infinite alternate; }
   &__tag { font-size: 0.72rem; letter-spacing: 0.2em; text-transform: uppercase; color: $muted; }
   &--main &__tag { align-self: flex-start; padding: 0.38rem 0.8rem; border-radius: 99px; color: #fff; background: $grad-cta; box-shadow: 0 6px 20px -6px rgba(109, 77, 255, 0.9); letter-spacing: 0.16em; }
   h3 { font-family: $display; font-size: 1.9rem; letter-spacing: -0.03em; line-height: 1; }

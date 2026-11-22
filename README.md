@@ -52,17 +52,19 @@ Videos come from **`assets/data/resources.json`**. Upload to YouTube (unlisted w
 **Everything else:**
 - **One flight down a tunnel:** the background is a shaft of graph paper with a light at the far end, and scrolling is travel along it, on phones too. Every panel change sends a ring of light down the shaft.
 - **Hero:** a headline in three finishes (solid, outline, gradient) and two neon rings that orbit the portrait, one passing in front of him, each with a point of light racing round it.
-- **Results:** one giant figure with the grade curve drawing itself behind it, and a chart whose top grades are lit and whose other bars dim when you point at one.
+- **The tutor in dots:** on the "about" panel the particles assemble into a halftone portrait of the tutor, sampled from the hero photo in the browser (swap the photo and the portrait follows). Behind the statement, giant outlined phrases cross the screen one after another.
+- **Results:** one giant figure with the grade curve drawing itself behind it, and a chart whose top grades are lit and whose other bars dim when you point at one. As the panel lands, one ring of light stretches and splits into three, which land on the three smaller figures as they start to roll.
 - **Story:** the years are giant outlined numerals that light up as the line reaches them, with a pulse of light travelling down the line.
 - **Testimonial scanner:** the testimonial cards travel through a beam of light. Left of the beam a card is its "before" (a dashed outline with the grade the student started on); right of it, the same card in full colour with the grade they reached and their words. With reduced motion they are three plain quotes.
+- **Staircase of cards:** the four cards that lead to the Tuition page arrive stacked as a staircase receding into the tunnel, then deal out into their row.
 - **Cards:** dark glass with a hairline edge; each card in a row has its own corner light, which grows under the pointer.
 - **Live 3D background:** aurora light, a rippling graph-paper grid, shooting stars and floating maths symbols. Each section has its own colour mood, and dust drifts past at different depths as you scroll.
-- **Particle shapes:** a sphere, a torus knot, z = sin x · cos y, a saddle, a spiral, and the words "A*", "KS" and "π". Each section owns one finished shape, and arriving there pours the particles straight from the last shape to the next in one smooth morph. They never pass through shapes in between, however fast you scroll. The particles twinkle, and glow hot while they are in flight. On desktop the pill in the bottom-left corner is a button: press it to pour them into the next shape.
+- **Particle shapes:** a sphere, a torus knot, z = sin x · cos y, a saddle, a spiral, the tutor's portrait, and the words "A*", "KS" and "π". Each section owns one finished shape, and arriving there pours the particles straight from the last shape to the next in one smooth morph. They never pass through shapes in between, however fast you scroll. The particles twinkle, and glow hot while they are in flight. On desktop the pill in the bottom-left corner is a button: press it to pour them into the next shape.
 - **Scroll speed drives the motion:** the grid warps, light streaks rush past, and the view widens like a warp jump. The particle cloud has weight: it lags behind a scroll and springs back, and the camera leans into every snap.
 - **Click anywhere:** a shockwave ripples through the grid and the particles. **Hold the mouse down** and the particles fall toward the cursor while light gathers there; let go and they are thrown back out, harder the longer you held.
 - **Snap scrolling:** one flick moves one full-screen section, with side dots (each names its section as you arrive) and keyboard support. Phones keep normal scrolling.
-- **Zoom-through panels:** on desktop the section you leave grows past the camera and the next one is seen through a round hole that opens from the far end of the tunnel. It follows the scroll, so it plays in both directions.
-- **Reveals:** headings rise letter by letter, the stats roll into place like a counter, chart bars shoot out with a spark on the tip, the story timeline lights up node by node as its line is drawn, and each testimonial's grade flips up like a departure board (D → C → B → A).
+- **Zoom-through panels:** on desktop the section you leave grows past the camera and the next one is seen through a soft-edged round hole that opens from the far end of the tunnel. The particles dive with it: the shape you leave swells until you are inside it and its dots stream past, and the next shape comes out of the hole and grows into place. It follows the scroll, so it plays in both directions. On phones a change of shape plays a shorter dive.
+- **Reveals:** headings rise letter by letter, the stats roll into place like a counter, chart bars shoot out with a spark on the tip, and the story timeline lights up node by node as its line is drawn.
 - **Cursor effects:** a ring that stretches as it travels, squeezes on a press and names what a click will do (Book, Read, Open, Next); a comet trail; hero letters that lift as the cursor passes; holographic foil on the portrait; 3D tilt, glare and a lit edge on cards; and buttons that fill from the point where the pointer enters and drain where it leaves.
 - **On phones:** the particles part around your finger, the scene leans as you tilt the phone, a tap leaves a ring where it landed, every control looks pressed the moment you touch it, and phones that can give a short buzz on a tap, a right answer or a mistake.
 - **Page changes:** the particles rush outward as you leave a page and pour back in on the next, so the two read as one jump.
@@ -84,6 +86,7 @@ The effects are heavy, so the site works hard to stay smooth:
 - **FPS meter.** Add `?fps` to the URL to see live numbers.
 - **60fps 3D on fast screens.** The refresh rate is detected after start-up. On 120/144Hz screens the 3D renders at about 60fps while scrolling and the UI stay at full refresh.
 - **Unloading engine.** Off-screen sections pause their CSS animations, and the scene throttles while the booking panel or video player covers it. Quality changes are applied only while nothing is moving, and particle trims fade instead of popping.
+- **No rounded cuts round moving layers.** Cutting something that moves (rolling digits, a curve drawing itself, a zooming panel) to a rounded or circular shape makes the graphics card draw it through a mask, and building that mask froze a frame the first time. Rounded corners are drawn as rounded backgrounds instead, and the hole a panel arrives through is a soft mask that stays on until the panel is at rest.
 - **No live blur.** There are no backdrop-filter blurs over the moving WebGL layer, and no per-frame repaints of animated gradients.
 - **Small assets.** The photo is a 29 KB WebP with a JPG fallback, the JS is minified into one file, and the 3D library is preloaded.
 
@@ -100,13 +103,14 @@ assets/             What the site loads (built, don't edit by hand)
   data/resources.json   the notes + videos list (edit this)
   notes/            note PDFs
 src/                Source code
-  js/               00-core.js … 25-touch.js, joined in filename order at build time (they share one scope)
+  js/               00-core.js … 27-setpieces.js, joined in filename order at build time (they share one scope)
                     00-core.js        set-up, and the event bus that lets features react to each other
                     01b-motion-kit.js shared helpers: rolling numbers, symbol bursts, reveals, phone buzz
                     04-scene.js       the 3D scene: shaders and the one render loop
                     06-scroll.js      scroll choreography: panel depth, headings, reveals, carousel
+                    27-setpieces.js   the ring that splits into the results, the staircase of cards, the giant phrases
                     24-audio.js       the optional sound: a small synthesiser that listens to the event bus
-  scss/             _abstracts.scss (tokens, mixins) + 33 partials, entry: style.scss
+  scss/             _abstracts.scss (tokens, mixins) + 35 partials, entry: style.scss
 tools/test.cjs      Browser tests
 docs/screenshots/   Images for this README
 build.mjs           Build script

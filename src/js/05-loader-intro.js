@@ -32,6 +32,14 @@ function warmSections() {
     s.style.transform = `translateY(${-s.getBoundingClientRect().top}px)`;
     s.style.opacity = "0.01"; s.style.zIndex = "500"; s.style.pointerEvents = "none";
   });
+  // A desktop panel arrives seen through a round hole (depthWrite in 06-scroll.js). Cutting a panel that holds moving
+  // layers to a circle is one more kind of drawing, so each panel is drawn through such a hole now as well.
+  const holed = panelMQ.matches && !reduce ? secs.map((s) => $(":scope > .wrap", s)).filter(Boolean) : [];
+  holed.forEach((w) => (w.style.maskImage = w.style.webkitMaskImage = "radial-gradient(circle, #000 42vmax, transparent 46vmax)"));
+  // The rolling numbers are built only when they roll (a strip of digits per column, each its own moving layer): they
+  // are built now too, held part-way through a roll, and put back as the plain "0" they were.
+  const rolled = reduce ? [] : $$("main [data-count]").filter((el) => !el._odo && el.textContent === "0");
+  rolled.forEach((el) => odometer(el, (+el.dataset.count).toFixed(+(el.dataset.dec || 0)))?.pause(0.4));
   // The scroll engine must never measure the page while the sections are lifted: it would place every one of them at
   // the top (the particles then took the last section's shape on the first screen). So the moment it is about to
   // measure, everything is put back, whether or not the hold is over.
@@ -44,6 +52,8 @@ function warmSections() {
     ScrollTrigger.removeEventListener("refreshInit", putBack);
     INPUTS.forEach((ev) => removeEventListener(ev, putBack, true));
     secs.forEach((s) => { s.style.transform = s.style.opacity = s.style.zIndex = s.style.pointerEvents = ""; });
+    holed.forEach((w) => (w.style.maskImage = w.style.webkitMaskImage = ""));
+    rolled.forEach((el) => { el._odo?.kill(); el._odo = null; el.textContent = "0"; });
     document.documentElement.classList.remove("is-warming");
   };
   ScrollTrigger.addEventListener("refreshInit", putBack);
@@ -58,6 +68,7 @@ if (ptIn) {
   warmed.then(() => {
     document.body.classList.remove("is-loading");
     buildTextShape(TEXT_SHAPE[0], TEXT_SHAPE[1]);
+    if (PAGE === "profile") buildPortraitShape();
     intro();
     lenis?.start();
     ScrollTrigger.refresh();
@@ -77,6 +88,7 @@ if (ptIn) {
     $$(".hero img").forEach((im) => im.decode?.().catch(() => {}));
     const h = buildLogoShape();
     buildTextShape(TEXT_SHAPE[0], TEXT_SHAPE[1]);             // the page's own word too, now rather than at the blast
+    if (PAGE === "profile") buildPortraitShape();             // …and the tutor in dots, for the "about" panel
     makeSymbols();                                            // the floating maths symbols (still invisible) too
     $("#loader").style.setProperty("--logo-h", h || 0.2);
     const u = pMat.uniforms;
