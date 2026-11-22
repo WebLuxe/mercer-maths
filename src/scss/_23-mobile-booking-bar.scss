@@ -116,6 +116,7 @@ $panel: "(min-width: 900px) and (min-height: 560px)";
     blockquote { font-size: clamp(0.95rem, 2.3vh, 1.3rem); }
     &:first-child blockquote { font-size: clamp(1.1rem, 2.9vh, 1.65rem); }
     &__shift b, &__shift em { font-size: clamp(2.3rem, 8.2vh, 4.6rem); } }
+  .scan { height: clamp(230px, 46vh, 420px); }
   .format { padding: clamp(1rem, 2.6vh, 2.1rem); gap: 1.15vh; &--main &__tag { padding: 0.24rem 0.7rem; }
     h3 { font-size: clamp(1.3rem, 3.4vh, 1.8rem); } &__price { font-size: clamp(1.8rem, 5.2vh, 2.7rem); }
     ul { gap: 0.8vh; font-size: clamp(0.8rem, 1.8vh, 0.9rem); }

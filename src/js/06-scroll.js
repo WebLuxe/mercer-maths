@@ -173,7 +173,7 @@ const depth = { items: [], measuring: true };
 function depthClear(it) {
   if (!it.on) return;
   it.on = false;
-  for (const el of it.els) { el.style.transform = ""; el.style.transformOrigin = ""; el.style.opacity = ""; el.style.willChange = ""; }
+  for (const el of it.els) { el.style.transform = ""; el.style.transformOrigin = ""; el.style.opacity = ""; el.style.willChange = ""; el.style.clipPath = ""; }
 }
 function depthWrite(it) {
   if (depth.measuring) return;
@@ -185,7 +185,7 @@ function depthWrite(it) {
   // it re-draws every card, shadow and glow at each new size (dozens of times per zoom), which is what froze frames.
   if (!it.on) for (const el of it.els) el.style.willChange = "transform, opacity";
   it.on = true;
-  let tf, op;
+  let tf, op, hole = "";
   if (!panelMQ.matches) {
     tf = `translateY(${(22 * a - 14 * b).toFixed(1)}px) scale(${(1 - 0.03 * a - 0.04 * b).toFixed(4)})`;
     op = (1 - 0.5 * a) * (1 - 0.5 * b);
@@ -196,15 +196,18 @@ function depthWrite(it) {
     // Zoom-through, arriving: the translate cancels the scroll, so the panel is held in the middle of the screen
     // and grows out of the far end of the shaft, appearing once the panel before it has gone past.
     const e = 1 - a, k = e * e * (3 - 2 * e);
-    tf = `translateY(${(-100 * a).toFixed(2)}vh) scale(${(0.3 + 0.7 * k).toFixed(4)})`;
-    op = Math.min(1, Math.max(0, (e - 0.3) / 0.5));
+    tf = `translateY(${(-100 * a).toFixed(2)}vh) scale(${(0.62 + 0.38 * k).toFixed(4)})`;
+    op = Math.min(1, Math.max(0, (e - 0.12) / 0.3));
+    // ...and it is seen through a round hole that opens from the middle of the screen, where the shaft's light is:
+    // the panel is not faded in over the old one, you fly into the hole and it is what is inside
+    hole = e > 0.995 ? "" : `circle(${(Math.max(0, e - 0.1) * Math.max(0, e - 0.1) * 150).toFixed(2)}vmax at 50% 50%)`;
   } else {
     // ...leaving: held in place the same way, it grows past the camera and is gone by the half-way point
     tf = `translateY(${(100 * b).toFixed(2)}vh) scale(${(1 + 1.9 * b * b).toFixed(4)})`;
     op = Math.max(0, 1 - b / 0.5);
   }
   const origin = it.flat || !panelMQ.matches ? "" : "50% 50%";
-  for (const el of it.els) { el.style.transform = tf; el.style.transformOrigin = origin; el.style.opacity = op.toFixed(3); }
+  for (const el of it.els) { el.style.transform = tf; el.style.transformOrigin = origin; el.style.opacity = op.toFixed(3); el.style.clipPath = hole; }
 }
 function depthArm() {
   depth.measuring = false;
@@ -284,11 +287,7 @@ function setupHeadings() {
   });
 }
 
-// a loop of pen that draws itself round whatever it is put inside (styles: .pen in _18-testimonials.scss). It starts
-// top-right, goes round once and overshoots its own start, as a hand does.
-const PEN_LOOP = `<svg class="pen" viewBox="0 0 120 70" preserveAspectRatio="none" aria-hidden="true"><path pathLength="1" d="M92 14 C70 2 28 4 14 24 C2 42 22 62 58 62 C92 62 114 46 108 28 C103 13 80 8 62 10" /></svg>`;
-
-/* ---------- Profile: the story timeline and the testimonials ---------- */
+/* ---------- Profile: the story timeline (the testimonials are 26-scanner.js) ---------- */
 function setupStory() {
   // timeline: the line draws itself down the page, and each node lights up, with its year and text arriving,
   // at the moment the line reaches it
@@ -321,26 +320,6 @@ function setupStory() {
       } }));
     }
   }
-
-  // testimonials: the cards settle one after another, and each grade flips up from the old grade to the new
-  // one like a departure board (D → C → B → A)
-  const GRADES = ["E", "D", "C", "B", "A", "A*"];
-  revealEach(".quote", { y: 90, opacity: 0, rotationX: -40, transformPerspective: 1000, transformOrigin: "50% 100%" }, { stagger: 0.12, start: "top 88%", duration: 1.2, ease: "back.out(1.15)", then: (cards) => cards.forEach((card, i) => {
-    const [from, to] = $$(".quote__shift b", card);
-    const path = to ? GRADES.slice(GRADES.indexOf(from.textContent), GRADES.indexOf(to.textContent) + 1) : [];
-    if (path.length < 2) return;
-    // while it flips, the letter on show is not the real grade: screen readers keep the real one
-    to.insertAdjacentHTML("afterend", `<span class="sr">${to.textContent}</span>`);
-    to.setAttribute("aria-hidden", "true");
-    to.textContent = path[0];
-    gsap.set(to, { transformPerspective: 300 });
-    const tl = gsap.timeline({ delay: 0.6 + i * 0.12, onComplete: () => { to.nextElementSibling.remove(); to.removeAttribute("aria-hidden");
-      to.insertAdjacentHTML("beforeend", PEN_LOOP); } });   // ...and the grade they reached is circled, the way a teacher would
-    path.slice(1).forEach((g) => tl
-      .to(to, { rotationX: -90, duration: 0.12, ease: "power2.in" })
-      .call(() => (to.textContent = g))
-      .fromTo(to, { rotationX: 90 }, { rotationX: 0, duration: 0.2, ease: "back.out(2.2)", immediateRender: false }));
-  }) });
 }
 
 /* ---------- section 4: 3D carousel, cards on a spinning cylinder ---------- */
