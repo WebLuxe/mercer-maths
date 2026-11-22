@@ -57,3 +57,9 @@ $glows: rgba(61, 123, 255, 0.5), rgba(139, 92, 255, 0.55), rgba(45, 212, 238, 0.
   .contact__info > div:hover { --glow-size: 270px; }
   .chart:hover { --glow-size: 480px; }
 }
+
+// ---- portal (26-portal.js): the two rings a panel change flies through. Drawn small and scaled up by the script.
+.portal { position: fixed; inset: 0; z-index: 60; pointer-events: none; overflow: hidden; display: grid; place-items: center;
+  i { grid-area: 1 / 1; width: 30vmin; aspect-ratio: 1; border-radius: 50%; opacity: 0; will-change: transform, opacity;
+    border: 3px solid #b4f8ff; box-shadow: 0 0 20px 3px rgba($a2, 0.95), inset 0 0 20px 3px rgba($a2, 0.8), 0 0 70px 10px rgba($a1, 0.55);
+    &:nth-child(2) { width: 24vmin; border-color: #d9ccff; box-shadow: 0 0 20px 3px rgba($a1, 0.95), inset 0 0 20px 3px rgba($a1, 0.8), 0 0 70px 10px rgba($a3, 0.4); } } }

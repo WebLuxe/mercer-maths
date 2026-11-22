@@ -8,4 +8,5 @@
 .thero__chips { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-top: 3.4vh;
   span { padding: 0.5rem 0.95rem; border-radius: 99px; @include glass(0.04); font-size: 0.8rem; color: $muted; }
   b { color: $ink; font-family: $display; margin-right: 0.15rem; } }
-.thero__space { min-height: 40vh; @include down(md) { display: none; } }
+.thero__space { position: relative; min-height: 40vh; perspective: 1200px; @include down(md) { display: none; }
+  .orbit--a { --d: min(124%, 82vh); } .orbit--b { --d: min(108%, 72vh); } }

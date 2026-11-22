@@ -134,7 +134,7 @@ function setupScroll() {
     t.replaceWith(m[1], num, m[3]);
   });
   if (!reduce) $$(".format").forEach((f) => f.classList.add("is-pre"));
-  revealEach(".format", { y: 80, opacity: 0 }, { stagger: 0.12, start: "top 88%", duration: 1.2, then: (cards) => cards.forEach((c, i) => {
+  revealEach(".format", { y: 90, opacity: 0, rotationX: -40, transformPerspective: 1000, transformOrigin: "50% 100%" }, { stagger: 0.12, start: "top 88%", duration: 1.2, then: (cards) => cards.forEach((c, i) => {
     c.classList.add("is-in");
     const num = $(".format__num", c);
     if (num) odometer(num, num.textContent, 0.25 + i * 0.12);
@@ -311,7 +311,7 @@ function setupStory() {
   // testimonials: the cards settle one after another, and each grade flips up from the old grade to the new
   // one like a departure board (D → C → B → A)
   const GRADES = ["E", "D", "C", "B", "A", "A*"];
-  revealEach(".quote", { y: 80, opacity: 0, rotate: 2 }, { stagger: 0.12, start: "top 88%", duration: 1.2, ease: "back.out(1.15)", then: (cards) => cards.forEach((card, i) => {
+  revealEach(".quote", { y: 90, opacity: 0, rotationX: -40, transformPerspective: 1000, transformOrigin: "50% 100%" }, { stagger: 0.12, start: "top 88%", duration: 1.2, ease: "back.out(1.15)", then: (cards) => cards.forEach((card, i) => {
     const [from, to] = $$(".quote__shift b", card);
     const path = to ? GRADES.slice(GRADES.indexOf(from.textContent), GRADES.indexOf(to.textContent) + 1) : [];
     if (path.length < 2) return;

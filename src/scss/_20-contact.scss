@@ -4,7 +4,7 @@
 
 // ---------- contact ----------
 .contact { text-align: center; padding: fluid(110, 190) 0 3rem;
-  &__big { font-size: fluid(52, 170); margin: 1.5rem 0 1.2rem;
+  &__big { font-size: clamp(28px, 7.8vw, 150px); margin: 1.5rem 0 1.2rem;
     // its two lines get masks from the script (setupHeadings) so the letters can rise out of them; the masks must not add height
     .reveal-line { margin-bottom: -0.06em; } }
   &__lede { color: $muted; max-width: 46ch; margin: 0 auto 2.6rem; }

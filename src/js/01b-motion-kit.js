@@ -70,6 +70,7 @@ function revealEach(targets, from, { stagger = 0.1, start = "top 90%", duration 
   if (!els.length || reduce) return;
   gsap.set(els, from);
   const to = { duration, ease, stagger };
-  for (const k in from) to[k] = k === "opacity" || k === "scale" ? 1 : 0;
+  // (transformPerspective and transformOrigin describe the 3D set-up of the move: they stay as they were set)
+  for (const k in from) if (k !== "transformPerspective" && k !== "transformOrigin") to[k] = k === "opacity" || k === "scale" ? 1 : 0;
   ScrollTrigger.batch(els, { start, once: true, onEnter: (batch) => { gsap.to(batch, to); then?.(batch); } });
 }

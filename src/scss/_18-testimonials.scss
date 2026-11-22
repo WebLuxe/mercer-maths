@@ -6,9 +6,14 @@
 .quotes { display: grid; gap: 1.4rem; @include up(md) { grid-template-columns: 1.3fr 1fr 1fr; } }
 .quote {
   border-radius: 28px; padding: fluid(22, 34); @include glass(0.03); display: flex; flex-direction: column; gap: 1.3rem;
-  &__shift { display: flex; align-items: center; gap: 0.6rem; font-size: 0.8rem; color: $muted;
-    b { font-family: $display; font-size: 1.6rem; color: $ink; line-height: 1; } i { font-style: normal; @include grad-text; font-size: 1.2rem; }
-    b:last-of-type { @include grad-text; position: relative; } }   // (the new grade: it flips up through the grades in between when its card arrives)
+  // The grade jump is the picture on each card: where they started in outline, where they finished in the gradient.
+  &__shift { display: flex; flex-wrap: wrap; align-items: center; gap: 0.2rem 0.9rem; font-size: 0.72rem; letter-spacing: 0.2em; text-transform: uppercase; color: $muted;
+    span { flex-basis: 100%; }
+    b, em { font-family: $poster; font-weight: 800; font-size: fluid(44, 74); line-height: 1.05; letter-spacing: -0.03em; }
+    b { color: rgba(255, 255, 255, 0.04); -webkit-text-stroke: 1.5px rgba(190, 196, 230, 0.55); }
+    i { font-style: normal; @include grad-text; font-size: 1.7rem; letter-spacing: 0; }
+    b:last-of-type { @include grad-text; -webkit-text-stroke: 0; position: relative; filter: drop-shadow(0 0 22px rgba($a1, 0.55)); }
+    em { font-style: normal; @include grad-text; height: 0.62em; line-height: 1.25; } }   // (the new grade: it flips up through the grades in between when its card arrives)
   blockquote { font-family: $display; font-weight: 500; letter-spacing: -0.02em; font-size: fluid(18, 22); line-height: 1.35; }
   &:first-child blockquote { font-size: fluid(21, 28); }
   cite { font-style: normal; font-size: 0.82rem; color: $muted; margin-top: auto; }

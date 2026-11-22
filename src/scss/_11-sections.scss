@@ -5,7 +5,11 @@
 // ---------- sections ----------
 .sec { padding: fluid(90, 160) 0; }
 .sec-head { margin-bottom: fluid(48, 80); display: grid; gap: 1.2rem;
-  h2 { font-size: fluid(44, 104); } p { color: $muted; max-width: 54ch; } }
+  h2 { font-size: fluid(29, 66); } p { color: $muted; max-width: 54ch; } }
+// The accent line of a heading is not always the gradient: on every other panel it is drawn in outline instead,
+// so the gradient stays something the eye notices.
+main > section:nth-of-type(even) .sec-head h2 .grad { background: none; animation: none; color: rgba(255, 255, 255, 0.05); -webkit-text-stroke: 1.5px rgb(150, 176, 255);
+  &.is-split .ch { background: none; color: rgba(255, 255, 255, 0.05); } }
 
 .about__text { font-family: $display; font-weight: 500; font-size: fluid(26, 52); line-height: 1.2; letter-spacing: -0.02em; max-width: 24ch; margin-top: 2rem;
   .w { opacity: 0.12; } em { font-style: normal; @include grad-text; } }
