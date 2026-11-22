@@ -4,18 +4,27 @@
 
 // ---------- timeline ----------
 .timeline { position: relative; display: grid; gap: 3rem; padding-left: 2.5rem;
-  &__line { position: absolute; left: 6px; top: 0; bottom: 0; width: 2px; background: $line; i { position: absolute; inset: 0; background: $grad; transform-origin: top; transform: scaleY(0); } } }
-.tl { position: relative;
-  &::before { content: ""; position: absolute; left: calc(-2.5rem + 1px); top: 0.45rem; width: 12px; height: 12px; border-radius: 50%; background: $bg; border: 2px solid $a2; box-shadow: 0 0 0 6px rgba($a2, 0.12);
+  &__line { position: absolute; left: 6px; top: 0; bottom: 0; width: 2px; background: $line; i { position: absolute; inset: 0; background: $grad; transform-origin: top; transform: scaleY(0); }
+    // a short pulse of light that keeps travelling down the line (it only ever moves: translate is a share of its own height)
+    &::after { content: ""; position: absolute; left: -2px; top: 0; width: 6px; height: 14%; border-radius: 6px; background: linear-gradient(transparent, rgba(255, 255, 255, 0.95) 75%, $a2);
+      box-shadow: 0 0 16px 2px rgba($a2, 0.8); opacity: 0; animation: tlRun 3.6s $ease 1.6s infinite; } } }
+@keyframes tlRun { 0% { translate: 0 -100%; opacity: 0; } 12%, 86% { opacity: 1; } 100% { translate: 0 614%; opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .timeline__line::after { animation: none; } }
+.tl { position: relative; --yr: #{fluid(34, 58)};   // the year's size: the node sits level with the middle of it
+  &::before { content: ""; position: absolute; left: calc(-2.5rem + 1px); top: calc(var(--yr) * 0.5 - 7px); width: 12px; height: 12px; border-radius: 50%; background: $bg; border: 2px solid $a2; box-shadow: 0 0 0 6px rgba($a2, 0.12);
     transition: background 0.35s, border-color 0.35s, box-shadow 0.5s; }
   // the ring that pulses out of a node at the moment the drawn line reaches it (.is-lit, see setupStory)
-  &::after { content: ""; position: absolute; left: calc(-2.5rem + 1px); top: 0.45rem; width: 12px; height: 12px; border-radius: 50%; border: 2px solid $a2; opacity: 0; pointer-events: none; }
+  &::after { content: ""; position: absolute; left: calc(-2.5rem + 1px); top: calc(var(--yr) * 0.5 - 7px); width: 12px; height: 12px; border-radius: 50%; border: 2px solid $a2; opacity: 0; pointer-events: none; }
   &.is-lit::before { background: $a2; box-shadow: 0 0 0 6px rgba($a2, 0.14), 0 0 16px rgba($a2, 0.85); }
   &.is-lit::after { animation: tlPing 0.9s $ease-out 1; }
-  &__year { font-family: $display; font-size: 0.85rem; color: $a2; letter-spacing: 0.1em; }
+  &__year { font-family: $poster; font-weight: 800; font-size: var(--yr); line-height: 1; letter-spacing: -0.03em;
+    color: transparent; -webkit-text-stroke: 1.5px $a1; transition: color 0.7s, text-shadow 0.7s; }
+  &:nth-child(odd) &__year { -webkit-text-stroke-color: $a2; }
+  &.is-lit &__year { color: rgba($a1, 0.2); text-shadow: 0 0 34px rgba($a1, 0.85); }
+  &.is-lit:nth-child(odd) &__year { color: rgba($a2, 0.16); text-shadow: 0 0 34px rgba($a2, 0.7); }
   h3 { font-family: $display; font-size: fluid(22, 32); letter-spacing: -0.02em; margin: 0.3rem 0 0.4rem; }
   p { color: $muted; max-width: 60ch; }
-  @include up(md) { display: grid; grid-template-columns: 140px 1fr; gap: 2rem; .tl__year { padding-top: 0.5rem; } h3 { margin-top: 0; } }
+  @include up(md) { display: grid; grid-template-columns: clamp(150px, 16vw, 232px) 1fr; gap: 2rem; align-items: start; h3 { margin-top: calc(var(--yr) * 0.1); } }
 }
 // while the line is still on its way, the nodes it has not reached yet wait unlit
 .timeline.is-live .tl:not(.is-lit)::before { border-color: rgba(255, 255, 255, 0.28); box-shadow: none; }

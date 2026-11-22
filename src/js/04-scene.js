@@ -68,12 +68,13 @@ const bgMat = new THREE.ShaderMaterial({
     uTime: { value: 0 }, uScroll: { value: 0 }, uIntro: { value: 0 }, uVel: { value: 0 }, uDir: { value: 1 },
     uRes: { value: new THREE.Vector2(innerWidth, innerHeight) }, uMouse: { value: new THREE.Vector2(0.5, 0.5) },
     uRipple: { value: new THREE.Vector2(0.5, 0.5) }, uRippleT: { value: -10 }, uCharge: { value: 0 }, uHue: hueU,
+    uScanT: { value: -10 }, uScanDir: { value: 1 },
   },
   vertexShader: /* glsl */ `void main(){ gl_Position = vec4(position.xy, 0., 1.); }`,
   fragmentShader: /* glsl */ `
     ${NOISE}
     ${HUE}
-    uniform float uTime, uScroll, uIntro, uVel, uDir, uRippleT, uCharge; uniform vec2 uRes, uMouse, uRipple;
+    uniform float uTime, uScroll, uIntro, uVel, uDir, uRippleT, uCharge, uScanT, uScanDir; uniform vec2 uRes, uMouse, uRipple;
     float fbm(vec3 p){ float a = .5, s = 0.; for (int i = 0; i < 2; i++){ s += a * snoise(p); p *= 2.03; a *= .5; } return s; }
     float hash(float n){ return fract(sin(n) * 43758.5453); }
 
@@ -109,21 +110,23 @@ const bgMat = new THREE.ShaderMaterial({
 
       // aurora ribbons (hue drifts with scroll, brighter while scrolling fast; the section's mood turns both colours)
       float n = fbm(vec3(p * 1.3, t + uScroll * 1.5));
-      float b1 = smoothstep(.32, 0., abs(p.y * .9 + .25 * sin(p.x * 2.2 + t * 6. + n * 2.) + n * .35 - .18));
-      float b2 = smoothstep(.42, 0., abs(p.y + .3 * cos(p.x * 1.6 - t * 5. + n * 2.5) - n * .4 + .38));
+      float b1 = smoothstep(.26, 0., abs(p.y * .9 + .25 * sin(p.x * 2.2 + t * 6. + n * 2.) + n * .35 - .18)); b1 *= b1;
+      float b2 = smoothstep(.32, 0., abs(p.y + .3 * cos(p.x * 1.6 - t * 5. + n * 2.5) - n * .4 + .38)); b2 *= b2;
       vec3 c1 = hueTurn(mix(vec3(.545, .361, .965), vec3(.133, .827, .933), .5 + .5 * sin(uScroll * 6.283 + t * 2.)));
       vec3 c2 = hueTurn(mix(vec3(.957, .447, .714), vec3(.545, .361, .965), .5 + .5 * cos(uScroll * 4.4 - t * 1.5)));
       float boost = 1. + v * 1.4;
-      col += (c1 * b1 * .27 + c2 * b2 * .2) * boost;
+      col += (c1 * b1 * .34 + c2 * b2 * .26) * boost;
 
-      // stage light: a wide violet wash from above and a blue one rising from below, so the page sits in colour, not in black
-      float top = exp(-length((p - vec2(-.15 * asp, .78)) * vec2(.5, 1.15)) * 1.7);
-      float low = exp(-length((p - vec2(.3 * asp, -.82)) * vec2(.45, 1.2)) * 1.8);
-      col += hueTurn(vec3(.40, .22, .98)) * top * .27 + hueTurn(vec3(.10, .42, 1.)) * low * .25;
+      // beams: a fan of light falling from above the top edge. It is the page's one directional light, so the rest
+      // of the frame can stay near black and what is lit reads as lit. The source drifts sideways as the page scrolls.
+      vec2 bo = p - vec2(sin(uScroll * 9.42) * .22 * asp, .64);
+      float ba = atan(bo.x, -bo.y);
+      float rays = .5 + .5 * sin(ba * 15. + sin(ba * 6. + t * 2.6) * 1.6 + t * 1.2);
+      col += hueTurn(vec3(.30, .36, 1.)) * smoothstep(1.05, .12, abs(ba)) * (.3 + .7 * rays * rays) * exp(-length(bo) * 1.5) * .6;
 
       // nebula
       float neb = snoise(vec3(p * .7 + 3., t * .6));
-      col += vec3(.2, .11, .42) * smoothstep(.0, .9, neb) * .36;
+      col += vec3(.2, .11, .42) * smoothstep(.15, .95, neb) * .16;
 
       // warped graph paper: warps harder while scrolling, bends around ripples
       vec2 q = p * 9. + vec2(snoise(vec3(p * 1.4, t)), snoise(vec3(p * 1.4 + 5., t))) * (.55 + v * 1.1);
@@ -134,10 +137,13 @@ const bgMat = new THREE.ShaderMaterial({
       vec2 m = (uMouse - .5) * vec2(asp, 1.);
       float md = length(p - m);
       float mask = smoothstep(1.15, .15, length(p));
-      col += vec3(.75, .72, .95) * grid * (.045 * mask + .13 * smoothstep(.55, 0., md) + v * .05 + (ring + echo) * .5);
+      // scan: on every panel change one band of light sweeps the paper in the direction of travel and lights its lines
+      float sa = uTime - uScanT;
+      float scan = step(0., sa) * exp(-pow((p.y * uScanDir + .8 - sa * 1.3) / .1, 2.)) * smoothstep(1.5, 1., sa);
+      col += vec3(.75, .72, .95) * grid * (.045 * mask + .13 * smoothstep(.55, 0., md) + v * .05 + (ring + echo) * .5 + scan * .8);
       col += vec3(.35, .25, .75) * smoothstep(.55, 0., md) * .1;
       vec3 cm = mix(c1, c2, .5);
-      col += cm * (ring + echo) * .45;
+      col += cm * ((ring + echo) * .45 + scan * .1);
 
       // hold to charge: light gathers at the cursor while a ring closes in on it
       col += cm * uCharge * (smoothstep(.36, 0., md) * .3 + smoothstep(.02, 0., abs(md - mix(.42, .06, uCharge))) * .55);
@@ -473,7 +479,7 @@ function buildTextShape(str, width) {
 }
 const sceneState = PAGE !== "profile"
   ? { morph: 5, rotX: 0, x: isMobile ? 0 : 2.7, y: isMobile ? 1.2 : 0, z: 0, blobScale: 0 }
-  : { morph: 0, rotX: 0, x: isMobile ? 0 : 2.6, y: 0, z: 0, blobScale: isMobile ? 0 : 1.5 };
+  : { morph: 0, rotX: 0, x: isMobile ? 0 : 2.6, y: 0, z: 0, blobScale: 0 };
 if (isMobile) blob.visible = false;
 const HERO_SPOT = { ...sceneState };                            // where the hero puts the scene
 if (LOGO_INTRO) Object.assign(sceneState, { x: 0, y: 0, z: 0, rotX: 0, blobScale: 0 });   // the logo sits dead centre
@@ -659,6 +665,7 @@ const mass = { x: 0, v: 0 };                                     // a soft sprin
 const camFx = { dolly: 0, roll: 0 };                             // snap move: a step back and a slight roll, in world units / radians
 const sceneFx = { warp: 0 };                                     // extra "speed" on top of the scroll's: the jump between pages
 bus.on("snap:go", ({ dur, dir }) => {
+  if (!reduce) { bgMat.uniforms.uScanT.value = bgMat.uniforms.uTime.value; bgMat.uniforms.uScanDir.value = dir; }
   if (reduce) return;
   const out = dur * 0.5;
   gsap.killTweensOf(camFx);

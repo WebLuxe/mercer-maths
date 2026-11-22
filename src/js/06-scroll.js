@@ -26,7 +26,7 @@ function setupScroll() {
   const L = isMobile ? 0 : -2.5, R = isMobile ? 0 : 2.6;
   const STATES = {
     profile: {
-      hero: [0, R, 0, 0, 0, isMobile ? 0 : 1.5], about: [1, R, 0, 0.4, 0, 0], results: [2, 0, -0.4, 0.55, -1, 0],
+      hero: [0, R, 0, 0, 0, 0], about: [1, R, 0, 0.4, 0, 0], results: [2, 0, -0.4, 0.55, -1, 0],
       journey: [3, L, 0, 0.6, 0, 0], students: [4, 0, -0.3, 1.05, 0, 0], teaser: [2, R, 0, 0.5, -1, 0],
       contact: [5, 0, 0.4, 0, -2.5, 0],
     },
@@ -270,6 +270,10 @@ function setupHeadings() {
   });
 }
 
+// a loop of pen that draws itself round whatever it is put inside (styles: .pen in _18-testimonials.scss). It starts
+// top-right, goes round once and overshoots its own start, as a hand does.
+const PEN_LOOP = `<svg class="pen" viewBox="0 0 120 70" preserveAspectRatio="none" aria-hidden="true"><path pathLength="1" d="M92 14 C70 2 28 4 14 24 C2 42 22 62 58 62 C92 62 114 46 108 28 C103 13 80 8 62 10" /></svg>`;
+
 /* ---------- Profile: the story timeline and the testimonials ---------- */
 function setupStory() {
   // timeline: the line draws itself down the page, and each node lights up, with its year and text arriving,
@@ -316,7 +320,8 @@ function setupStory() {
     to.setAttribute("aria-hidden", "true");
     to.textContent = path[0];
     gsap.set(to, { transformPerspective: 300 });
-    const tl = gsap.timeline({ delay: 0.6 + i * 0.12, onComplete: () => { to.nextElementSibling.remove(); to.removeAttribute("aria-hidden"); } });
+    const tl = gsap.timeline({ delay: 0.6 + i * 0.12, onComplete: () => { to.nextElementSibling.remove(); to.removeAttribute("aria-hidden");
+      to.insertAdjacentHTML("beforeend", PEN_LOOP); } });   // ...and the grade they reached is circled, the way a teacher would
     path.slice(1).forEach((g) => tl
       .to(to, { rotationX: -90, duration: 0.12, ease: "power2.in" })
       .call(() => (to.textContent = g))

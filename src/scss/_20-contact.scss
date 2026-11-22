@@ -15,6 +15,11 @@
   &__foot { margin-top: 5rem; padding-top: 2rem; border-top: 1px solid $line; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 1rem; color: $muted; font-size: 0.8rem; }
 }
 
+// the wordmark, page-wide, as a faint outline rising out of the bottom edge
+.contact__mark { position: absolute; z-index: -1; left: 50%; bottom: 0; translate: -50% 0; font-family: $poster; font-weight: 800; font-size: 9.3vw; line-height: 1; height: 0.74em; overflow: hidden;   /* (its own box crops it: nothing spills out of the panel) */
+  letter-spacing: -0.04em; white-space: nowrap; pointer-events: none; -webkit-user-select: none; user-select: none; color: transparent; -webkit-text-stroke: 1px rgba(165, 180, 255, 0.22);
+  -webkit-mask: linear-gradient(#000 10%, transparent 92%); mask: linear-gradient(#000 10%, transparent 92%); }
+
 // one soft ring that expands from the main button once the panel has landed (placed and animated by setupScroll)
 .cta-ring { position: absolute; border-radius: 99px; border: 1.5px solid rgba(255, 255, 255, 0.85); box-shadow: 0 0 18px rgba($a2, 0.7), inset 0 0 12px rgba($a1, 0.5); pointer-events: none; }
 

@@ -8,7 +8,8 @@
   &__card { position: absolute; inset: 0; transform-style: preserve-3d; will-change: transform; }
   &__frame { position: absolute; inset: 0; border-radius: 28px; overflow: hidden; background: $bg-2; clip-path: inset(100% 0 0 0 round 28px);
     img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 25%; transform: scale(1.3); }
-    &::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 55%, rgba($bg, 0.85)); } }
+    // (the last two layers light the photo like the scene around it: violet from the top-left, cyan from the bottom-right)
+    &::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 55%, rgba($bg, 0.85)), linear-gradient(125deg, rgba($a1, 0.34), transparent 46%), linear-gradient(310deg, rgba($a2, 0.22), transparent 38%); } }
   &__name { position: absolute; left: 1.4rem; bottom: 1.2rem; z-index: 2; transform: translateZ(40px);
     strong { display: block; font-family: $display; font-size: 1.5rem; letter-spacing: -0.03em; line-height: 1.1; }
     span { font-size: 0.78rem; color: $muted; } }
@@ -18,6 +19,26 @@
     strong { display: block; font-family: $display; font-size: 1.6rem; @include grad-text; }
     &--a { top: 8%; left: -9%; } &--b { top: 44%; right: -10%; }
     @include down(sm) { &--a { left: -4px; } &--b { right: -4px; } } }
-  &__orbit { position: absolute; inset: -12%; border: 1px dashed rgba(255, 255, 255, 0.12); border-radius: 50%; animation: spin 40s linear infinite; z-index: -2;
-    &::before { content: ""; position: absolute; top: 50%; left: -5px; width: 10px; height: 10px; border-radius: 50%; background: $a2; box-shadow: 0 0 20px $a2; } }
 }
+
+// Two neon rings orbit the portrait. Each is a flat ring tilted back in 3D (the .portrait gives the perspective), with a
+// white-hot point of light racing round it. Building blocks: .orbit places the ring, turns it in the screen plane and
+// tilts it back (on the box itself, so its layout box is the flattened ring and never adds to the section's height),
+// its <i> is the plane the front half is cut from, its <b> spins. The tube and its glow are two masked gradients painted once, so the only
+// thing that ever changes is one rotation per ring. The cyan ring exists twice: whole, behind the card, and its near
+// half again in front of the card (.orbit--front), which is what makes it pass around him.
+.orbit { position: absolute; left: 50%; top: 50%; width: var(--d); aspect-ratio: 1; translate: -50% -50%; transform: rotate(var(--z)) rotateX(var(--x)); z-index: -1; pointer-events: none;
+  i { position: absolute; inset: 0; }
+  b { position: absolute; inset: 0; border-radius: 50%; animation: spin var(--t) linear infinite;
+    &::before, &::after { content: ""; position: absolute; inset: 0; border-radius: 50%; background: var(--lit); }
+    &::before { opacity: 0.8; -webkit-mask: radial-gradient(closest-side, transparent calc(100% - 48px), #000 calc(100% - 24px), transparent 100%); mask: radial-gradient(closest-side, transparent calc(100% - 48px), #000 calc(100% - 24px), transparent 100%); }
+    &::after { -webkit-mask: radial-gradient(closest-side, transparent calc(100% - 30px), #000 calc(100% - 29px), #000 calc(100% - 20px), transparent calc(100% - 19px)); mask: radial-gradient(closest-side, transparent calc(100% - 30px), #000 calc(100% - 29px), #000 calc(100% - 20px), transparent calc(100% - 19px)); } }
+  &--a { --d: 160%; --z: -20deg; --x: 71deg; --t: 13s;
+    --lit: conic-gradient(from 90deg, rgba(139, 108, 255, 0.6) 0deg, #a78bfa 130deg, #fff 166deg, rgba(139, 108, 255, 0.6) 180deg, rgba(139, 108, 255, 0.6) 200deg, #a78bfa 318deg, #efe8ff 346deg, rgba(139, 108, 255, 0.6) 360deg);
+    b { animation-direction: reverse; } }
+  &--b { --d: 142%; --z: 24deg; --x: 62deg; --t: 7.5s;
+    --lit: conic-gradient(from 0deg, rgba(95, 240, 255, 0.55) 0deg, rgba(95, 240, 255, 0.55) 205deg, #5ff0ff 318deg, #fff 350deg, rgba(95, 240, 255, 0.55) 360deg); }
+  &--front { z-index: 3; i { clip-path: inset(50% -12% -12% -12%); } }
+}
+.low-power .orbit b { animation: none; }
+@media (prefers-reduced-motion: reduce) { .orbit b { animation: none; } }
